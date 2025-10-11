@@ -1,7 +1,10 @@
+'use client';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Check, Copy } from 'lucide-react';
 
+import { MainLayout } from '@/components/layouts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -102,66 +105,68 @@ export default function Snip() {
   );
 
   return (
-    <section className='container mx-auto px-4 py-32 md:py-40'>
-      <div className='max-w-2xl mx-auto'>
-        <h1 className='text-4xl md:text-5xl font-semibold mb-4 text-balance text-center'>
-          Shorten your links
-        </h1>
+    <MainLayout>
+      <section className='container mx-auto px-4 py-32 md:py-40'>
+        <div className='max-w-2xl mx-auto'>
+          <h1 className='text-4xl md:text-5xl font-semibold mb-4 text-balance text-center'>
+            Shorten your links
+          </h1>
 
-        <p className='text-muted-foreground mb-12 text-center text-balance'>
-          Make your URLs shorter and easier to share
-        </p>
+          <p className='text-muted-foreground mb-12 text-center text-balance'>
+            Make your URLs shorter and easier to share
+          </p>
 
-        <div className='space-y-4'>
-          <div>
-            <Input
-              type='url'
-              placeholder='Paste your long URL (e.g., https://example.com)'
-              value={url}
-              onChange={e => handleUrlChange(e.target.value)}
-              onKeyDown={handleKeyPress}
-              className={`h-12 text-base ${error ? 'border-red-500' : ''}`}
-              aria-invalid={!!error}
-              aria-describedby={error ? 'url-error' : undefined}
-            />
-            {error && (
-              <p
-                id='url-error'
-                className='text-red-500 text-sm mt-2'
-                role='alert'
-              >
-                {error}
-              </p>
+          <div className='space-y-4'>
+            <div>
+              <Input
+                type='url'
+                placeholder='Paste your long URL (e.g., https://example.com)'
+                value={url}
+                onChange={e => handleUrlChange(e.target.value)}
+                onKeyDown={handleKeyPress}
+                className={`h-12 text-base ${error ? 'border-red-500' : ''}`}
+                aria-invalid={!!error}
+                aria-describedby={error ? 'url-error' : undefined}
+              />
+              {error && (
+                <p
+                  id='url-error'
+                  className='text-red-500 text-sm mt-2'
+                  role='alert'
+                >
+                  {error}
+                </p>
+              )}
+            </div>
+
+            <Button onClick={handleShorten} size='lg' className='w-full h-12'>
+              Shorten
+            </Button>
+
+            {shortUrl && (
+              <div className='flex items-center gap-2 p-4 bg-muted rounded-lg'>
+                <code className='flex-1 text-sm font-mono break-all'>
+                  {shortUrl}
+                </code>
+                <Button
+                  size='sm'
+                  variant='ghost'
+                  onClick={handleCopy}
+                  aria-label={
+                    copied ? 'Copied to clipboard' : 'Copy to clipboard'
+                  }
+                >
+                  {copied ? (
+                    <Check className='h-4 w-4' aria-hidden='true' />
+                  ) : (
+                    <Copy className='h-4 w-4' aria-hidden='true' />
+                  )}
+                </Button>
+              </div>
             )}
           </div>
-
-          <Button onClick={handleShorten} size='lg' className='w-full h-12'>
-            Shorten
-          </Button>
-
-          {shortUrl && (
-            <div className='flex items-center gap-2 p-4 bg-muted rounded-lg'>
-              <code className='flex-1 text-sm font-mono break-all'>
-                {shortUrl}
-              </code>
-              <Button
-                size='sm'
-                variant='ghost'
-                onClick={handleCopy}
-                aria-label={
-                  copied ? 'Copied to clipboard' : 'Copy to clipboard'
-                }
-              >
-                {copied ? (
-                  <Check className='h-4 w-4' aria-hidden='true' />
-                ) : (
-                  <Copy className='h-4 w-4' aria-hidden='true' />
-                )}
-              </Button>
-            </div>
-          )}
         </div>
-      </div>
-    </section>
+      </section>
+    </MainLayout>
   );
 }
