@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -64,7 +66,7 @@ export function SignupForm({
               <Field>
                 <Button type='submit'>Create Account</Button>
                 <FieldDescription className='text-center'>
-                  Already have an account? <a href='#'>Sign in</a>
+                  Already have an account? <Link href='/login'>Sign in</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

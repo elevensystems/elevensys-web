@@ -7,15 +7,23 @@ export default function Header() {
     <header className='border-b border-border'>
       <div className='container mx-auto px-4 h-16 flex items-center justify-between'>
         <Link href='/' className='flex items-center gap-2'>
-          <div className='w-8 h-8 bg-foreground rounded-md flex items-center justify-center'>
-            <span className='text-background font-bold text-sm'>URL</span>
+          <div className='w-full h-8 bg-foreground rounded-md flex items-center justify-center'>
+            <span className='text-background font-bold text-md px-2'>
+              Eleven
+            </span>
           </div>
-          <span className='font-semibold text-lg'>Demo</span>
+          <span className='font-semibold text-lg'>Systems</span>
         </Link>
 
-        <div className='flex items-center gap-3'>
-          <Button variant='ghost'>Sign In</Button>
-          <Button>Sign Up</Button>
+        <div className='flex items-center gap-4'>
+          <Link href='/login'>
+            <Button variant='ghost' className='font-medium'>
+              Sign In
+            </Button>
+          </Link>
+          <Link href='/signup'>
+            <Button className='font-medium shadow-sm'>Sign Up</Button>
+          </Link>
         </div>
       </div>
     </header>

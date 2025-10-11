@@ -1,12 +1,12 @@
 'use client';
 
-import { SignupForm } from '@/components/features/auth/signup-form';
+import { LoginForm } from '@/components/features/auth/login-form';
 import { AuthLayout } from '@/components/layouts';
 
 export default function Login() {
   return (
     <AuthLayout>
-      <SignupForm />
+      <LoginForm />
     </AuthLayout>
   );
 }
