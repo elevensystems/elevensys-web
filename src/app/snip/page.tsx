@@ -24,19 +24,12 @@ const isValidUrl = (urlString: string): boolean => {
   return URL_REGEX.test(urlString.trim());
 };
 
-/**
- * Generates a random short URL identifier
- */
-const generateShortUrl = (): string => {
-  const randomId = Math.random().toString(36).substring(2, 9);
-  return `short.link/${randomId}`;
-};
-
 export default function Snip() {
   const [url, setUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -59,7 +52,7 @@ export default function Snip() {
     [error]
   );
 
-  const handleShorten = useCallback(() => {
+  const handleShorten = useCallback(async () => {
     if (!url.trim()) {
       setError('Please enter a URL');
       return;
@@ -73,7 +66,36 @@ export default function Snip() {
     }
 
     setError('');
-    setShortUrl(generateShortUrl());
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('https://api.urlify.cc/shorten', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          originalUrl: url.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to shorten URL');
+      }
+
+      const result = await response.json();
+
+      if (result.data && result.data.shortUrl) {
+        setShortUrl(result.data.shortUrl);
+      } else {
+        throw new Error('Invalid response from server');
+      }
+    } catch (err) {
+      console.error('Error shortening URL:', err);
+      setError('Failed to shorten URL. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   }, [url]);
 
   const handleCopy = useCallback(async () => {
@@ -139,8 +161,13 @@ export default function Snip() {
               )}
             </div>
 
-            <Button onClick={handleShorten} size='lg' className='w-full h-12'>
-              Shorten
+            <Button
+              onClick={handleShorten}
+              size='lg'
+              className='w-full h-12'
+              disabled={isLoading}
+            >
+              {isLoading ? 'Shortening...' : 'Shorten'}
             </Button>
 
             {shortUrl && (
