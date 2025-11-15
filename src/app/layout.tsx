@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
+import { Ubuntu } from 'next/font/google';
 
 import '@/styles/globals.css';
+
+const ubuntu = Ubuntu({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '700'],
+  variable: '--font-ubuntu',
+});
 
 export const metadata: Metadata = {
   title: 'URL Shortener',
@@ -14,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className='antialiased'>{children}</body>
+      <body className={`${ubuntu.variable} antialiased`}>{children}</body>
     </html>
   );
 }
