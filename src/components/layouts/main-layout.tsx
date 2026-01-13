@@ -1,6 +1,23 @@
-import { ReactNode } from 'react';
+"use client"
 
-import Header from '@/components/header';
+import { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+
+import { AppSidebar } from '@/components/layouts/app-sidebar';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Separator } from '@/components/ui/separator';
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -8,19 +25,76 @@ interface MainLayoutProps {
 }
 
 /**
- * Main layout for public pages
- * Includes header with navigation and sign in/up buttons
+ * Main layout with sidebar-08 (inset sidebar with secondary navigation)
+ * Includes collapsible sidebar with navigation, projects, and user menu
  */
 export default function MainLayout({
   children,
   className = '',
 }: MainLayoutProps) {
+  const pathname = usePathname();
+  
+  // Generate breadcrumb items from pathname
+  const pathSegments = pathname.split('/').filter(Boolean);
+  
+  // Helper function to format segment text
+  const formatSegment = (segment: string) => {
+    return segment
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+  
   return (
-    <div className='min-h-screen flex flex-col bg-background'>
-      <Header />
-      <div className='items-center justify-center px-4'>
-        <main className={className}>{children}</main>
-      </div>
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className='flex h-16 shrink-0 items-center gap-2'>
+          <div className='flex items-center gap-2 px-4'>
+            <SidebarTrigger className='-ml-1' />
+            <Separator
+              orientation='vertical'
+              className='mr-2 data-[orientation=vertical]:h-4'
+            />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className='hidden md:block'>
+                  <BreadcrumbLink href='/'>
+                    Home
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                {pathSegments.length > 0 && (
+                  <BreadcrumbSeparator className='hidden md:block' />
+                )}
+                {pathSegments.map((segment, index) => {
+                  const isLast = index === pathSegments.length - 1;
+                  const href = '/' + pathSegments.slice(0, index + 1).join('/');
+                  
+                  return (
+                    <div key={href} className='contents'>
+                      <BreadcrumbItem>
+                        {isLast ? (
+                          <BreadcrumbPage>{formatSegment(segment)}</BreadcrumbPage>
+                        ) : (
+                          <BreadcrumbLink href={href} className='hidden md:block'>
+                            {formatSegment(segment)}
+                          </BreadcrumbLink>
+                        )}
+                      </BreadcrumbItem>
+                      {!isLast && (
+                        <BreadcrumbSeparator className='hidden md:block' />
+                      )}
+                    </div>
+                  );
+                })}
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
+        <div className='flex flex-1 flex-col gap-4 p-4 pt-0'>
+          <main className={className}>{children}</main>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
