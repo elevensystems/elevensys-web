@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 
 const COPY_FEEDBACK_DURATION = 2000;
 
@@ -160,14 +161,14 @@ export default function PasswordGeneratorPage() {
                       className='w-20 h-9'
                     />
                   </div>
-                  <input
+                  <Slider
                     id='length'
-                    type='range'
-                    min='4'
-                    max='128'
-                    value={length}
-                    onChange={e => setLength(Number(e.target.value))}
-                    className='w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary'
+                    min={4}
+                    max={128}
+                    step={1}
+                    value={[length]}
+                    onValueChange={values => setLength(values[0])}
+                    className='w-full'
                   />
                 </div>
 

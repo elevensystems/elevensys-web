@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Ubuntu } from 'next/font/google';
 
+import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
-
 import '@/styles/globals.css';
 
 const ubuntu = Ubuntu({
@@ -12,8 +12,8 @@ const ubuntu = Ubuntu({
 });
 
 export const metadata: Metadata = {
-  title: 'URL Shortener',
-  description: 'Transform your long URLs into short, shareable links',
+  title: 'Eleven Systems',
+  description: 'Connecting Ideas, Building Solutions',
 };
 
 export default function RootLayout({
@@ -22,10 +22,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <body className={`${ubuntu.variable} antialiased`}>
-        {children}
-        <Toaster />
+        <ThemeProvider
+          attribute='class'
+          defaultTheme='system'
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

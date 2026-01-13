@@ -37,11 +37,11 @@ import {
 } from '@/components/ui/sidebar';
 
 const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
+  user: null as {
+    name: string;
+    email: string;
+    avatar: string;
+  } | null, // Set to null for guest, or provide user object when authenticated
   navMain: [
     {
       title: 'Home',
