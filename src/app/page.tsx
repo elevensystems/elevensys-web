@@ -3,9 +3,9 @@ import { MainLayout } from '@/components/layouts';
 export default function Home() {
   return (
     <MainLayout>
-      <div className='container mx-auto'>
-        <div className='max-w-4xl'>
-          <h1 className='text-4xl font-bold mb-4'>Welcome to Eleven System</h1>
+      <div className='container mx-auto px-4 py-12'>
+        <div className='max-w-6xl mx-auto'>
+          <h1 className='text-4xl font-bold mb-4'>Welcome to Eleven Systems</h1>
           <p className='text-lg text-muted-foreground mb-6'>
             Your premium workspace for managing tools and projects efficiently.
           </p>

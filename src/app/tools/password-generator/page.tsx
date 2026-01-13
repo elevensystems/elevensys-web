@@ -9,6 +9,7 @@ import { MainLayout } from '@/components/layouts';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -177,38 +178,30 @@ export default function PasswordGeneratorPage() {
                   <Label>Character Types</Label>
                   <div className='space-y-2'>
                     <label className='flex items-center gap-2 cursor-pointer'>
-                      <input
-                        type='checkbox'
+                      <Checkbox
                         checked={options.uppercase}
-                        onChange={() => toggleOption('uppercase')}
-                        className='w-4 h-4 accent-primary cursor-pointer'
+                        onCheckedChange={() => toggleOption('uppercase')}
                       />
                       <span className='text-sm'>Uppercase Letters (A-Z)</span>
                     </label>
                     <label className='flex items-center gap-2 cursor-pointer'>
-                      <input
-                        type='checkbox'
+                      <Checkbox
                         checked={options.lowercase}
-                        onChange={() => toggleOption('lowercase')}
-                        className='w-4 h-4 accent-primary cursor-pointer'
+                        onCheckedChange={() => toggleOption('lowercase')}
                       />
                       <span className='text-sm'>Lowercase Letters (a-z)</span>
                     </label>
                     <label className='flex items-center gap-2 cursor-pointer'>
-                      <input
-                        type='checkbox'
+                      <Checkbox
                         checked={options.numbers}
-                        onChange={() => toggleOption('numbers')}
-                        className='w-4 h-4 accent-primary cursor-pointer'
+                        onCheckedChange={() => toggleOption('numbers')}
                       />
                       <span className='text-sm'>Numbers (0-9)</span>
                     </label>
                     <label className='flex items-center gap-2 cursor-pointer'>
-                      <input
-                        type='checkbox'
+                      <Checkbox
                         checked={options.symbols}
-                        onChange={() => toggleOption('symbols')}
-                        className='w-4 h-4 accent-primary cursor-pointer'
+                        onCheckedChange={() => toggleOption('symbols')}
                       />
                       <span className='text-sm'>
                         Special Symbols (!@#$%^&*)
