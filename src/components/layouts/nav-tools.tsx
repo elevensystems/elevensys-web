@@ -54,12 +54,12 @@ export function NavTools({
   const { isMobile } = useSidebar();
 
   return (
-    <SidebarGroup className='group-data-[collapsible=icon]:hidden'>
+    <SidebarGroup>
       <SidebarGroupLabel>Tools</SidebarGroupLabel>
       <SidebarMenu>
         {tools.map(item => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild tooltip={item.name}>
               <Link href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
@@ -97,7 +97,7 @@ export function NavTools({
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
-          <SidebarMenuButton>
+          <SidebarMenuButton className='group-data-[collapsible=icon]:hidden'>
             <MoreHorizontal />
             <span>More</span>
           </SidebarMenuButton>

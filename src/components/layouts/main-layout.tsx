@@ -1,6 +1,7 @@
-"use client"
+'use client';
 
 import { ReactNode } from 'react';
+
 import { usePathname } from 'next/navigation';
 
 import { AppSidebar } from '@/components/layouts/app-sidebar';
@@ -25,18 +26,19 @@ interface MainLayoutProps {
 }
 
 /**
- * Main layout with sidebar-08 (inset sidebar with secondary navigation)
+ * Main layout with floating sidebar
  * Includes collapsible sidebar with navigation, projects, and user menu
+ * Sidebar state is persisted globally using localStorage
  */
 export default function MainLayout({
   children,
   className = '',
 }: MainLayoutProps) {
   const pathname = usePathname();
-  
+
   // Generate breadcrumb items from pathname
   const pathSegments = pathname.split('/').filter(Boolean);
-  
+
   // Helper function to format segment text
   const formatSegment = (segment: string) => {
     return segment
@@ -44,9 +46,9 @@ export default function MainLayout({
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
-  
+
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <AppSidebar />
       <SidebarInset>
         <header className='flex h-16 shrink-0 items-center gap-2'>
@@ -59,9 +61,7 @@ export default function MainLayout({
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className='hidden md:block'>
-                  <BreadcrumbLink href='/'>
-                    Home
-                  </BreadcrumbLink>
+                  <BreadcrumbLink href='/'>Home</BreadcrumbLink>
                 </BreadcrumbItem>
                 {pathSegments.length > 0 && (
                   <BreadcrumbSeparator className='hidden md:block' />
@@ -69,14 +69,19 @@ export default function MainLayout({
                 {pathSegments.map((segment, index) => {
                   const isLast = index === pathSegments.length - 1;
                   const href = '/' + pathSegments.slice(0, index + 1).join('/');
-                  
+
                   return (
                     <div key={href} className='contents'>
                       <BreadcrumbItem>
                         {isLast ? (
-                          <BreadcrumbPage>{formatSegment(segment)}</BreadcrumbPage>
+                          <BreadcrumbPage>
+                            {formatSegment(segment)}
+                          </BreadcrumbPage>
                         ) : (
-                          <BreadcrumbLink href={href} className='hidden md:block'>
+                          <BreadcrumbLink
+                            href={href}
+                            className='hidden md:block'
+                          >
                             {formatSegment(segment)}
                           </BreadcrumbLink>
                         )}
