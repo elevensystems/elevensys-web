@@ -89,8 +89,8 @@ export default function Snip() {
 
       const result = await response.json();
 
-      if (result.data && result.data.shortUrl) {
-        setShortUrl(result.data.shortUrl);
+      if (result.shortUrl) {
+        setShortUrl(result.shortUrl);
         toast.success('URL shortened successfully', {
           description: 'Your short URL is ready to use.',
           icon: <Check className='h-4 w-4' />,

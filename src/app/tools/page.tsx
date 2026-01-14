@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { Key, Link2, Wrench } from 'lucide-react';
+import { FileText, Key, Link2, Package, Wrench } from 'lucide-react';
 
 import { MainLayout } from '@/components/layouts';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,30 @@ const tools = [
     description: 'Generate secure, random passwords with customizable options',
     href: '/tools/password-generator',
     icon: Key,
+  },
+  {
+    title: 'NPM Converter',
+    description: 'Convert Lerna publish output to npm install commands',
+    href: '/tools/npm-converter',
+    icon: Package,
+  },
+  {
+    title: 'PR Link Shrinker',
+    description: 'Shorten GitHub PR URLs to a compact, readable format',
+    href: '/tools/pr-link-shrinker',
+    icon: Link2,
+  },
+  {
+    title: 'Summary Smith',
+    description: 'Generate formatted status summaries for Rally stories',
+    href: '/tools/summary-smith',
+    icon: FileText,
+  },
+  {
+    title: 'Prompt Templates',
+    description: 'Browse and copy prompt templates for AI agents and workflows',
+    href: '/tools/prompt-templates',
+    icon: FileText,
   },
   // Add more tools here as they are created
 ];

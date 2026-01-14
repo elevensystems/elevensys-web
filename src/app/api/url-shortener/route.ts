@@ -30,8 +30,11 @@ export async function POST(request: NextRequest) {
 
     const result = await response.json();
 
-    // Return the result to client
-    return NextResponse.json(result);
+    return NextResponse.json({
+      shortUrl: result.data.shortUrl,
+      shortCode:
+        result.data.shortCode || result.data.shortUrl?.split('/').pop(),
+    });
   } catch (error) {
     console.error('Error in URL shortener API:', error);
     return NextResponse.json(

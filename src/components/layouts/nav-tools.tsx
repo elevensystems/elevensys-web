@@ -28,7 +28,15 @@ import {
 } from '@/components/ui/sidebar';
 
 // Tools that should not have the dropdown menu
-const EXCLUDED_TOOLS = ['URL Shortener', 'Password Generator'];
+const EXCLUDED_TOOLS = [
+  'URL Shortener',
+  'Password Generator',
+  'NPM Converter',
+  'PR Link Shrinker',
+  'Summary Smith',
+  'Prompt Templates',
+  'Song Recommender',
+];
 
 const shouldShowDropdown = (toolName: string): boolean => {
   return !EXCLUDED_TOOLS.includes(toolName);

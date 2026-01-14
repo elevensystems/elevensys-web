@@ -8,16 +8,21 @@ import {
   //   BookOpen,
   //   Bot,
   Command,
+  FileText,
   //   Frame,
   Home,
   Key,
   LifeBuoy,
   Link2,
+  Link as LinkIcon,
   //   Map,
-  //   PieChart,
-  Send,
+  Music4,
+  Package,
+  ScrollText,
   //   Settings2,
   //   SquareTerminal,
+  //   PieChart,
+  Send,
 } from 'lucide-react';
 
 import { FeedbackModal } from '@/components/layouts/feedback-modal';
@@ -152,12 +157,37 @@ const data = {
     {
       name: 'URL Shortener',
       url: '/tools/url-shortener',
-      icon: Link2,
+      icon: LinkIcon,
     },
     {
       name: 'Password Generator',
       url: '/tools/password-generator',
       icon: Key,
+    },
+    {
+      name: 'NPM Converter',
+      url: '/tools/npm-converter',
+      icon: Package,
+    },
+    {
+      name: 'PR Link Shrinker',
+      url: '/tools/pr-link-shrinker',
+      icon: Link2,
+    },
+    {
+      name: 'Summary Smith',
+      url: '/tools/summary-smith',
+      icon: FileText,
+    },
+    {
+      name: 'Prompt Templates',
+      url: '/tools/prompt-templates',
+      icon: ScrollText,
+    },
+    {
+      name: 'Song Recommender',
+      url: '/tools/song-recommender',
+      icon: Music4,
     },
     // {
     //   name: "Design Engineering",
