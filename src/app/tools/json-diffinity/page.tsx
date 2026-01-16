@@ -4,7 +4,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 
 import Editor from '@monaco-editor/react';
 import { findNodeAtLocation, parseTree } from 'jsonc-parser';
-import { Braces, GitCompare, TextInitial } from 'lucide-react';
+import { Braces, Eraser, GitCompare, TextInitial } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 import parserBabel from 'prettier/plugins/babel';
@@ -248,6 +248,25 @@ export default function JsonDiffPage() {
     []
   );
 
+  const clearHighlights = useCallback(() => {
+    const originalEditor = originalEditorRef.current;
+    const modifiedEditor = modifiedEditorRef.current;
+
+    if (originalEditor) {
+      originalDecorationsRef.current = originalEditor.deltaDecorations(
+        originalDecorationsRef.current,
+        []
+      );
+    }
+
+    if (modifiedEditor) {
+      modifiedDecorationsRef.current = modifiedEditor.deltaDecorations(
+        modifiedDecorationsRef.current,
+        []
+      );
+    }
+  }, []);
+
   const handleCompare = useCallback(() => {
     if (isCompareDisabled) {
       toast.error('Fix JSON errors before comparing.');
@@ -345,21 +364,35 @@ export default function JsonDiffPage() {
                   <Braces className='h-5 w-5' />
                   Original JSON
                 </CardTitle>
-                <Button
-                  variant='secondary'
-                  size='sm'
-                  onClick={() =>
-                    handleFormatJson(
-                      originalEditorRef,
-                      originalText,
-                      setOriginalText,
-                      'Original JSON'
-                    )
-                  }
-                >
-                  <TextInitial className='h-4 w-4 mr-2' />
-                  Format
-                </Button>
+                <div className='flex items-center gap-2'>
+                  <Button
+                    variant='secondary'
+                    size='sm'
+                    onClick={() =>
+                      handleFormatJson(
+                        originalEditorRef,
+                        originalText,
+                        setOriginalText,
+                        'Original JSON'
+                      )
+                    }
+                  >
+                    <TextInitial className='h-4 w-4 mr-2' />
+                    Format
+                  </Button>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={() => {
+                      setOriginalText('');
+                      setDiffHtml('');
+                      clearHighlights();
+                    }}
+                  >
+                    <Eraser className='h-4 w-4 mr-2' />
+                    Clear
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className='flex flex-col gap-3'>
                 <div className='rounded-lg border bg-muted/30 overflow-hidden'>
@@ -401,21 +434,35 @@ export default function JsonDiffPage() {
                   <Braces className='h-5 w-5' />
                   Modified JSON
                 </CardTitle>
-                <Button
-                  variant='secondary'
-                  size='sm'
-                  onClick={() =>
-                    handleFormatJson(
-                      modifiedEditorRef,
-                      modifiedText,
-                      setModifiedText,
-                      'Modified JSON'
-                    )
-                  }
-                >
-                  <TextInitial className='h-4 w-4 mr-2' />
-                  Format
-                </Button>
+                <div className='flex items-center gap-2'>
+                  <Button
+                    variant='secondary'
+                    size='sm'
+                    onClick={() =>
+                      handleFormatJson(
+                        modifiedEditorRef,
+                        modifiedText,
+                        setModifiedText,
+                        'Modified JSON'
+                      )
+                    }
+                  >
+                    <TextInitial className='h-4 w-4 mr-2' />
+                    Format
+                  </Button>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={() => {
+                      setModifiedText('');
+                      setDiffHtml('');
+                      clearHighlights();
+                    }}
+                  >
+                    <Eraser className='h-4 w-4 mr-2' />
+                    Clear
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className='flex flex-col gap-3'>
                 <div className='rounded-lg border bg-muted/30 overflow-hidden'>
@@ -469,27 +516,23 @@ export default function JsonDiffPage() {
             </span>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Diffinity Viewer</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className='h-[420px] rounded-lg border bg-muted/30'>
-                <div className='p-4'>
-                  {diffHtml ? (
+          {diffHtml ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Diffinity Viewer</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className='h-[420px] rounded-lg border bg-muted/30'>
+                  <div className='p-4'>
                     <div
                       className='json-diff-viewer'
                       dangerouslySetInnerHTML={{ __html: diffHtml }}
                     />
-                  ) : (
-                    <p className='text-sm text-muted-foreground'>
-                      Run a comparison to see the visual diff output here.
-                    </p>
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
       </section>
     </MainLayout>
