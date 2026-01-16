@@ -120,7 +120,7 @@ export default function PRLinkShrinkerPage() {
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-7xl mx-auto'>
+        <div className='max-w-full mx-auto'>
           <ToolPageHeader
             title='PR Link Shrinker'
             description='Shorten long GitHub PR URLs to a compact, readable format. Perfect for status updates and documentation.'

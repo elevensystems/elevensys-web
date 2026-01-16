@@ -126,7 +126,7 @@ export default function PasswordGeneratorPage() {
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-7xl mx-auto'>
+        <div className='max-w-full mx-auto'>
           <ToolPageHeader
             title='Password Generator'
             description='Generate secure, random passwords with customizable options. Free tool for creating strong passwords.'

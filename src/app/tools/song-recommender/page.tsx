@@ -330,7 +330,7 @@ export default function SongRecommenderPage() {
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-7xl mx-auto'>
+        <div className='max-w-full mx-auto'>
           <ToolPageHeader
             title='Song Recommender'
             description='Discover music that matches your vibe. Describe your mood, select genres, and get personalized song recommendations.'
