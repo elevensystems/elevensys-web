@@ -198,7 +198,7 @@ export default function PromptTemplatesPage() {
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-8 sm:py-12'>
+      <section className='container mx-auto px-4 py-12'>
         <div className='max-w-7xl mx-auto space-y-8'>
           <ToolPageHeader
             title='Prompt Templates'

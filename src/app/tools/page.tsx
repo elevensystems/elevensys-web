@@ -58,7 +58,7 @@ export default function ToolsPage() {
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-6xl mx-auto'>
+        <div className='max-w-7xl mx-auto'>
           <div className='mb-12'>
             <div className='flex items-center gap-3 mb-4'>
               <Wrench className='h-8 w-8' />

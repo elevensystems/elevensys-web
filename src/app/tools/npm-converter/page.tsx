@@ -117,7 +117,7 @@ export default function NpmConverterPage() {
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-6xl mx-auto'>
+        <div className='max-w-7xl mx-auto'>
           <ToolPageHeader
             title='NPM Converter'
             description='Convert Lerna publish output to npm install commands. Paste your Lerna output and get the npm install command instantly.'

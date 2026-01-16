@@ -248,7 +248,7 @@ export default function SummarySmithPage() {
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-6xl mx-auto'>
+        <div className='max-w-7xl mx-auto'>
           <ToolPageHeader
             title='Summary Smith'
             description='Generate formatted status summaries for Rally stories. Perfect for standup updates and team communication.'

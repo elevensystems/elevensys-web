@@ -126,7 +126,7 @@ export default function PasswordGeneratorPage() {
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-6xl mx-auto'>
+        <div className='max-w-7xl mx-auto'>
           <ToolPageHeader
             title='Password Generator'
             description='Generate secure, random passwords with customizable options. Free tool for creating strong passwords.'
@@ -250,16 +250,18 @@ export default function PasswordGeneratorPage() {
                         <Label className='text-xs text-muted-foreground'>
                           Password {index + 1}
                         </Label>
-                        <div className='flex items-center justify-between mb-1'>
-                          <Label className='text-sm font-medium'>
-                            Password Strength
-                          </Label>
-                          <span
-                            className={`text-sm font-semibold ${strength.color}`}
-                          >
-                            {strength.label}
-                          </span>
-                        </div>
+                        {index === 0 && (
+                          <div className='flex items-center justify-between mb-1'>
+                            <Label className='text-sm font-medium'>
+                              Password Strength
+                            </Label>
+                            <span
+                              className={`text-sm font-semibold ${strength.color}`}
+                            >
+                              {strength.label}
+                            </span>
+                          </div>
+                        )}
                         <div className='flex items-center gap-2 p-3 bg-muted rounded-lg'>
                           <code className='flex-1 text-sm font-mono break-all select-all'>
                             {password}
