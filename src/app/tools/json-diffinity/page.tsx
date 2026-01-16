@@ -364,7 +364,7 @@ export default function JsonDiffPage() {
               <CardContent className='flex flex-col gap-3'>
                 <div className='rounded-lg border bg-muted/30 overflow-hidden'>
                   <Editor
-                    height='420px'
+                    height='520px'
                     language='json'
                     value={originalText}
                     theme={editorTheme}
@@ -384,7 +384,7 @@ export default function JsonDiffPage() {
                   />
                 </div>
                 {originalValidation.error ? (
-                  <p className='text-sm text-destructive'>
+                  <p className='text-xs text-destructive'>
                     {originalValidation.error}
                   </p>
                 ) : (
@@ -420,7 +420,7 @@ export default function JsonDiffPage() {
               <CardContent className='flex flex-col gap-3'>
                 <div className='rounded-lg border bg-muted/30 overflow-hidden'>
                   <Editor
-                    height='420px'
+                    height='520px'
                     language='json'
                     value={modifiedText}
                     theme={editorTheme}
@@ -452,7 +452,7 @@ export default function JsonDiffPage() {
             </Card>
           </div>
 
-          <div className='flex flex-wrap items-center gap-3'>
+          <div className='flex flex-col items-center justify-center gap-2 text-center'>
             <Button onClick={handleCompare} disabled={isCompareDisabled}>
               <GitCompare className='h-4 w-4 mr-2' />
               Compare JSON
