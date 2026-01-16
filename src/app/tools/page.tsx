@@ -2,7 +2,15 @@
 
 import Link from 'next/link';
 
-import { Braces, FileText, Key, Link2, Package, Wrench } from 'lucide-react';
+import {
+  Braces,
+  FileText,
+  Key,
+  Link2,
+  Music4,
+  Package,
+  Wrench,
+} from 'lucide-react';
 
 import { MainLayout } from '@/components/layouts';
 import { Button } from '@/components/ui/button';
@@ -20,6 +28,12 @@ const tools = [
     description: 'Shorten long URLs to make them easier to share and manage',
     href: '/tools/url-shortener',
     icon: Link2,
+  },
+  {
+    title: 'JSON Diffinity',
+    description: 'Compare two JSON payloads with editor-style highlighting',
+    href: '/tools/json-diffinity',
+    icon: Braces,
   },
   {
     title: 'Password Generator',
@@ -52,10 +66,10 @@ const tools = [
     icon: FileText,
   },
   {
-    title: 'JSON Diffinity',
-    description: 'Compare two JSON payloads with editor-style highlighting',
-    href: '/tools/json-diffinity',
-    icon: Braces,
+    title: 'Song Recommender',
+    description: 'Get song recommendations based on your favorite artists',
+    href: '/tools/song-recommender',
+    icon: Music4,
   },
   // Add more tools here as they are created
 ];

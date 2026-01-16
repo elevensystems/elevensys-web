@@ -4,7 +4,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 
 import Editor from '@monaco-editor/react';
 import { findNodeAtLocation, parseTree } from 'jsonc-parser';
-import { Braces, GitCompare, Sparkles } from 'lucide-react';
+import { Braces, GitCompare, TextInitial } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 import parserBabel from 'prettier/plugins/babel';
@@ -357,8 +357,8 @@ export default function JsonDiffPage() {
                     )
                   }
                 >
-                  <Sparkles className='h-4 w-4 mr-2' />
-                  Format JSON
+                  <TextInitial className='h-4 w-4 mr-2' />
+                  Format
                 </Button>
               </CardHeader>
               <CardContent className='flex flex-col gap-3'>
@@ -413,8 +413,8 @@ export default function JsonDiffPage() {
                     )
                   }
                 >
-                  <Sparkles className='h-4 w-4 mr-2' />
-                  Format JSON
+                  <TextInitial className='h-4 w-4 mr-2' />
+                  Format
                 </Button>
               </CardHeader>
               <CardContent className='flex flex-col gap-3'>
