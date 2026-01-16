@@ -36,6 +36,7 @@ const EXCLUDED_TOOLS = [
   'Summary Smith',
   'Prompt Templates',
   'Song Recommender',
+  'JSON Diffinity',
 ];
 
 const shouldShowDropdown = (toolName: string): boolean => {

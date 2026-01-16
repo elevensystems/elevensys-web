@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { FileText, Key, Link2, Package, Wrench } from 'lucide-react';
+import { Braces, FileText, Key, Link2, Package, Wrench } from 'lucide-react';
 
 import { MainLayout } from '@/components/layouts';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,12 @@ const tools = [
     description: 'Browse and copy prompt templates for AI agents and workflows',
     href: '/tools/prompt-templates',
     icon: FileText,
+  },
+  {
+    title: 'JSON Diffinity',
+    description: 'Compare two JSON payloads with editor-style highlighting',
+    href: '/tools/json-diffinity',
+    icon: Braces,
   },
   // Add more tools here as they are created
 ];

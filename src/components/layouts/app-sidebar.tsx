@@ -7,6 +7,7 @@ import Link from 'next/link';
 import {
   //   BookOpen,
   //   Bot,
+  Braces,
   Command,
   FileText,
   //   Frame,
@@ -188,6 +189,11 @@ const data = {
       name: 'Song Recommender',
       url: '/tools/song-recommender',
       icon: Music4,
+    },
+    {
+      name: 'JSON Diffinity',
+      url: '/tools/json-diffinity',
+      icon: Braces,
     },
     // {
     //   name: "Design Engineering",
