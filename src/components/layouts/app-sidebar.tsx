@@ -13,6 +13,7 @@ import {
   //   Frame,
   Home,
   Key,
+  Languages,
   LifeBuoy,
   Link2,
   Link as LinkIcon,
@@ -166,14 +167,19 @@ const data = {
       icon: Braces,
     },
     {
-      name: 'Password Generator',
-      url: '/tools/password-generator',
-      icon: Key,
+      name: 'AI Translator',
+      url: '/tools/translate',
+      icon: Languages,
     },
     {
       name: 'NPM Converter',
       url: '/tools/npm-converter',
       icon: Package,
+    },
+    {
+      name: 'Password Generator',
+      url: '/tools/password-generator',
+      icon: Key,
     },
     {
       name: 'PR Link Shrinker',

@@ -6,6 +6,7 @@ import {
   Braces,
   FileText,
   Key,
+  Languages,
   Link2,
   Music4,
   Package,
@@ -34,6 +35,12 @@ const tools = [
     description: 'Compare two JSON payloads with editor-style highlighting',
     href: '/tools/json-diffinity',
     icon: Braces,
+  },
+  {
+    title: 'AI Translator',
+    description: 'Translate between Vietnamese and English with tone control',
+    href: '/tools/translate',
+    icon: Languages,
   },
   {
     title: 'Password Generator',

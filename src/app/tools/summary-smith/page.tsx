@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 
 interface PRItem {
@@ -319,7 +320,7 @@ export default function SummarySmithPage() {
 
                 <div className='space-y-2'>
                   <Label htmlFor='status'>Current Status (optional)</Label>
-                  <select
+                  <NativeSelect
                     id='status'
                     value={status}
                     onChange={e => {
@@ -329,14 +330,13 @@ export default function SummarySmithPage() {
                         setErrors(prev => ({ ...prev, reason: undefined }));
                       }
                     }}
-                    className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
                   >
                     {STATUS_OPTIONS.map(opt => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </div>
 
                 {status === 'Blocked' && (

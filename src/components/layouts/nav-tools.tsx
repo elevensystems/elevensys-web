@@ -31,6 +31,7 @@ import {
 const EXCLUDED_TOOLS = [
   'URL Shortener',
   'Password Generator',
+  'AI Translator',
   'NPM Converter',
   'PR Link Shrinker',
   'Summary Smith',
