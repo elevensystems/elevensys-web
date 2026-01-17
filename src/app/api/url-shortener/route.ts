@@ -4,6 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { originalUrl } = body;
+    const apiUrl = process.env.URL_SHORTENER_API;
 
     // Validate input
     if (!originalUrl || typeof originalUrl !== 'string') {
@@ -13,8 +14,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!apiUrl) {
+      console.error('Missing URL_SHORTENER_API environment variable');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     // Call external API
-    const response = await fetch('https://api.urlify.cc/shorten', {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
