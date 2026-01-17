@@ -7,9 +7,6 @@ import { findNodeAtLocation, parseTree } from 'jsonc-parser';
 import { Braces, Eraser, GitCompare, TextInitial } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
-import parserBabel from 'prettier/plugins/babel';
-import parserEstree from 'prettier/plugins/estree';
-import prettier from 'prettier/standalone';
 import { toast } from 'sonner';
 
 import { MainLayout } from '@/components/layouts';
@@ -65,14 +62,9 @@ const parseJsonSafely = (value: string) => {
   }
 };
 
-const formatJsonWithPrettier = async (value: string) => {
-  // Prettier runs entirely in the browser and provides consistent JSON formatting.
-  return await prettier.format(value, {
-    parser: 'json',
-    plugins: [parserBabel, parserEstree],
-    printWidth: 80,
-    tabWidth: 2,
-  });
+const formatJson = async (value: string) => {
+  const parsed = JSON.parse(value) as unknown;
+  return `${JSON.stringify(parsed, null, 2)}\n`;
 };
 
 const buildDecorationsForPaths = (
@@ -314,7 +306,7 @@ export default function JsonDiffPage() {
       try {
         // Prettier integration keeps formatting client-side and preserves
         // cursor position when we rewrite the editor content.
-        const formatted = await formatJsonWithPrettier(value);
+        const formatted = await formatJson(value);
         const model = editor.getModel();
 
         if (!model) {
@@ -397,7 +389,7 @@ export default function JsonDiffPage() {
               <CardContent className='flex flex-col gap-3'>
                 <div className='rounded-lg border bg-muted/30 overflow-hidden'>
                   <Editor
-                    height='520px'
+                    height='420px'
                     language='json'
                     value={originalText}
                     theme={editorTheme}
@@ -467,7 +459,7 @@ export default function JsonDiffPage() {
               <CardContent className='flex flex-col gap-3'>
                 <div className='rounded-lg border bg-muted/30 overflow-hidden'>
                   <Editor
-                    height='520px'
+                    height='420px'
                     language='json'
                     value={modifiedText}
                     theme={editorTheme}
