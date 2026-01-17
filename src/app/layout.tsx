@@ -3,6 +3,8 @@ import { Ubuntu } from 'next/font/google';
 
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
+import { AuthProvider } from '@/contexts/auth-context';
+import { getUserFromSession } from '@/lib/auth';
 import '@/styles/globals.css';
 
 const ubuntu = Ubuntu({
@@ -16,11 +18,13 @@ export const metadata: Metadata = {
   description: 'Connecting Ideas, Building Solutions',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUserFromSession();
+
   return (
     <html lang='en' suppressHydrationWarning>
       <body className={`${ubuntu.variable} antialiased`}>
@@ -30,8 +34,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster />
+          <AuthProvider user={user}>
+            {children}
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -8,13 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Field, FieldDescription, FieldGroup } from '@/components/ui/field';
 import { cn } from '@/lib/utils';
 
 export function LoginForm({
@@ -25,40 +19,16 @@ export function LoginForm({
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>Use Cognito login</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            You&apos;ll be redirected to the hosted login page.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form action='/api/auth/login' method='get'>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor='email'>Email</FieldLabel>
-                <Input
-                  id='email'
-                  type='email'
-                  placeholder='m@example.com'
-                  required
-                />
-              </Field>
-              <Field>
-                <div className='flex items-center'>
-                  <FieldLabel htmlFor='password'>Password</FieldLabel>
-                  <Link
-                    href='/forgot-password'
-                    className='ml-auto inline-block text-sm underline-offset-4 hover:underline'
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
-                <Input id='password' type='password' required />
-              </Field>
-              <Field>
-                <Button type='submit'>Login</Button>
-                {/* <Button variant='outline' type='button'>
-                  Login with Google
-                </Button> */}
+                <Button type='submit'>Continue to sign in</Button>
                 <FieldDescription className='text-center'>
                   Don&apos;t have an account?{' '}
                   <Link href='/signup'>Sign up</Link>
