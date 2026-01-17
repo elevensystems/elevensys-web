@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getUserFromSession } from '@/lib/auth';
 import { requireEnv } from '@/lib/utils';
 
 interface TranslateRequestBody {
@@ -21,6 +22,13 @@ const buildPrompt = (
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getUserFromSession();
+    if (!user || (user.role !== 'pro' && user.role !== 'admin')) {
+      return NextResponse.json(
+        { error: 'Pro access required.' },
+        { status: 403 }
+      );
+    }
     const body = (await request.json()) as TranslateRequestBody;
     const input = body.input?.trim();
     const direction = body.direction ?? 'vi-en';

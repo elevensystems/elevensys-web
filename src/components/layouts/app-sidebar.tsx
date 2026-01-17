@@ -221,12 +221,24 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
     name: string;
     email: string;
     avatar?: string;
+    role: 'admin' | 'free' | 'pro';
+    groups: string[];
   } | null;
 };
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
+  const restrictedTools = React.useMemo(
+    () => new Set(['AI Translator', 'Prompt Templates']),
+    []
+  );
+  const filteredTools = React.useMemo(() => {
+    if (user?.role === 'pro' || user?.role === 'admin') {
+      return data.tools;
+    }
+    return data.tools.filter(tool => !restrictedTools.has(tool.name));
+  }, [restrictedTools, user?.role]);
 
   const handleNavAction = (action?: string) => {
     if (action === 'support') {
@@ -249,7 +261,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                   </div>
                   <div className='grid flex-1 text-left text-sm leading-tight'>
                     <span className='truncate font-medium'>Eleven Systems</span>
-                    <span className='truncate text-xs'>Premium</span>
+                    <span className='truncate text-xs'>Trial</span>
                   </div>
                 </Link>
               </SidebarMenuButton>
@@ -258,7 +270,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         </SidebarHeader>
         <SidebarContent>
           {hasData(data.navMain) && <NavMain items={data.navMain} />}
-          {hasData(data.tools) && <NavTools tools={data.tools} />}
+          {hasData(filteredTools) && <NavTools tools={filteredTools} />}
           {hasData(data.navSecondary) && (
             <NavSecondary
               items={data.navSecondary}

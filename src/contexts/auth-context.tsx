@@ -6,6 +6,8 @@ type AuthUser = {
   name: string;
   email: string;
   avatar?: string;
+  role: 'admin' | 'free' | 'pro';
+  groups: string[];
 } | null;
 
 type AuthContextType = {

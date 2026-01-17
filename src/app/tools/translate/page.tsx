@@ -29,6 +29,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/contexts/auth-context';
 
 const TONES = [
   { value: 'neutral', label: 'Neutral' },
@@ -60,6 +61,8 @@ interface Preferences {
 }
 
 export default function TranslatePage() {
+  const { user } = useAuth();
+  const hasAccess = user?.role === 'pro' || user?.role === 'admin';
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [direction, setDirection] = useState<Direction>(DIRECTION.VI_EN);
@@ -220,6 +223,28 @@ export default function TranslatePage() {
   );
 
   const inputCount = inputText.length;
+
+  if (!hasAccess) {
+    return (
+      <MainLayout>
+        <section className='container mx-auto px-4 py-12'>
+          <div className='max-w-3xl mx-auto space-y-6'>
+            <ToolPageHeader
+              title='AI Translator'
+              description='Translate between Vietnamese and English with tone control for natural, context-aware results.'
+            />
+            <Alert className='border-dashed'>
+              <AlertTitle>Pro access required</AlertTitle>
+              <AlertDescription>
+                This tool is available to Pro users only. Upgrade your plan to
+                unlock AI Translator.
+              </AlertDescription>
+            </Alert>
+          </div>
+        </section>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>

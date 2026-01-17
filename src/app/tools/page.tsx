@@ -1,5 +1,7 @@
 'use client';
 
+import { useMemo } from 'react';
+
 import Link from 'next/link';
 
 import {
@@ -22,6 +24,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { useAuth } from '@/contexts/auth-context';
+import { hasRole } from '@/lib/auth';
 
 const tools = [
   {
@@ -82,6 +86,15 @@ const tools = [
 ];
 
 export default function ToolsPage() {
+  const { user } = useAuth();
+  const visibleTools = useMemo(() => {
+    if (hasRole(user, ['pro'])) {
+      return tools;
+    }
+    const restricted = new Set(['AI Translator', 'Prompt Templates']);
+    return tools.filter(tool => !restricted.has(tool.title));
+  }, [user?.role]);
+
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
@@ -97,7 +110,7 @@ export default function ToolsPage() {
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {tools.map(tool => {
+            {visibleTools.map(tool => {
               const Icon = tool.icon;
               return (
                 <Link key={tool.href} href={tool.href}>

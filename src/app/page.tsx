@@ -7,7 +7,7 @@ export default function Home() {
         <div className='max-w-full mx-auto'>
           <h1 className='text-4xl font-bold mb-4'>Welcome to Eleven Systems</h1>
           <p className='text-lg text-muted-foreground mb-6'>
-            Your premium workspace for managing tools and projects efficiently.
+            Your workspace for managing tools and projects efficiently.
           </p>
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
             <div className='bg-card p-6 rounded-lg border'>

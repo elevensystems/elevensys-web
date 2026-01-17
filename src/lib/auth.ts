@@ -15,15 +15,29 @@ export type JwtPayload = {
   family_name?: string;
   preferred_username?: string;
   picture?: string;
+  'cognito:groups'?: string[];
   exp?: number;
   iat?: number;
   [key: string]: unknown;
 };
 
+export type UserRole = 'admin' | 'free' | 'pro';
+
 export type AuthUser = {
   name: string;
   email: string;
   avatar?: string;
+  role: UserRole;
+  groups: string[];
+};
+
+export const hasRole = (
+  user: AuthUser | null | undefined,
+  roles: UserRole[]
+): boolean => {
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  return roles.includes(user.role);
 };
 
 const base64UrlDecode = (input: string): string => {
@@ -85,10 +99,22 @@ export const getUserFromSession = async (): Promise<AuthUser | null> => {
     'User';
 
   const avatar = typeof payload.picture === 'string' ? payload.picture : '';
+  const groups = Array.isArray(payload['cognito:groups'])
+    ? payload['cognito:groups'].filter(
+        (group): group is string => typeof group === 'string'
+      )
+    : [];
+  const role: UserRole = groups.includes('pro')
+    ? 'pro'
+    : groups.includes('admin')
+      ? 'admin'
+      : 'free';
   const result = {
     name: displayName,
     email: email || displayName,
     avatar: avatar || undefined,
+    role,
+    groups,
   };
   return result;
 };

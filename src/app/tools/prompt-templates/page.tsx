@@ -24,12 +24,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
 
 interface Template {
@@ -40,6 +42,8 @@ interface Template {
 }
 
 export default function PromptTemplatesPage() {
+  const { user } = useAuth();
+  const hasAccess = user?.role === 'pro' || user?.role === 'admin';
   const [templates, setTemplates] = useState<Template[]>([]);
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -195,6 +199,28 @@ export default function PromptTemplatesPage() {
       icon: <FileText className='h-4 w-4' />,
     },
   ];
+
+  if (!hasAccess) {
+    return (
+      <MainLayout>
+        <section className='container mx-auto px-4 py-12'>
+          <div className='max-w-3xl mx-auto space-y-6'>
+            <ToolPageHeader
+              title='Prompt Templates'
+              description='Browse and copy prompt templates for AI agents, code reviews, testing, and more. Ready-to-use templates for your development workflow.'
+            />
+            <Alert className='border-dashed'>
+              <AlertTitle>Pro access required</AlertTitle>
+              <AlertDescription>
+                This tool is available to Pro users only. Upgrade your plan to
+                unlock Prompt Templates.
+              </AlertDescription>
+            </Alert>
+          </div>
+        </section>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>

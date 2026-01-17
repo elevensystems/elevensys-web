@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+import { getUserFromSession } from '@/lib/auth';
+
 export interface TemplateDefinition {
   id: string;
   title: string;
@@ -60,6 +62,13 @@ const TEMPLATE_DEFINITIONS: TemplateDefinition[] = [
 
 export async function GET() {
   try {
+    const user = await getUserFromSession();
+    if (!user || (user.role !== 'pro' && user.role !== 'admin')) {
+      return NextResponse.json(
+        { success: false, error: 'Pro access required.' },
+        { status: 403 }
+      );
+    }
     const templatesDir = path.join(process.cwd(), 'public', 'templates');
 
     const templates: Template[] = await Promise.all(
