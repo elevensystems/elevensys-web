@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { AUTH_COOKIES } from '@/lib/auth';
-
-const requireEnv = (name: string): string => {
-  const value = process.env[name];
-  if (!value) throw new Error(`Missing ${name}`);
-  return value;
-};
+import { requireEnv } from '@/lib/utils';
 
 export const GET = async () => {
   const cognitoDomain = requireEnv('COGNITO_DOMAIN');

@@ -6,17 +6,14 @@ import Link from 'next/link';
 
 import {
   BadgeCheck,
-  Bell,
   Check,
   ChevronsUpDown,
-  CreditCard,
   LogIn,
   LogOut,
   Moon,
   Settings,
   Sparkles,
   Sun,
-  UserPlus,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
@@ -52,6 +49,16 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const { theme, setTheme } = useTheme();
+
+  const getUserInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  };
 
   // Guest user UI
   if (!user) {
@@ -99,12 +106,12 @@ export function NavUser({
                     Sign in
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                {/* <DropdownMenuItem asChild>
                   <Link href='/signup' className='cursor-pointer'>
                     <UserPlus />
                     Sign up
                   </Link>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
@@ -140,17 +147,6 @@ export function NavUser({
       </SidebarMenu>
     );
   }
-
-  // Helper to get user initials
-  const getUserInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .filter(Boolean)
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
-  };
 
   return (
     <SidebarMenu>
@@ -206,14 +202,6 @@ export function NavUser({
               <DropdownMenuItem>
                 <BadgeCheck />
                 Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

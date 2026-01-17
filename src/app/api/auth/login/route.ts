@@ -3,12 +3,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 
 import { AUTH_COOKIES } from '@/lib/auth';
-
-const requireEnv = (name: string): string => {
-  const value = process.env[name];
-  if (!value) throw new Error(`Missing ${name}`);
-  return value;
-};
+import { requireEnv } from '@/lib/utils';
 
 const base64UrlEncode = (buffer: Buffer): string => {
   return buffer

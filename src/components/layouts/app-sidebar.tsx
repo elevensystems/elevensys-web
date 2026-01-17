@@ -5,25 +5,18 @@ import * as React from 'react';
 import Link from 'next/link';
 
 import {
-  //   BookOpen,
-  //   Bot,
   Braces,
   Command,
   FileText,
-  //   Frame,
   Home,
   Key,
   Languages,
   LifeBuoy,
   Link2,
   Link as LinkIcon,
-  //   Map,
   Music4,
   Package,
   ScrollText,
-  //   Settings2,
-  //   SquareTerminal,
-  //   PieChart,
   Send,
 } from 'lucide-react';
 

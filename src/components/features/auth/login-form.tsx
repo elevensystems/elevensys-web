@@ -19,7 +19,7 @@ export function LoginForm({
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Use Cognito login</CardTitle>
+          <CardTitle>Login to your account</CardTitle>
           <CardDescription>
             You&apos;ll be redirected to the hosted login page.
           </CardDescription>
@@ -29,10 +29,10 @@ export function LoginForm({
             <FieldGroup>
               <Field>
                 <Button type='submit'>Continue to sign in</Button>
-                <FieldDescription className='text-center'>
+                {/* <FieldDescription className='text-center'>
                   Don&apos;t have an account?{' '}
                   <Link href='/signup'>Sign up</Link>
-                </FieldDescription>
+                </FieldDescription> */}
               </Field>
             </FieldGroup>
           </form>

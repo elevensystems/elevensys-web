@@ -1,24 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { requireEnv } from '@/lib/utils';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { originalUrl } = body;
-    const apiUrl = process.env.URL_SHORTENER_API;
+    const apiUrl = requireEnv('URL_SHORTENER_API');
 
     // Validate input
     if (!originalUrl || typeof originalUrl !== 'string') {
       return NextResponse.json(
         { error: 'Invalid URL provided' },
         { status: 400 }
-      );
-    }
-
-    if (!apiUrl) {
-      console.error('Missing URL_SHORTENER_API environment variable');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
       );
     }
 

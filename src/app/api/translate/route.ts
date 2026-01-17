@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { requireEnv } from '@/lib/utils';
+
 interface TranslateRequestBody {
   input?: string;
   direction?: 'vi-en' | 'en-vi';
@@ -45,7 +47,7 @@ export async function POST(request: NextRequest) {
       'You are an expert bilingual translator specializing in high-quality Vietnamese-English and English-Vietnamese translations.';
     const userMessage = buildPrompt(input, directionLabel, tonesLabel);
 
-    const lambdaBase = process.env.OPENAI_URL || '';
+    const lambdaBase = requireEnv('OPENAI_URL');
     const response = await fetch(lambdaBase, {
       method: 'POST',
       headers: {

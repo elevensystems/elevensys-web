@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { AppSidebar } from '@/components/layouts/app-sidebar';
@@ -63,7 +64,9 @@ export default function MainLayout({
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className='hidden md:block'>
-                  <BreadcrumbLink href='/'>Home</BreadcrumbLink>
+                  <BreadcrumbLink asChild>
+                    <Link href='/'>Home</Link>
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
                 {pathSegments.length > 0 && (
                   <BreadcrumbSeparator className='hidden md:block' />
@@ -80,11 +83,8 @@ export default function MainLayout({
                             {formatSegment(segment)}
                           </BreadcrumbPage>
                         ) : (
-                          <BreadcrumbLink
-                            href={href}
-                            className='hidden md:block'
-                          >
-                            {formatSegment(segment)}
+                          <BreadcrumbLink asChild className='hidden md:block'>
+                            <Link href={href}>{formatSegment(segment)}</Link>
                           </BreadcrumbLink>
                         )}
                       </BreadcrumbItem>
