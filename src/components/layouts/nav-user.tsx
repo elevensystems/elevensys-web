@@ -234,7 +234,11 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href='/api/auth/logout' className='cursor-pointer'>
+              <Link
+                href='/api/auth/logout'
+                prefetch={false}
+                className='cursor-pointer'
+              >
                 <LogOut />
                 Log out
               </Link>
