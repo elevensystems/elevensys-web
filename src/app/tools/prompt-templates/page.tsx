@@ -32,7 +32,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/auth-context';
-import { cn } from '@/lib/utils';
+import { cn, hasRole } from '@/lib/utils';
 
 interface Template {
   id: string;
@@ -43,7 +43,6 @@ interface Template {
 
 export default function PromptTemplatesPage() {
   const { user } = useAuth();
-  const hasAccess = user?.role === 'pro' || user?.role === 'admin';
   const [templates, setTemplates] = useState<Template[]>([]);
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -200,7 +199,7 @@ export default function PromptTemplatesPage() {
     },
   ];
 
-  if (!hasAccess) {
+  if (hasRole(user, ['pro'])) {
     return (
       <MainLayout>
         <section className='container mx-auto px-4 py-12'>

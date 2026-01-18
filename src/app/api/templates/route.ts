@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { getUserFromSession } from '@/lib/auth';
+import { hasRole } from '@/lib/utils';
 
 export interface TemplateDefinition {
   id: string;
@@ -63,7 +64,7 @@ const TEMPLATE_DEFINITIONS: TemplateDefinition[] = [
 export async function GET() {
   try {
     const user = await getUserFromSession();
-    if (!user || (user.role !== 'pro' && user.role !== 'admin')) {
+    if (!hasRole(user, ['pro'])) {
       return NextResponse.json(
         { success: false, error: 'Pro access required.' },
         { status: 403 }

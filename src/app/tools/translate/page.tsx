@@ -30,6 +30,7 @@ import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
+import { hasRole } from '@/lib/utils';
 
 const TONES = [
   { value: 'neutral', label: 'Neutral' },
@@ -62,7 +63,6 @@ interface Preferences {
 
 export default function TranslatePage() {
   const { user } = useAuth();
-  const hasAccess = user?.role === 'pro' || user?.role === 'admin';
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [direction, setDirection] = useState<Direction>(DIRECTION.VI_EN);
@@ -224,7 +224,7 @@ export default function TranslatePage() {
 
   const inputCount = inputText.length;
 
-  if (!hasAccess) {
+  if (!hasRole(user, ['pro'])) {
     return (
       <MainLayout>
         <section className='container mx-auto px-4 py-12'>

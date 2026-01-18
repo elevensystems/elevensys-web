@@ -35,13 +35,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { hasRole } from '@/lib/utils';
+import { AuthUser } from '@/types/auth';
 
 const data = {
-  user: null as {
-    name: string;
-    email: string;
-    avatar: string;
-  } | null, // Set to null for guest, or provide user object when authenticated
+  user: null as AuthUser | null, // Set to null for guest, or provide user object when authenticated
   navMain: [
     {
       title: 'Home',
@@ -217,13 +215,7 @@ const hasData = <T,>(data: T[] | undefined | null): boolean => {
 };
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
-  user?: {
-    name: string;
-    email: string;
-    avatar?: string;
-    role: 'admin' | 'free' | 'pro';
-    groups: string[];
-  } | null;
+  user?: AuthUser | null;
 };
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
@@ -234,7 +226,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
     []
   );
   const filteredTools = React.useMemo(() => {
-    if (user?.role === 'pro' || user?.role === 'admin') {
+    if (hasRole(user, ['pro'])) {
       return data.tools;
     }
     return data.tools.filter(tool => !restrictedTools.has(tool.name));

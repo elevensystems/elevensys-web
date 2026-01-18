@@ -1,44 +1,13 @@
 import { cookies } from 'next/headers';
 
+import type { AuthUser, JwtPayload, UserRole } from '@/types/auth';
+
 export const AUTH_COOKIES = {
   idToken: 'cognito_id_token',
   refreshToken: 'cognito_refresh_token',
   oauthState: 'cognito_oauth_state',
   pkceVerifier: 'cognito_pkce_verifier',
 } as const;
-
-export type JwtPayload = {
-  sub?: string;
-  email?: string;
-  name?: string;
-  given_name?: string;
-  family_name?: string;
-  preferred_username?: string;
-  picture?: string;
-  'cognito:groups'?: string[];
-  exp?: number;
-  iat?: number;
-  [key: string]: unknown;
-};
-
-export type UserRole = 'admin' | 'free' | 'pro';
-
-export type AuthUser = {
-  name: string;
-  email: string;
-  avatar?: string;
-  role: UserRole;
-  groups: string[];
-};
-
-export const hasRole = (
-  user: AuthUser | null | undefined,
-  roles: UserRole[]
-): boolean => {
-  if (!user) return false;
-  if (user.role === 'admin') return true;
-  return roles.includes(user.role);
-};
 
 const base64UrlDecode = (input: string): string => {
   const base64 = input.replace(/-/g, '+').replace(/_/g, '/');

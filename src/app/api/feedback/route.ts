@@ -13,17 +13,11 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!name || typeof name !== 'string' || !name.trim()) {
-      return NextResponse.json(
-        { error: 'Name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
     if (!email || typeof email !== 'string' || !email.trim()) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     // Basic email validation
@@ -46,7 +40,7 @@ export async function POST(request: NextRequest) {
     // 1. Save to database
     // 2. Send email notification
     // 3. Send to a ticketing system, etc.
-    
+
     // For now, just log the feedback
     console.log('Feedback received:', {
       name: name.trim(),

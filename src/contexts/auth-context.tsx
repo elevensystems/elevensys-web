@@ -2,16 +2,10 @@
 
 import { ReactNode, createContext, useContext } from 'react';
 
-type AuthUser = {
-  name: string;
-  email: string;
-  avatar?: string;
-  role: 'admin' | 'free' | 'pro';
-  groups: string[];
-} | null;
+import type { AuthUser } from '@/types/auth';
 
 type AuthContextType = {
-  user: AuthUser;
+  user: AuthUser | null;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,7 +15,7 @@ export function AuthProvider({
   user,
 }: {
   children: ReactNode;
-  user: AuthUser;
+  user: AuthUser | null;
 }) {
   return (
     <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>

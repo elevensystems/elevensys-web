@@ -25,7 +25,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
-import { hasRole } from '@/lib/auth';
+import { hasRole } from '@/lib/utils';
 
 const tools = [
   {
@@ -88,7 +88,7 @@ const tools = [
 export default function ToolsPage() {
   const { user } = useAuth();
   const visibleTools = useMemo(() => {
-    if (hasRole(user, ['pro'])) {
+    if (!hasRole(user, ['pro'])) {
       return tools;
     }
     const restricted = new Set(['AI Translator', 'Prompt Templates']);

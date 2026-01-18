@@ -37,16 +37,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { AuthUser } from '@/types/auth';
 
-export function NavUser({
-  user,
-}: {
-  user?: {
-    name: string;
-    email: string;
-    avatar?: string;
-  } | null;
-}) {
+export function NavUser({ user }: { user?: AuthUser | null }) {
   const { isMobile } = useSidebar();
   const { theme, setTheme } = useTheme();
 
