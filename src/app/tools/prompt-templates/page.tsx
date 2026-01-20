@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
+  AlertTriangle,
   Check,
   Code2,
   Copy,
@@ -12,9 +13,11 @@ import {
   Loader2,
   ScrollText,
   Search,
+  Settings2,
   Sparkles,
   X,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { MainLayout } from '@/components/layouts';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
@@ -28,11 +31,30 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
 import { cn, hasRole } from '@/lib/utils';
+
+import {
+  areRequiredInputsFilled,
+  generatePrompt,
+  getManualInputWarning,
+  getTemplateInputConfig,
+  templateHasInputs,
+  type TemplateInputConfig,
+} from './template-inputs';
 
 interface Template {
   id: string;
@@ -50,6 +72,34 @@ export default function PromptTemplatesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+
+  // Generate with inputs state
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null
+  );
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
+  const [isInputModalOpen, setIsInputModalOpen] = useState(false);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [generatedPrompt, setGeneratedPrompt] = useState('');
+  const [resultCopied, setResultCopied] = useState(false);
+
+  // Get input config for selected template
+  const selectedInputConfig = useMemo<TemplateInputConfig | null>(() => {
+    if (!selectedTemplate) return null;
+    return getTemplateInputConfig(selectedTemplate.id);
+  }, [selectedTemplate]);
+
+  // Check if generate button should be enabled
+  const canGenerate = useMemo(() => {
+    if (!selectedInputConfig) return false;
+    return areRequiredInputsFilled(selectedInputConfig, inputValues);
+  }, [selectedInputConfig, inputValues]);
+
+  // Get warning message for manual inputs
+  const manualWarning = useMemo(() => {
+    if (!selectedInputConfig) return null;
+    return getManualInputWarning(selectedInputConfig);
+  }, [selectedInputConfig]);
 
   // Load templates on mount and categorize them
   useEffect(() => {
@@ -138,6 +188,68 @@ export default function PromptTemplatesPage() {
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
     }
+  }, []);
+
+  // Open input modal for a template
+  const handleOpenInputModal = useCallback((template: Template) => {
+    setSelectedTemplate(template);
+    // Initialize input values with defaults
+    const config = getTemplateInputConfig(template.id);
+    if (config) {
+      const defaults: Record<string, string> = {};
+      config.inputs.forEach(input => {
+        if (input.defaultValue) {
+          defaults[input.id] = input.defaultValue;
+        }
+      });
+      setInputValues(defaults);
+    } else {
+      setInputValues({});
+    }
+    setIsInputModalOpen(true);
+  }, []);
+
+  // Handle input value change
+  const handleInputChange = useCallback((inputId: string, value: string) => {
+    setInputValues(prev => ({ ...prev, [inputId]: value }));
+  }, []);
+
+  // Generate prompt with inputs
+  const handleGenerate = useCallback(() => {
+    if (!selectedTemplate || !selectedInputConfig) return;
+
+    const prompt = generatePrompt(
+      selectedTemplate.content,
+      selectedInputConfig,
+      inputValues
+    );
+    setGeneratedPrompt(prompt);
+    setIsInputModalOpen(false);
+    setIsResultModalOpen(true);
+    setResultCopied(false);
+  }, [selectedTemplate, selectedInputConfig, inputValues]);
+
+  // Copy generated prompt
+  const handleCopyGenerated = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(generatedPrompt);
+      setResultCopied(true);
+      toast.success('Prompt copied to clipboard!');
+      setTimeout(() => setResultCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      toast.error('Failed to copy prompt');
+    }
+  }, [generatedPrompt]);
+
+  // Close modals and reset state
+  const handleCloseModals = useCallback(() => {
+    setIsInputModalOpen(false);
+    setIsResultModalOpen(false);
+    setSelectedTemplate(null);
+    setInputValues({});
+    setGeneratedPrompt('');
+    setResultCopied(false);
   }, []);
 
   const getCategoryLabel = (category: string) => {
@@ -526,12 +638,28 @@ export default function PromptTemplatesPage() {
                                       words
                                     </span>
                                   </div>
-                                  <Badge
-                                    variant='secondary'
-                                    className='text-xs'
-                                  >
-                                    Markdown
-                                  </Badge>
+                                  <div className='flex items-center gap-2'>
+                                    {templateHasInputs(template.id) && (
+                                      <Button
+                                        size='sm'
+                                        variant='outline'
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          handleOpenInputModal(template);
+                                        }}
+                                        className='gap-1.5'
+                                      >
+                                        <Settings2 className='h-3.5 w-3.5' />
+                                        Generate With Inputs
+                                      </Button>
+                                    )}
+                                    <Badge
+                                      variant='secondary'
+                                      className='text-xs'
+                                    >
+                                      Markdown
+                                    </Badge>
+                                  </div>
                                 </div>
                               </div>
                             </AccordionContent>
@@ -565,6 +693,9 @@ export default function PromptTemplatesPage() {
                           Copy button adds templates to your clipboard instantly
                         </li>
                         <li>Filter by category to browse related templates</li>
+                        <li>
+                          Use &quot;Generate With Inputs&quot; to customize templates with your specific values
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -574,6 +705,135 @@ export default function PromptTemplatesPage() {
           </Card>
         </div>
       </section>
+
+      {/* Input Modal */}
+      <Dialog open={isInputModalOpen} onOpenChange={setIsInputModalOpen}>
+        <DialogContent className='max-w-lg'>
+          <DialogHeader>
+            <DialogTitle className='flex items-center gap-2'>
+              <Settings2 className='h-5 w-5 text-primary' />
+              Configure Template Inputs
+            </DialogTitle>
+            <DialogDescription>
+              {selectedTemplate?.title}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className='space-y-4 py-4'>
+            {selectedInputConfig?.inputs.map(input => (
+              <div key={input.id} className='space-y-2'>
+                <Label htmlFor={input.id} className='flex items-center gap-2'>
+                  {input.label}
+                  {input.required &&
+                    input.type !== 'image' &&
+                    input.type !== 'file' && (
+                      <span className='text-destructive'>*</span>
+                    )}
+                  {(input.type === 'image' || input.type === 'file') && (
+                    <Badge variant='outline' className='text-xs font-normal'>
+                      Manual
+                    </Badge>
+                  )}
+                </Label>
+                {input.type === 'list' ? (
+                  <Textarea
+                    id={input.id}
+                    placeholder={input.placeholder}
+                    value={inputValues[input.id] || ''}
+                    onChange={e => handleInputChange(input.id, e.target.value)}
+                    rows={3}
+                    className='resize-none font-mono text-sm'
+                  />
+                ) : input.type === 'image' || input.type === 'file' ? (
+                  <Input
+                    id={input.id}
+                    placeholder={input.placeholder}
+                    disabled
+                    className='font-mono text-sm bg-muted'
+                  />
+                ) : (
+                  <Input
+                    id={input.id}
+                    type={input.type === 'url' ? 'url' : input.type === 'email' ? 'email' : 'text'}
+                    placeholder={input.placeholder}
+                    value={inputValues[input.id] || ''}
+                    onChange={e => handleInputChange(input.id, e.target.value)}
+                    className='font-mono text-sm'
+                  />
+                )}
+                {input.helpText && (
+                  <p className='text-xs text-muted-foreground'>
+                    {input.helpText}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter className='flex-col sm:flex-row gap-2'>
+            <Button
+              variant='outline'
+              onClick={() => setIsInputModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleGenerate} disabled={!canGenerate}>
+              <Sparkles className='h-4 w-4 mr-2' />
+              Generate Prompt
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Result Modal */}
+      <Dialog open={isResultModalOpen} onOpenChange={setIsResultModalOpen}>
+        <DialogContent className='max-w-3xl max-h-[85vh] flex flex-col'>
+          <DialogHeader className='flex-shrink-0'>
+            <DialogTitle className='flex items-center gap-2'>
+              <Sparkles className='h-5 w-5 text-primary' />
+              Generated Prompt
+            </DialogTitle>
+            <DialogDescription>
+              {selectedTemplate?.title}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className='flex-1 min-h-0 my-4'>
+            <ScrollArea className='h-[50vh] w-full rounded-lg border-2 bg-muted/30'>
+              <pre className='p-4 text-sm leading-relaxed font-mono whitespace-pre-wrap break-words'>
+                {generatedPrompt}
+              </pre>
+            </ScrollArea>
+          </div>
+
+          <DialogFooter className='flex-shrink-0 flex-col sm:flex-row gap-3 items-stretch sm:items-center'>
+            {manualWarning && (
+              <div className='flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-800 dark:text-amber-200 text-sm flex-1'>
+                <AlertTriangle className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                <span>{manualWarning}</span>
+              </div>
+            )}
+            <div className='flex gap-2 flex-shrink-0'>
+              <Button variant='outline' onClick={handleCloseModals}>
+                Close
+              </Button>
+              <Button onClick={handleCopyGenerated} className='gap-2'>
+                {resultCopied ? (
+                  <>
+                    <Check className='h-4 w-4' />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className='h-4 w-4' />
+                    Copy Prompt
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <style jsx>{`
         @keyframes fadeIn {
