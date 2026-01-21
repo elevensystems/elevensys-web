@@ -80,7 +80,7 @@ export default function NpmConverterPage() {
 
     // Check if it looks like valid Lerna output
     if (!isLernaOutput(trimmedInput)) {
-      setError('Hey, you sure you pasted the correct Lerna output? 🤔');
+      setError('Input does not appear to be valid Lerna output');
       return;
     }
 
