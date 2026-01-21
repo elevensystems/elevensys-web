@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
+import { ShineBorder } from '@/components/ui/shine-border';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
 import { hasRole } from '@/lib/utils';
@@ -263,7 +264,19 @@ export default function TranslatePage() {
           )}
 
           <div className='grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-start'>
-            <Card className='lg:sticky lg:top-6'>
+            <Card className='lg:sticky lg:top-6 relative overflow-hidden'>
+              <ShineBorder
+                borderWidth={2}
+                duration={30}
+                shineColor={[
+                  '#34d399',
+                  '#10b981',
+                  '#84cc16',
+                  '#f7ff00',
+                  '#e99a52',
+                  '#db36a4',
+                ]}
+              />
               <CardHeader>
                 <CardTitle className='flex items-center justify-between py-2'>
                   <span>Input Text</span>

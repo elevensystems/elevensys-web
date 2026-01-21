@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { ShineBorder } from '@/components/ui/shine-border';
 import { Textarea } from '@/components/ui/textarea';
 
 // Genre definitions
@@ -339,7 +340,19 @@ export default function SongRecommenderPage() {
 
           <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
             {/* Settings Card */}
-            <Card className='lg:col-span-1'>
+            <Card className='lg:col-span-1 relative overflow-hidden'>
+              <ShineBorder
+                borderWidth={2}
+                duration={30}
+                shineColor={[
+                  '#34d399',
+                  '#10b981',
+                  '#84cc16',
+                  '#f7ff00',
+                  '#e99a52',
+                  '#db36a4',
+                ]}
+              />
               <CardHeader>
                 <CardTitle className='flex items-center gap-2'>
                   <Headphones className='h-5 w-5' />
