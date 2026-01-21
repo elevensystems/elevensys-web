@@ -163,6 +163,10 @@ export default function JsonDiffPage() {
       configureMonaco(monaco);
       monacoRef.current = monaco;
 
+      editor.onDidPaste(() => {
+        editor.getAction('editor.action.formatDocument')?.run();
+      });
+
       if (side === 'original') {
         originalEditorRef.current = editor;
       } else {
