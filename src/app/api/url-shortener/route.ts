@@ -5,7 +5,7 @@ import { requireEnv } from '@/lib/utils';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { originalUrl } = body;
+    const { originalUrl, createdBy, autoDelete, ttlDays } = body;
     const apiUrl = requireEnv('URL_SHORTENER_API');
 
     // Validate input
@@ -24,6 +24,9 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         originalUrl: originalUrl.trim(),
+        createdBy,
+        autoDelete,
+        ttlDays,
       }),
     });
 
@@ -37,6 +40,9 @@ export async function POST(request: NextRequest) {
       shortUrl: result.data.shortUrl,
       shortCode:
         result.data.shortCode || result.data.shortUrl?.split('/').pop(),
+      originalUrl: result.data.originalUrl,
+      createdAt: result.data.createdAt,
+      expiresAt: result.data.expiresAt,
     });
   } catch (error) {
     console.error('Error in URL shortener API:', error);

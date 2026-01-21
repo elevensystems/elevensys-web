@@ -2,13 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Check, Copy, Link2, Settings as SettingsIcon } from 'lucide-react';
+import {
+  CalendarClock,
+  Check,
+  Copy,
+  Link2,
+  Settings as SettingsIcon,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 import { MainLayout } from '@/components/layouts';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -30,7 +37,15 @@ const isValidUrl = (urlString: string): boolean => {
 
 export default function Snip() {
   const [url, setUrl] = useState('');
-  const [shortUrl, setShortUrl] = useState('');
+  const [autoDelete, setAutoDelete] = useState(false);
+  const [ttlDays, setTtlDays] = useState('');
+  const [result, setResult] = useState<{
+    shortUrl: string;
+    shortCode?: string;
+    originalUrl?: string;
+    createdAt?: string;
+    expiresAt?: string;
+  } | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +64,7 @@ export default function Snip() {
   const handleUrlChange = useCallback(
     (value: string) => {
       setUrl(value);
+      setResult(null);
       if (error) {
         setError('');
       }
@@ -69,6 +85,14 @@ export default function Snip() {
       return;
     }
 
+    if (autoDelete && ttlDays.trim()) {
+      const parsedTtlDays = Number(ttlDays);
+      if (Number.isNaN(parsedTtlDays) || parsedTtlDays <= 0) {
+        setError('TTL must be a positive number of days');
+        return;
+      }
+    }
+
     setError('');
     setIsLoading(true);
 
@@ -80,6 +104,8 @@ export default function Snip() {
         },
         body: JSON.stringify({
           originalUrl: url.trim(),
+          autoDelete,
+          ttlDays: autoDelete && ttlDays.trim() ? Number(ttlDays) : undefined,
         }),
       });
 
@@ -90,7 +116,7 @@ export default function Snip() {
       const result = await response.json();
 
       if (result.shortUrl) {
-        setShortUrl(result.shortUrl);
+        setResult(result);
         toast.success('URL shortened successfully', {
           description: 'Your short URL is ready to use.',
           icon: <Check className='h-4 w-4' />,
@@ -109,11 +135,15 @@ export default function Snip() {
     } finally {
       setIsLoading(false);
     }
-  }, [url]);
+  }, [autoDelete, ttlDays, url]);
 
   const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(shortUrl);
+      if (!result?.shortUrl) {
+        return;
+      }
+
+      await navigator.clipboard.writeText(result.shortUrl);
       setCopied(true);
 
       // Clear any existing timeout
@@ -128,7 +158,7 @@ export default function Snip() {
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
     }
-  }, [shortUrl]);
+  }, [result?.shortUrl]);
 
   const handleKeyPress = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -175,6 +205,40 @@ export default function Snip() {
                   />
                 </div>
 
+                {/* Auto-delete */}
+                <div className='flex items-center gap-3 rounded-lg border bg-muted/30 p-4'>
+                  <Checkbox
+                    id='auto-delete'
+                    checked={autoDelete}
+                    onCheckedChange={checked => setAutoDelete(checked === true)}
+                  />
+                  <div className='space-y-1'>
+                    <Label htmlFor='auto-delete'>Auto-delete link</Label>
+                    <p className='text-xs text-muted-foreground'>
+                      Enable to expire the link after a set number of days.
+                    </p>
+                  </div>
+                </div>
+
+                {autoDelete ? (
+                  <div className='space-y-2'>
+                    <Label htmlFor='ttl-days'>Expires After (days)</Label>
+                    <Input
+                      id='ttl-days'
+                      type='number'
+                      min={1}
+                      step={1}
+                      placeholder='30'
+                      value={ttlDays}
+                      onChange={e => setTtlDays(e.target.value)}
+                      className='h-12'
+                    />
+                    <p className='text-xs text-muted-foreground'>
+                      Leave blank to use the default 30-day expiration.
+                    </p>
+                  </div>
+                ) : null}
+
                 {/* Shorten Button */}
                 <Button
                   onClick={handleShorten}
@@ -197,31 +261,76 @@ export default function Snip() {
                 </CardTitle>
               </CardHeader>
               <CardContent className='space-y-4'>
-                {!shortUrl ? (
+                {!result?.shortUrl ? (
                   <div className='flex items-center justify-center h-40 text-muted-foreground'>
                     <p>Enter a URL and click "Shorten URL" to get started</p>
                   </div>
                 ) : (
-                  <div className='space-y-2'>
-                    <Label className='text-sm font-medium'>Shortened URL</Label>
-                    <div className='flex items-center gap-2 p-3 bg-muted rounded-lg'>
-                      <code className='flex-1 text-sm font-mono break-all select-all'>
-                        {shortUrl}
-                      </code>
-                      <Button
-                        size='sm'
-                        variant='ghost'
-                        onClick={handleCopy}
-                        aria-label={
-                          copied ? 'Copied to clipboard' : 'Copy to clipboard'
-                        }
-                      >
-                        {copied ? (
-                          <Check className='h-4 w-4' aria-hidden='true' />
-                        ) : (
-                          <Copy className='h-4 w-4' aria-hidden='true' />
-                        )}
-                      </Button>
+                  <div className='space-y-4'>
+                    <div className='space-y-2'>
+                      <Label className='text-sm font-medium'>
+                        Shortened URL
+                      </Label>
+                      <div className='flex items-center gap-2 p-3 bg-muted rounded-lg'>
+                        <code className='flex-1 text-sm font-mono break-all select-all'>
+                          {result.shortUrl}
+                        </code>
+                        <Button
+                          size='sm'
+                          variant='ghost'
+                          onClick={handleCopy}
+                          aria-label={
+                            copied ? 'Copied to clipboard' : 'Copy to clipboard'
+                          }
+                        >
+                          {copied ? (
+                            <Check className='h-4 w-4' aria-hidden='true' />
+                          ) : (
+                            <Copy className='h-4 w-4' aria-hidden='true' />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className='grid gap-3 rounded-lg border bg-muted/30 p-4 text-sm'>
+                      <div className='flex items-center justify-between gap-3'>
+                        <span className='text-muted-foreground'>
+                          Short code
+                        </span>
+                        <span className='font-medium'>
+                          {result.shortCode ?? '—'}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between gap-3'>
+                        <span className='text-muted-foreground'>
+                          Original URL
+                        </span>
+                        <span className='font-medium break-all text-right'>
+                          {result.originalUrl ?? url.trim()}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between gap-3'>
+                        <span className='flex items-center gap-2 text-muted-foreground'>
+                          <CalendarClock className='h-4 w-4' />
+                          Created
+                        </span>
+                        <span className='font-medium'>
+                          {result.createdAt
+                            ? new Date(result.createdAt).toLocaleString()
+                            : '—'}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between gap-3'>
+                        <span className='flex items-center gap-2 text-muted-foreground'>
+                          <CalendarClock className='h-4 w-4' />
+                          Expires
+                        </span>
+                        <span className='font-medium'>
+                          {result.expiresAt
+                            ? new Date(result.expiresAt).toLocaleString()
+                            : 'Never'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 )}
