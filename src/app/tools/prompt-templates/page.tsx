@@ -48,12 +48,12 @@ import { useAuth } from '@/contexts/auth-context';
 import { cn, hasRole } from '@/lib/utils';
 
 import {
+  type TemplateInputConfig,
   areRequiredInputsFilled,
   generatePrompt,
   getManualInputWarning,
   getTemplateInputConfig,
   templateHasInputs,
-  type TemplateInputConfig,
 } from './template-inputs';
 
 interface Template {
@@ -311,7 +311,7 @@ export default function PromptTemplatesPage() {
     },
   ];
 
-  if (hasRole(user, ['pro'])) {
+  if (!hasRole(user, ['pro'])) {
     return (
       <MainLayout>
         <section className='container mx-auto px-4 py-12'>
@@ -694,7 +694,8 @@ export default function PromptTemplatesPage() {
                         </li>
                         <li>Filter by category to browse related templates</li>
                         <li>
-                          Use &quot;Generate With Inputs&quot; to customize templates with your specific values
+                          Use &quot;Generate With Inputs&quot; to customize
+                          templates with your specific values
                         </li>
                       </ul>
                     </div>
@@ -714,9 +715,7 @@ export default function PromptTemplatesPage() {
               <Settings2 className='h-5 w-5 text-primary' />
               Configure Template Inputs
             </DialogTitle>
-            <DialogDescription>
-              {selectedTemplate?.title}
-            </DialogDescription>
+            <DialogDescription>{selectedTemplate?.title}</DialogDescription>
           </DialogHeader>
 
           <div className='space-y-4 py-4'>
@@ -754,7 +753,13 @@ export default function PromptTemplatesPage() {
                 ) : (
                   <Input
                     id={input.id}
-                    type={input.type === 'url' ? 'url' : input.type === 'email' ? 'email' : 'text'}
+                    type={
+                      input.type === 'url'
+                        ? 'url'
+                        : input.type === 'email'
+                          ? 'email'
+                          : 'text'
+                    }
                     placeholder={input.placeholder}
                     value={inputValues[input.id] || ''}
                     onChange={e => handleInputChange(input.id, e.target.value)}
@@ -793,9 +798,7 @@ export default function PromptTemplatesPage() {
               <Sparkles className='h-5 w-5 text-primary' />
               Generated Prompt
             </DialogTitle>
-            <DialogDescription>
-              {selectedTemplate?.title}
-            </DialogDescription>
+            <DialogDescription>{selectedTemplate?.title}</DialogDescription>
           </DialogHeader>
 
           <div className='flex-1 min-h-0 my-4'>

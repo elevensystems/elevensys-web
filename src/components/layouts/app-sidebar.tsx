@@ -35,7 +35,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { hasRole } from '@/lib/utils';
 import { AuthUser } from '@/types/auth';
 
 const data = {
@@ -46,91 +45,6 @@ const data = {
       url: '/',
       icon: Home,
     },
-    //     {
-    //       title: "Playground",
-    //       url: "#",
-    //       icon: SquareTerminal,
-    //       isActive: true,
-    //       items: [
-    //         {
-    //           title: "History",
-    //           url: "#",
-    //         },
-    //         {
-    //           title: "Starred",
-    //           url: "#",
-    //         },
-    //         {
-    //           title: "Settings",
-    //           url: "#",
-    //         },
-    //       ],
-    //     },
-    //     {
-    //       title: "Models",
-    //       url: "#",
-    //       icon: Bot,
-    //       items: [
-    //         {
-    //           title: "Genesis",
-    //           url: "#",
-    //         },
-    //         {
-    //           title: "Explorer",
-    //           url: "#",
-    //         },
-    //         {
-    //           title: "Quantum",
-    //           url: "#",
-    //         },
-    //       ],
-    //     },
-    //     {
-    //       title: "Documentation",
-    //       url: "#",
-    //       icon: BookOpen,
-    //       items: [
-    //         {
-    //           title: "Introduction",
-    //           url: "#",
-    //         },
-    //         {
-    //           title: "Get Started",
-    //           url: "#",
-    //         },
-    //         {
-    //           title: "Tutorials",
-    //           url: "#",
-    //         },
-    //         {
-    //           title: "Changelog",
-    //           url: "#",
-    //         },
-    //       ],
-    //     },
-    //     {
-    //       title: "Settings",
-    //       url: "#",
-    //       icon: Settings2,
-    //       items: [
-    //         {
-    //           title: "General",
-    //           url: "#",
-    //         },
-    //         {
-    //           title: "Team",
-    //           url: "#",
-    //         },
-    //         {
-    //           title: "Billing",
-    //           url: "#",
-    //         },
-    //         {
-    //           title: "Limits",
-    //           url: "#",
-    //         },
-    //       ],
-    //     },
   ],
   navSecondary: [
     {
@@ -192,21 +106,6 @@ const data = {
       url: '/tools/song-recommender',
       icon: Music4,
     },
-    // {
-    //   name: "Design Engineering",
-    //   url: "#",
-    //   icon: Frame,
-    // },
-    // {
-    //   name: "Sales & Marketing",
-    //   url: "#",
-    //   icon: PieChart,
-    // },
-    // {
-    //   name: "Travel",
-    //   url: "#",
-    //   icon: Map,
-    // },
   ],
 };
 
@@ -221,16 +120,7 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
-  const restrictedTools = React.useMemo(
-    () => new Set(['AI Translator', 'Prompt Templates']),
-    []
-  );
-  const filteredTools = React.useMemo(() => {
-    if (hasRole(user, ['pro'])) {
-      return data.tools;
-    }
-    return data.tools.filter(tool => !restrictedTools.has(tool.name));
-  }, [restrictedTools, user?.role]);
+  const tools = data.tools;
 
   const handleNavAction = (action?: string) => {
     if (action === 'support') {
@@ -262,7 +152,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         </SidebarHeader>
         <SidebarContent>
           {hasData(data.navMain) && <NavMain items={data.navMain} />}
-          {hasData(filteredTools) && <NavTools tools={filteredTools} />}
+          {hasData(tools) && <NavTools tools={tools} />}
           {hasData(data.navSecondary) && (
             <NavSecondary
               items={data.navSecondary}
