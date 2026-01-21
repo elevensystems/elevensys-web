@@ -80,12 +80,7 @@ export async function POST(request: NextRequest) {
     });
 
     const data = await response.json();
-    console.log('Translate API response status:', {
-      userMessage,
-      data,
-      dataOutput: data?.data?.output,
-      outputText: data?.data?.output_text,
-    });
+
     if (!response.ok) {
       return NextResponse.json(
         {
@@ -100,7 +95,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ outputText });
   } catch (error) {
-    console.error('Translate API error:', error);
     return NextResponse.json(
       { error: 'Failed to translate. Please try again later.' },
       { status: 500 }
