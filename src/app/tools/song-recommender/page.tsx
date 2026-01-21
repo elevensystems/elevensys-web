@@ -31,6 +31,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { RainbowButton } from '@/components/ui/rainbow-button';
 import { Separator } from '@/components/ui/separator';
 import { ShineBorder } from '@/components/ui/shine-border';
 import { Textarea } from '@/components/ui/textarea';
@@ -340,19 +341,7 @@ export default function SongRecommenderPage() {
 
           <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
             {/* Settings Card */}
-            <Card className='lg:col-span-1 relative overflow-hidden'>
-              <ShineBorder
-                borderWidth={2}
-                duration={30}
-                shineColor={[
-                  '#34d399',
-                  '#10b981',
-                  '#84cc16',
-                  '#f7ff00',
-                  '#e99a52',
-                  '#db36a4',
-                ]}
-              />
+            <Card className='lg:col-span-1'>
               <CardHeader>
                 <CardTitle className='flex items-center gap-2'>
                   <Headphones className='h-5 w-5' />
@@ -481,7 +470,7 @@ export default function SongRecommenderPage() {
                       {Array.from(selectedGenres).map(genre => (
                         <Badge
                           key={genre}
-                          variant='secondary'
+                          variant='default'
                           className='cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors'
                           onClick={() => toggleGenre(genre)}
                         >
@@ -497,9 +486,10 @@ export default function SongRecommenderPage() {
 
                 {/* Action Buttons */}
                 <div className='space-y-2'>
-                  <Button
+                  <RainbowButton
                     onClick={handleRecommend}
                     disabled={isLoading || !mood.trim()}
+                    variant='outline'
                     className='w-full'
                     size='lg'
                   >
@@ -514,12 +504,12 @@ export default function SongRecommenderPage() {
                         Get Recommendations
                       </>
                     )}
-                  </Button>
+                  </RainbowButton>
 
                   <div className='grid grid-cols-2 gap-2'>
                     <Button
                       onClick={handleRandomMood}
-                      variant='outline'
+                      variant='secondary'
                       size='sm'
                       disabled={isLoading}
                     >
@@ -528,7 +518,7 @@ export default function SongRecommenderPage() {
                     </Button>
                     <Button
                       onClick={handleReset}
-                      variant='outline'
+                      variant='secondary'
                       size='sm'
                       disabled={isLoading}
                     >
