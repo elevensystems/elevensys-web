@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { MainLayout } from '@/components/layouts';
+import { MainLayout, ProAccessOnly } from '@/components/layouts';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import {
   Accordion,
@@ -27,7 +27,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,6 +61,12 @@ interface Template {
   content: string;
   category?: string;
 }
+
+const PAGE_METADATA = {
+  title: 'Prompt Templates',
+  description:
+    'Browse and copy prompt templates for AI agents, code reviews, testing, and more. Ready-to-use templates for your development workflow.',
+};
 
 export default function PromptTemplatesPage() {
   const { user } = useAuth();
@@ -103,8 +108,16 @@ export default function PromptTemplatesPage() {
 
   // Load templates on mount and categorize them
   useEffect(() => {
+    if (!hasRole(user, ['pro'])) {
+      setIsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
     const loadTemplates = async () => {
       try {
+        if (!isMounted) return;
         setIsLoading(true);
         const response = await fetch('/api/templates');
         if (!response.ok) {
@@ -142,6 +155,7 @@ export default function PromptTemplatesPage() {
               return { ...template, category };
             }
           );
+          if (!isMounted) return;
           setTemplates(categorizedTemplates);
           setFilteredTemplates(categorizedTemplates);
         } else {
@@ -149,14 +163,20 @@ export default function PromptTemplatesPage() {
         }
       } catch (err) {
         console.error('Error loading templates:', err);
+        if (!isMounted) return;
         setError('Failed to load templates. Please try again.');
       } finally {
+        if (!isMounted) return;
         setIsLoading(false);
       }
     };
 
     loadTemplates();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   // Filter templates based on search query and active tab
   useEffect(() => {
@@ -313,23 +333,11 @@ export default function PromptTemplatesPage() {
 
   if (!hasRole(user, ['pro'])) {
     return (
-      <MainLayout>
-        <section className='container mx-auto px-4 py-12'>
-          <div className='max-w-3xl mx-auto space-y-6'>
-            <ToolPageHeader
-              title='Prompt Templates'
-              description='Browse and copy prompt templates for AI agents, code reviews, testing, and more. Ready-to-use templates for your development workflow.'
-            />
-            <Alert className='border-dashed'>
-              <AlertTitle>Pro access required</AlertTitle>
-              <AlertDescription>
-                This tool is available to Pro users only. Upgrade your plan to
-                unlock Prompt Templates.
-              </AlertDescription>
-            </Alert>
-          </div>
-        </section>
-      </MainLayout>
+      <ProAccessOnly
+        title={PAGE_METADATA.title}
+        description={PAGE_METADATA.description}
+        toolName={PAGE_METADATA.title}
+      />
     );
   }
 
@@ -338,8 +346,8 @@ export default function PromptTemplatesPage() {
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-full mx-auto space-y-8'>
           <ToolPageHeader
-            title='Prompt Templates'
-            description='Browse and copy prompt templates for AI agents, code reviews, testing, and more. Ready-to-use templates for your development workflow.'
+            title={PAGE_METADATA.title}
+            description={PAGE_METADATA.description}
             infoMessage='Search through templates by title or content. Click to expand and view the full template. Copy templates with one click.'
             error={error}
           />

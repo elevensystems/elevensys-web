@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react';
 
-import { MainLayout } from '@/components/layouts';
+import { MainLayout, ProAccessOnly } from '@/components/layouts';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
 import { RainbowButton } from '@/components/ui/rainbow-button';
-import { ShineBorder } from '@/components/ui/shine-border';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
 import { hasRole } from '@/lib/utils';
@@ -49,6 +48,12 @@ const MODELS = [
 ];
 
 const STORAGE_KEY = 'translate-tool-preferences';
+
+const PAGE_METADATA = {
+  title: 'AI Translator',
+  description:
+    'Translate between Vietnamese and English with tone control for natural, context-aware results.',
+};
 
 const DIRECTION = {
   VI_EN: 'vi-en',
@@ -228,23 +233,11 @@ export default function TranslatePage() {
 
   if (!hasRole(user, ['pro'])) {
     return (
-      <MainLayout>
-        <section className='container mx-auto px-4 py-12'>
-          <div className='max-w-3xl mx-auto space-y-6'>
-            <ToolPageHeader
-              title='AI Translator'
-              description='Translate between Vietnamese and English with tone control for natural, context-aware results.'
-            />
-            <Alert className='border-dashed'>
-              <AlertTitle>Pro access required</AlertTitle>
-              <AlertDescription>
-                This tool is available to Pro users only. Upgrade your plan to
-                unlock AI Translator.
-              </AlertDescription>
-            </Alert>
-          </div>
-        </section>
-      </MainLayout>
+      <ProAccessOnly
+        title={PAGE_METADATA.title}
+        description={PAGE_METADATA.description}
+        toolName={PAGE_METADATA.title}
+      />
     );
   }
 
@@ -253,8 +246,8 @@ export default function TranslatePage() {
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-full mx-auto'>
           <ToolPageHeader
-            title='AI Translator'
-            description='Translate between Vietnamese and English with tone control for natural, context-aware results.'
+            title={PAGE_METADATA.title}
+            description={PAGE_METADATA.description}
           />
 
           {error && (
