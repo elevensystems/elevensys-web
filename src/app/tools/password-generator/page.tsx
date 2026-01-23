@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Check, Copy, Key, Settings as SettingsIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -21,6 +21,11 @@ interface CharacterOptions {
   lowercase: boolean;
   numbers: boolean;
   symbols: boolean;
+}
+
+interface PasswordEntry {
+  id: string;
+  value: string;
 }
 
 /**
@@ -58,15 +63,25 @@ export default function PasswordGeneratorPage() {
     numbers: true,
     symbols: true,
   });
-  const [passwords, setPasswords] = useState<string[]>([]);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const createPasswordEntries = useCallback((values: string[]) => {
+    return values.map(value => ({
+      id:
+        typeof crypto !== 'undefined' && 'randomUUID' in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      value,
+    }));
+  }, []);
 
   const handleGeneratePasswords = useCallback(async () => {
     setIsLoading(true);
     setError('');
-    setCopiedIndex(null);
+    setCopiedId(null);
 
     try {
       const response = await fetch('/api/password-generator', {
@@ -87,7 +102,7 @@ export default function PasswordGeneratorPage() {
       const result = await response.json();
 
       if (result.success && result.passwords) {
-        setPasswords(result.passwords);
+        setPasswords(createPasswordEntries(result.passwords));
         toast.success('Passwords generated successfully', {
           description: `Passwords (${result.passwords.length}) have been generated.`,
           icon: <Check className='h-4 w-4' />,
@@ -105,23 +120,25 @@ export default function PasswordGeneratorPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [length, options]);
+  }, [createPasswordEntries, length, options]);
 
-  const handleCopy = useCallback(async (password: string, index: number) => {
+  const handleCopy = useCallback(async (password: string, id: string) => {
     try {
       await navigator.clipboard.writeText(password);
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), COPY_FEEDBACK_DURATION);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), COPY_FEEDBACK_DURATION);
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
     }
   }, []);
 
-  const toggleOption = (key: keyof CharacterOptions) => {
+  const toggleOption = useCallback((key: keyof CharacterOptions) => {
     setOptions(prev => ({ ...prev, [key]: !prev[key] }));
-  };
+  }, []);
 
-  const hasAtLeastOneOption = Object.values(options).some(Boolean);
+  const hasAtLeastOneOption = useMemo(() => {
+    return Object.values(options).some(Boolean);
+  }, [options]);
 
   return (
     <MainLayout>
@@ -147,7 +164,9 @@ export default function PasswordGeneratorPage() {
                 {/* Password Length */}
                 <div className='space-y-3'>
                   <div className='flex items-center justify-between'>
-                    <Label htmlFor='length'>Password Length: {length}</Label>
+                    <Label htmlFor='length-input'>
+                      Password Length: {length}
+                    </Label>
                     <Input
                       id='length-input'
                       type='number'
@@ -242,11 +261,11 @@ export default function PasswordGeneratorPage() {
                 ) : (
                   passwords.map((password, index) => {
                     const strength = calculatePasswordStrength(
-                      password,
+                      password.value,
                       options
                     );
                     return (
-                      <div key={index} className='space-y-2'>
+                      <div key={password.id} className='space-y-2'>
                         <Label className='text-xs text-muted-foreground'>
                           Password {index + 1}
                         </Label>
@@ -264,19 +283,21 @@ export default function PasswordGeneratorPage() {
                         )}
                         <div className='flex items-center gap-2 p-3 bg-muted rounded-lg'>
                           <code className='flex-1 text-sm font-mono break-all select-all'>
-                            {password}
+                            {password.value}
                           </code>
                           <Button
                             size='sm'
                             variant='ghost'
-                            onClick={() => handleCopy(password, index)}
+                            onClick={() =>
+                              handleCopy(password.value, password.id)
+                            }
                             aria-label={
-                              copiedIndex === index
+                              copiedId === password.id
                                 ? 'Copied to clipboard'
                                 : 'Copy to clipboard'
                             }
                           >
-                            {copiedIndex === index ? (
+                            {copiedId === password.id ? (
                               <Check className='h-4 w-4' aria-hidden='true' />
                             ) : (
                               <Copy className='h-4 w-4' aria-hidden='true' />

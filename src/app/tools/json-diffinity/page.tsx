@@ -22,13 +22,20 @@ const DEFAULT_ORIGINAL = `{
   "version": 1,
   "features": {
     "fraudProtection": true,
-    "currencies": ["USD", "EUR", "JPY"]
+    "currencies": [
+      "USD",
+      "EUR",
+      "JPY"
+    ]
   },
   "limits": {
     "daily": 5000,
     "monthly": 50000
   },
-  "owners": ["alex", "morgan"]
+  "owners": [
+    "alex",
+    "morgan"
+  ]
 }`;
 
 const DEFAULT_MODIFIED = `{
@@ -36,7 +43,12 @@ const DEFAULT_MODIFIED = `{
   "version": 2,
   "features": {
     "fraudProtection": false,
-    "currencies": ["USD", "EUR", "JPY", "GBP"],
+    "currencies": [
+      "USD",
+      "EUR",
+      "JPY",
+      "GBP"
+    ],
     "retries": 3
   },
   "limits": {
