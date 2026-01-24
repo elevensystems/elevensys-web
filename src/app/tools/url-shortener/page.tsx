@@ -22,20 +22,18 @@ import { Label } from '@/components/ui/label';
 const COPY_FEEDBACK_DURATION = 2000;
 
 /**
- * Regex pattern for validating HTTP/HTTPS URLs
- * Matches: protocol, domain (with optional subdomains), optional port, optional path/query/hash
- */
-const URL_REGEX =
-  /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
-
-/**
- * Validates if a string is a valid HTTP/HTTPS URL using regex
+ * Validates if a string is a valid HTTP/HTTPS URL
  */
 const isValidUrl = (urlString: string): boolean => {
-  return URL_REGEX.test(urlString.trim());
+  try {
+    const parsedUrl = new URL(urlString.trim());
+    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+  } catch {
+    return false;
+  }
 };
 
-export default function Snip() {
+export default function UrlShortenerPage() {
   const [url, setUrl] = useState('');
   const [autoDelete, setAutoDelete] = useState(false);
   const [ttlDays, setTtlDays] = useState('');
@@ -61,16 +59,11 @@ export default function Snip() {
     };
   }, []);
 
-  const handleUrlChange = useCallback(
-    (value: string) => {
-      setUrl(value);
-      setResult(null);
-      if (error) {
-        setError('');
-      }
-    },
-    [error]
-  );
+  const handleUrlChange = useCallback((value: string) => {
+    setUrl(value);
+    setResult(null);
+    setError('');
+  }, []);
 
   const handleShorten = useCallback(async () => {
     if (!url.trim()) {
@@ -202,7 +195,13 @@ export default function Snip() {
                     onKeyDown={handleKeyPress}
                     className='h-12'
                     aria-invalid={!!error}
+                    aria-describedby={error ? 'url-error' : undefined}
                   />
+                  {error ? (
+                    <p id='url-error' className='text-sm text-destructive'>
+                      {error}
+                    </p>
+                  ) : null}
                 </div>
 
                 {/* Auto-delete */}

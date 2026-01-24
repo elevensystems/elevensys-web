@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const OPENAI_API_HOST =
-  'https://aiportalapi.stu-platform.live/use/chat/completions';
-const OPENAI_API_KEY = 'Bearer sk-2LQ3zHN989dyBkpD7zIx7Q';
-const OPENAI_API_MODEL = 'GPT-5-nano';
+import { requireEnv } from '@/lib/utils';
+
+const DEFAULT_MODEL = 'gpt-5-nano';
+const MODEL_ALLOWLIST = new Set(['gpt-5', 'gpt-5-mini', 'gpt-5-nano']);
+const REQUEST_TIMEOUT_MS = 30000; // 30 seconds
 
 interface MoodRequest {
-  action: 'detect-language' | 'recommend-songs';
+  action: 'recommend-songs';
   mood?: string;
   language?: string;
   genres?: string[];
   excludedSongs?: string[];
+  model?: string;
 }
 
 interface Message {
@@ -23,61 +25,10 @@ export async function POST(request: NextRequest) {
     const body: MoodRequest = await request.json();
     const { action, mood, language, genres, excludedSongs } = body;
 
-    if (action === 'detect-language') {
-      if (!mood) {
-        return NextResponse.json(
-          { error: 'Mood is required for language detection' },
-          { status: 400 }
-        );
-      }
-
-      const messages: Message[] = [
-        {
-          role: 'system',
-          content:
-            'You are a language detector. Respond with only the ISO 639-1 language code (e.g., "en", "vi", "ja", "es"). No explanation, just the code.',
-        },
-        {
-          role: 'user',
-          content: `What language is this text in? "${mood}"`,
-        },
-      ];
-
-      try {
-        const response = await fetch(OPENAI_API_HOST, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: OPENAI_API_KEY,
-          },
-          body: JSON.stringify({
-            model: OPENAI_API_MODEL,
-            messages,
-            temperature: 0.3,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(
-            'OpenAI API error (detect-language):',
-            response.status,
-            errorText
-          );
-          throw new Error(`OpenAI API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const detectedLanguage =
-          data.choices[0]?.message?.content?.trim() || 'en';
-
-        return NextResponse.json({ language: detectedLanguage });
-      } catch (error) {
-        console.error('Language detection error:', error);
-        // Default to English if detection fails
-        return NextResponse.json({ language: 'en' });
-      }
-    }
+    const lambdaBase = requireEnv('OPENAI_URL');
+    const model = MODEL_ALLOWLIST.has(body.model ?? '')
+      ? (body.model as string)
+      : DEFAULT_MODEL;
 
     if (action === 'recommend-songs') {
       if (!mood) {
@@ -94,34 +45,21 @@ export async function POST(request: NextRequest) {
           ? `\n\nExclude these songs that were already recommended:\n${excludedSongs.join(', ')}`
           : '';
 
-      const systemPrompt =
-        language === 'vi'
-          ? `Bạn là một chuyên gia âm nhạc. Đề xuất 5 bài hát phù hợp với tâm trạng người dùng. ${
-              genres && genres.length > 0
-                ? `Chỉ gợi ý bài hát thuộc thể loại: ${genresStr}.`
-                : 'Gợi ý bài hát thuộc bất kỳ thể loại nào.'
-            }
+      const languageLine = language
+        ? `Write the "reason" field in ${language}.`
+        : 'Write the "reason" field in English.';
 
-Trả về trong định dạng JSON như sau:
-{
-  "songs": [
-    {"title": "Tên bài hát", "artist": "Tên ca sĩ", "reason": "Lý do ngắn gọn"},
-    ...
-  ]
-}
-
-Chỉ trả về JSON thuần túy, không có markdown hoặc giải thích thêm.${excludeStr}`
-          : `You are a music expert. Recommend 5 songs that match the user's mood. ${
-              genres && genres.length > 0
-                ? `Only recommend songs from these genres: ${genresStr}.`
-                : 'Recommend songs from any genre.'
-            }
+      const systemPrompt = `You are a music expert. Recommend exactly 5 songs that match the user's mood. ${
+        genres && genres.length > 0
+          ? `Only recommend songs from these genres: ${genresStr}.`
+          : 'Recommend songs from any genre.'
+      }
+Avoid duplicates, keep the list diverse (different artists when possible), and keep each reason to one short sentence. ${languageLine}
 
 Return in this JSON format:
 {
   "songs": [
-    {"title": "Song Title", "artist": "Artist Name", "reason": "Brief reason"},
-    ...
+    {"title": "Song Title", "artist": "Artist Name", "reason": "Brief reason"}
   ]
 }
 
@@ -139,18 +77,26 @@ Return only pure JSON, no markdown or explanations.${excludeStr}`;
       ];
 
       try {
-        const response = await fetch(OPENAI_API_HOST, {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(
+          () => controller.abort(),
+          REQUEST_TIMEOUT_MS
+        );
+
+        const response = await fetch(lambdaBase, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: OPENAI_API_KEY,
           },
           body: JSON.stringify({
-            model: OPENAI_API_MODEL,
-            messages,
-            temperature: 0.8,
+            model,
+            input: messages,
+            temperature: 1,
+            store: true,
           }),
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -166,7 +112,8 @@ Return only pure JSON, no markdown or explanations.${excludeStr}`;
         }
 
         const data = await response.json();
-        let content = data.choices[0]?.message?.content?.trim() || '';
+        let content =
+          data?.output_text?.trim() || data?.data?.output_text?.trim() || '';
 
         if (!content) {
           console.error('Empty response from OpenAI');
@@ -175,9 +122,7 @@ Return only pure JSON, no markdown or explanations.${excludeStr}`;
             { status: 502 }
           );
         }
-
-        // Clean markdown code blocks if present
-        content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+        console.log('Raw AI response content:', content);
 
         try {
           const parsedData = JSON.parse(content);
@@ -201,6 +146,13 @@ Return only pure JSON, no markdown or explanations.${excludeStr}`;
           );
         }
       } catch (fetchError) {
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          console.error('Recommend songs request timeout');
+          return NextResponse.json(
+            { error: 'AI request timed out. Please try again.' },
+            { status: 504 }
+          );
+        }
         console.error('Fetch error:', fetchError);
         return NextResponse.json(
           { error: 'Failed to connect to AI service' },

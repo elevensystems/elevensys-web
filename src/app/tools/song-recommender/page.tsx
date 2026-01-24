@@ -211,25 +211,6 @@ export default function SongRecommenderPage() {
     setDisplayedSongs([]);
 
     try {
-      // Detect language
-      const langResponse = await fetch('/api/mood-amp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'detect-language',
-          mood: mood.trim(),
-        }),
-      });
-
-      if (!langResponse.ok) {
-        throw new Error('Failed to detect language');
-      }
-
-      const { language } = await langResponse.json();
-
-      // Get song recommendations
       const genresArray = Array.from(selectedGenres);
       const songsResponse = await fetch('/api/song-recommender', {
         method: 'POST',
@@ -239,7 +220,6 @@ export default function SongRecommenderPage() {
         body: JSON.stringify({
           action: 'recommend-songs',
           mood: mood.trim(),
-          language,
           genres: genresArray.length > 0 ? genresArray : undefined,
         }),
       });
@@ -250,6 +230,8 @@ export default function SongRecommenderPage() {
 
       const data = await songsResponse.json();
       const recommendedSongs = data.songs || [];
+
+      console.log('Recommended Songs:', recommendedSongs);
 
       setSongs(recommendedSongs);
       setDisplayedSongs(recommendedSongs);
@@ -270,24 +252,6 @@ export default function SongRecommenderPage() {
     setIsLoading(true);
 
     try {
-      // Detect language
-      const langResponse = await fetch('/api/song-recommender', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'detect-language',
-          mood: mood.trim(),
-        }),
-      });
-
-      if (!langResponse.ok) {
-        throw new Error('Failed to detect language');
-      }
-
-      const { language } = await langResponse.json();
-
       // Get more song recommendations, excluding already displayed songs
       const excludedSongs = displayedSongs.map(
         s => `${s.title} by ${s.artist}`
@@ -302,7 +266,6 @@ export default function SongRecommenderPage() {
         body: JSON.stringify({
           action: 'recommend-songs',
           mood: mood.trim(),
-          language,
           genres: genresArray.length > 0 ? genresArray : undefined,
           excludedSongs,
         }),

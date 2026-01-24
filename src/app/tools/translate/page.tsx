@@ -48,6 +48,8 @@ const MODELS = [
 ];
 
 const STORAGE_KEY = 'translate-tool-preferences';
+const COPY_FEEDBACK_DURATION = 2000;
+const MAX_INPUT_LENGTH = 10000;
 
 const PAGE_METADATA = {
   title: 'AI Translator',
@@ -213,9 +215,10 @@ export default function TranslatePage() {
     try {
       await navigator.clipboard.writeText(outputText);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION);
     } catch (err) {
       console.error('Failed to copy translation:', err);
+      setError('Failed to copy to clipboard. Please try again.');
     }
   }, [outputText]);
 
@@ -272,15 +275,29 @@ export default function TranslatePage() {
                   <Textarea
                     id='input-text'
                     value={inputText}
-                    onChange={event => setInputText(event.target.value)}
+                    onChange={event => {
+                      const newValue = event.target.value;
+                      if (newValue.length <= MAX_INPUT_LENGTH) {
+                        setInputText(newValue);
+                      }
+                    }}
                     onKeyDown={handleKeyDown}
                     placeholder={inputPlaceholder}
                     className='min-h-[180px]'
                     disabled={loading}
+                    maxLength={MAX_INPUT_LENGTH}
                   />
                   <div className='flex items-center justify-between text-xs text-muted-foreground'>
                     <span>Ctrl + Enter to translate</span>
-                    <span>{inputCount} characters</span>
+                    <span
+                      className={
+                        inputCount > MAX_INPUT_LENGTH * 0.9
+                          ? 'text-warning'
+                          : ''
+                      }
+                    >
+                      {inputCount} / {MAX_INPUT_LENGTH}
+                    </span>
                   </div>
                 </div>
 

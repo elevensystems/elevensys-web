@@ -12,6 +12,8 @@ interface TranslateRequestBody {
 
 const DEFAULT_MODEL = 'gpt-5-nano';
 const MODEL_ALLOWLIST = new Set(['gpt-5', 'gpt-5-mini', 'gpt-5-nano']);
+const REQUEST_TIMEOUT_MS = 30000; // 30 seconds
+const MAX_INPUT_LENGTH = 10000;
 
 const buildPrompt = (
   input: string,
@@ -47,6 +49,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (input.length > MAX_INPUT_LENGTH) {
+      return NextResponse.json(
+        {
+          error: `Input text exceeds maximum length of ${MAX_INPUT_LENGTH} characters.`,
+        },
+        { status: 400 }
+      );
+    }
+
     const directionLabel =
       direction === 'vi-en' ? 'Vietnamese to English' : 'English to Vietnamese';
     const tonesLabel = tones.join(', ');
@@ -56,45 +67,73 @@ export async function POST(request: NextRequest) {
     const userMessage = buildPrompt(input, directionLabel, tonesLabel);
 
     const lambdaBase = requireEnv('OPENAI_URL');
-    const response = await fetch(lambdaBase, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        input: [
-          {
-            role: 'system',
-            content: systemMessage,
-          },
-          {
-            role: 'user',
-            content: userMessage,
-          },
-        ],
-        temperature: 1,
-        // max_output_tokens: 1000,
-        store: true,
-      }),
-    });
 
-    const data = await response.json();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-    if (!response.ok) {
-      return NextResponse.json(
-        {
-          error: data?.error || 'Translation service error.',
-          details: data?.details ?? null,
+    try {
+      const response = await fetch(lambdaBase, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        { status: response.status }
-      );
+        body: JSON.stringify({
+          model,
+          input: [
+            {
+              role: 'system',
+              content: systemMessage,
+            },
+            {
+              role: 'user',
+              content: userMessage,
+            },
+          ],
+          temperature: 1, // Using temperature 1 for natural, varied translations
+          store: true,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('Translation service error:', {
+          status: response.status,
+          error: data?.error,
+        });
+        return NextResponse.json(
+          {
+            error: data?.error || 'Translation service error.',
+          },
+          { status: response.status }
+        );
+      }
+
+      const outputText = data?.output_text || data?.data?.output_text || '';
+
+      if (!outputText) {
+        throw new Error('Empty translation response');
+      }
+
+      return NextResponse.json({ outputText });
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.error('Translation request timeout');
+        return NextResponse.json(
+          { error: 'Translation request timed out. Please try again.' },
+          { status: 504 }
+        );
+      }
+      throw fetchError;
     }
-
-    const outputText = data?.output_text || data?.data?.output_text || '';
-
-    return NextResponse.json({ outputText });
   } catch (error) {
+    console.error(
+      'Translation error:',
+      error instanceof Error ? error.message : 'Unknown error'
+    );
     return NextResponse.json(
       { error: 'Failed to translate. Please try again later.' },
       { status: 500 }
