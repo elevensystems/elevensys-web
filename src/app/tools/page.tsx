@@ -10,6 +10,7 @@ import {
   Link2,
   Music4,
   Package,
+  Sparkles,
   Wrench,
 } from 'lucide-react';
 
@@ -35,6 +36,12 @@ const tools = [
     description: 'Compare two JSON payloads with editor-style highlighting',
     href: '/tools/json-diffinity',
     icon: Braces,
+  },
+  {
+    title: 'JSON Objectify',
+    description: 'Transform JSON into clean JavaScript object notation',
+    href: '/tools/json-objectify',
+    icon: Sparkles,
   },
   {
     title: 'AI Translator',

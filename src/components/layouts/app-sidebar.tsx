@@ -18,6 +18,7 @@ import {
   Package,
   ScrollText,
   Send,
+  Sparkles,
 } from 'lucide-react';
 
 import { FeedbackModal } from '@/components/layouts/feedback-modal';
@@ -70,6 +71,11 @@ const data = {
       name: 'JSON Diffinity',
       url: '/tools/json-diffinity',
       icon: Braces,
+    },
+    {
+      name: 'JSON Objectify',
+      url: '/tools/json-objectify',
+      icon: Sparkles,
     },
     {
       name: 'AI Translator',
