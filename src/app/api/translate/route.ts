@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getValidModel } from '@/lib/ai-config';
+import {
+  badRequest,
+  errorResponse,
+  forbidden,
+  gatewayTimeout,
+} from '@/lib/api-helpers';
 import { getUserFromSession } from '@/lib/auth';
+import { MAX_INPUT_LENGTH } from '@/lib/constants';
+import { fetchWithTimeout, TimeoutError } from '@/lib/fetch-with-timeout';
 import { requireEnv } from '@/lib/utils';
-
-interface TranslateRequestBody {
-  input?: string;
-  direction?: 'vi-en' | 'en-vi';
-  tones?: string[];
-  model?: string;
-}
-
-const DEFAULT_MODEL = 'gpt-5-nano';
-const MODEL_ALLOWLIST = new Set(['gpt-5', 'gpt-5-mini', 'gpt-5-nano']);
-const REQUEST_TIMEOUT_MS = 30000; // 30 seconds
-const MAX_INPUT_LENGTH = 10000;
+import type { TranslateRequest } from '@/types/api';
 
 const buildPrompt = (
   input: string,
@@ -26,40 +24,32 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getUserFromSession();
     if (!user || (user.role !== 'pro' && user.role !== 'admin')) {
-      return NextResponse.json(
-        { error: 'Pro access required.' },
-        { status: 403 }
-      );
+      return forbidden('Pro access required.');
     }
-    const body = (await request.json()) as TranslateRequestBody;
+
+    const body = (await request.json()) as TranslateRequest;
     const input = body.input?.trim();
     const direction = body.direction ?? 'vi-en';
     const tones =
       Array.isArray(body.tones) && body.tones.length > 0
         ? body.tones
         : ['neutral'];
-    const model = MODEL_ALLOWLIST.has(body.model ?? '')
-      ? (body.model as string)
-      : DEFAULT_MODEL;
+    const model = getValidModel(body.model);
 
     if (!input) {
-      return NextResponse.json(
-        { error: 'Input text is required.' },
-        { status: 400 }
-      );
+      return badRequest('Input text is required.');
     }
 
     if (input.length > MAX_INPUT_LENGTH) {
-      return NextResponse.json(
-        {
-          error: `Input text exceeds maximum length of ${MAX_INPUT_LENGTH} characters.`,
-        },
-        { status: 400 }
+      return badRequest(
+        `Input text exceeds maximum length of ${MAX_INPUT_LENGTH} characters.`
       );
     }
 
     const directionLabel =
-      direction === 'vi-en' ? 'Vietnamese to English' : 'English to Vietnamese';
+      direction === 'vi-en'
+        ? 'Vietnamese to English'
+        : 'English to Vietnamese';
     const tonesLabel = tones.join(', ');
 
     const systemMessage =
@@ -68,11 +58,8 @@ export async function POST(request: NextRequest) {
 
     const lambdaBase = requireEnv('OPENAI_URL');
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
     try {
-      const response = await fetch(lambdaBase, {
+      const response = await fetchWithTimeout(lambdaBase, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,12 +76,10 @@ export async function POST(request: NextRequest) {
               content: userMessage,
             },
           ],
-          temperature: 1, // Using temperature 1 for natural, varied translations
+          temperature: 1,
           store: true,
         }),
-        signal: controller.signal,
       });
-      clearTimeout(timeoutId);
 
       const data = await response.json();
 
@@ -103,11 +88,9 @@ export async function POST(request: NextRequest) {
           status: response.status,
           error: data?.error,
         });
-        return NextResponse.json(
-          {
-            error: data?.error || 'Translation service error.',
-          },
-          { status: response.status }
+        return errorResponse(
+          data?.error || 'Translation service error.',
+          response.status
         );
       }
 
@@ -119,12 +102,10 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ outputText });
     } catch (fetchError) {
-      clearTimeout(timeoutId);
-      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+      if (fetchError instanceof TimeoutError) {
         console.error('Translation request timeout');
-        return NextResponse.json(
-          { error: 'Translation request timed out. Please try again.' },
-          { status: 504 }
+        return gatewayTimeout(
+          'Translation request timed out. Please try again.'
         );
       }
       throw fetchError;
@@ -134,9 +115,6 @@ export async function POST(request: NextRequest) {
       'Translation error:',
       error instanceof Error ? error.message : 'Unknown error'
     );
-    return NextResponse.json(
-      { error: 'Failed to translate. Please try again later.' },
-      { status: 500 }
-    );
+    return errorResponse('Failed to translate. Please try again later.', 500);
   }
 }

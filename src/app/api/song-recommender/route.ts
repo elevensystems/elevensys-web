@@ -1,41 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getValidModel } from '@/lib/ai-config';
+import {
+  badGateway,
+  badRequest,
+  errorResponse,
+  gatewayTimeout,
+  getErrorMessage,
+  serviceUnavailable,
+} from '@/lib/api-helpers';
+import { fetchWithTimeout, TimeoutError } from '@/lib/fetch-with-timeout';
 import { requireEnv } from '@/lib/utils';
-
-const DEFAULT_MODEL = 'gpt-5-nano';
-const MODEL_ALLOWLIST = new Set(['gpt-5', 'gpt-5-mini', 'gpt-5-nano']);
-const REQUEST_TIMEOUT_MS = 30000; // 30 seconds
-
-interface MoodRequest {
-  action: 'recommend-songs';
-  mood?: string;
-  language?: string;
-  genres?: string[];
-  excludedSongs?: string[];
-  model?: string;
-}
-
-interface Message {
-  role: 'system' | 'user';
-  content: string;
-}
+import type { AiMessage, SongRecommenderRequest } from '@/types/api';
 
 export async function POST(request: NextRequest) {
   try {
-    const body: MoodRequest = await request.json();
+    const body: SongRecommenderRequest = await request.json();
     const { action, mood, language, genres, excludedSongs } = body;
 
     const lambdaBase = requireEnv('OPENAI_URL');
-    const model = MODEL_ALLOWLIST.has(body.model ?? '')
-      ? (body.model as string)
-      : DEFAULT_MODEL;
+    const model = getValidModel(body.model);
 
     if (action === 'recommend-songs') {
       if (!mood) {
-        return NextResponse.json(
-          { error: 'Mood is required for song recommendations' },
-          { status: 400 }
-        );
+        return badRequest('Mood is required for song recommendations');
       }
 
       const genresStr =
@@ -65,7 +53,7 @@ Return in this JSON format:
 
 Return only pure JSON, no markdown or explanations.${excludeStr}`;
 
-      const messages: Message[] = [
+      const messages: AiMessage[] = [
         {
           role: 'system',
           content: systemPrompt,
@@ -77,13 +65,7 @@ Return only pure JSON, no markdown or explanations.${excludeStr}`;
       ];
 
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(
-          () => controller.abort(),
-          REQUEST_TIMEOUT_MS
-        );
-
-        const response = await fetch(lambdaBase, {
+        const response = await fetchWithTimeout(lambdaBase, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -94,9 +76,7 @@ Return only pure JSON, no markdown or explanations.${excludeStr}`;
             temperature: 1,
             store: true,
           }),
-          signal: controller.signal,
         });
-        clearTimeout(timeoutId);
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -105,70 +85,50 @@ Return only pure JSON, no markdown or explanations.${excludeStr}`;
             response.status,
             errorText
           );
-          return NextResponse.json(
-            { error: `AI service error: ${response.status}` },
-            { status: 502 }
-          );
+          return badGateway(`AI service error: ${response.status}`);
         }
 
         const data = await response.json();
-        let content =
+        const content =
           data?.output_text?.trim() || data?.data?.output_text?.trim() || '';
 
         if (!content) {
           console.error('Empty response from OpenAI');
-          return NextResponse.json(
-            { error: 'Received empty response from AI service' },
-            { status: 502 }
-          );
+          return badGateway('Received empty response from AI service');
         }
         console.log('Raw AI response content:', content);
 
         try {
           const parsedData = JSON.parse(content);
 
-          // Validate response structure
           if (!parsedData.songs || !Array.isArray(parsedData.songs)) {
             console.error('Invalid response structure:', parsedData);
-            return NextResponse.json(
-              { error: 'Invalid response format from AI service' },
-              { status: 502 }
-            );
+            return badGateway('Invalid response format from AI service');
           }
 
           return NextResponse.json(parsedData);
         } catch (parseError) {
           console.error('JSON parse error:', parseError);
           console.error('Raw content:', content);
-          return NextResponse.json(
-            { error: 'Failed to parse AI response' },
-            { status: 502 }
-          );
+          return badGateway('Failed to parse AI response');
         }
       } catch (fetchError) {
-        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        if (fetchError instanceof TimeoutError) {
           console.error('Recommend songs request timeout');
-          return NextResponse.json(
-            { error: 'AI request timed out. Please try again.' },
-            { status: 504 }
-          );
+          return gatewayTimeout('AI request timed out. Please try again.');
         }
         console.error('Fetch error:', fetchError);
-        return NextResponse.json(
-          { error: 'Failed to connect to AI service' },
-          { status: 503 }
-        );
+        return serviceUnavailable('Failed to connect to AI service');
       }
     }
 
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    return badRequest('Invalid action');
   } catch (error) {
     console.error('Song Recommender API error:', error);
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to process request', details: errorMessage },
-      { status: 500 }
+    return errorResponse(
+      'Failed to process request',
+      500,
+      getErrorMessage(error)
     );
   }
 }

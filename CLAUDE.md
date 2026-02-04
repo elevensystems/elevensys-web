@@ -73,30 +73,40 @@ src/
 │   └── page.tsx            # Homepage
 ├── components/
 │   ├── ui/                 # shadcn/ui components (27 components)
-│   ├── layouts/            # Layout components
+│   ├── layouts/            # Layout components (direct imports only)
 │   │   ├── main-layout.tsx
+│   │   ├── auth-layout.tsx
 │   │   ├── app-sidebar.tsx
 │   │   ├── tool-page-header.tsx
 │   │   ├── nav-main.tsx
 │   │   ├── nav-tools.tsx
 │   │   ├── nav-user.tsx
-│   │   ├── pro-access-only.tsx  # Pro tier gating
+│   │   ├── pro-access-only.tsx
 │   │   ├── feedback-modal.tsx
 │   │   └── support-modal.tsx
 │   ├── features/           # Feature-specific components
 │   │   └── auth/
+│   ├── error-boundary.tsx  # React error boundary
 │   └── theme-provider.tsx
 ├── contexts/
 │   └── auth-context.tsx    # Auth state via React Context
 ├── hooks/
-│   └── use-mobile.ts       # Mobile breakpoint detection
+│   ├── use-mobile.ts       # Mobile breakpoint detection
+│   └── use-copy-to-clipboard.ts  # Clipboard with feedback
 ├── lib/
 │   ├── auth.ts             # JWT decoding, session helpers
 │   ├── utils.ts            # cn(), hasRole(), requireEnv()
+│   ├── constants.ts        # Shared UI constants (COPY_FEEDBACK_DURATION, etc.)
+│   ├── ai-config.ts        # AI model config (DEFAULT_MODEL, MODEL_ALLOWLIST)
+│   ├── api-helpers.ts      # Standardized API responses (badRequest, etc.)
+│   ├── fetch-with-timeout.ts  # Timeout-aware fetch wrapper
+│   ├── json-utils.ts       # JSON parsing and validation
+│   ├── editor-config.ts    # Monaco Editor configurations
 │   ├── diff.ts             # JSON diff utilities
 │   └── shine-palettes.ts
 ├── types/
-│   └── auth.ts             # AuthUser, UserRole, JwtPayload types
+│   ├── auth.ts             # AuthUser, UserRole, JwtPayload
+│   └── api.ts              # Request/response types for all APIs
 └── styles/
     └── globals.css         # Global styles, CSS variables
 
@@ -123,6 +133,7 @@ public/
 - **No barrel files**: Import directly from source files, not via `index.ts` re-exports
 - **Type definitions**: Place shared types in `/types` folder, not inside components
 - **Utilities**: General helpers go in `/lib` folder
+- **Constants**: Shared constants in `/lib/constants.ts`, AI config in `/lib/ai-config.ts`
 
 ### Component Patterns
 
@@ -134,7 +145,7 @@ public/
 // 1. React imports
 // 2. Next.js imports
 // 3. Third-party libraries
-// 4. @/ aliased imports
+// 4. @/ aliased imports (direct paths, no barrel files)
 // 5. Relative imports
 
 import { useCallback, useState } from 'react';
@@ -143,8 +154,9 @@ import { useRouter } from 'next/navigation';
 
 import { toast } from 'sonner';
 
-import { MainLayout } from '@/components/layouts';
+import MainLayout from '@/components/layouts/main-layout';
 import { Button } from '@/components/ui/button';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import type { AuthUser } from '@/types/auth';
 
 // Define interfaces above component
@@ -156,6 +168,7 @@ interface MyComponentProps {
 // Functional components with explicit typing
 export default function MyComponent({ title, user }: MyComponentProps) {
   const [loading, setLoading] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
   const handleAction = useCallback(async () => {
     // Implementation
@@ -176,11 +189,13 @@ Every tool page follows this structure:
 ```tsx
 'use client';
 
-import { MainLayout } from '@/components/layouts';
+import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 
 export default function ToolPage() {
   const [error, setError] = useState('');
+  const { copied, copy } = useCopyToClipboard();
 
   return (
     <MainLayout>
@@ -209,38 +224,136 @@ export default function ToolPage() {
 ```tsx
 import { NextRequest, NextResponse } from 'next/server';
 
-// Define request/response interfaces
-interface MyRequest {
-  field: string;
-}
+import { getValidModel } from '@/lib/ai-config';
+import {
+  badRequest,
+  badGateway,
+  errorResponse,
+  gatewayTimeout,
+  getErrorMessage,
+} from '@/lib/api-helpers';
+import { fetchWithTimeout, TimeoutError } from '@/lib/fetch-with-timeout';
+import { requireEnv } from '@/lib/utils';
+import type { MyRequest } from '@/types/api';
 
 export async function POST(request: NextRequest) {
   try {
     const body: MyRequest = await request.json();
 
-    // Validate input
+    // Validate input using helper
     if (!body.field) {
-      return NextResponse.json(
-        { error: 'Field is required' },
-        { status: 400 }
-      );
+      return badRequest('Field is required');
     }
 
-    // Process request
-    const result = await processData(body);
+    // Use fetchWithTimeout for external calls
+    try {
+      const response = await fetchWithTimeout(apiUrl, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
 
-    return NextResponse.json({
-      success: true,
-      data: result,
-    });
+      if (!response.ok) {
+        return badGateway('External service error');
+      }
+
+      const data = await response.json();
+      return NextResponse.json(data);
+    } catch (fetchError) {
+      if (fetchError instanceof TimeoutError) {
+        return gatewayTimeout('Request timed out');
+      }
+      throw fetchError;
+    }
   } catch (error) {
     console.error('API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    return errorResponse(
+      'Failed to process request',
+      500,
+      getErrorMessage(error)
     );
   }
 }
+```
+
+## Shared Utilities
+
+### Constants (`lib/constants.ts`)
+
+```typescript
+import { COPY_FEEDBACK_DURATION, MAX_INPUT_LENGTH } from '@/lib/constants';
+```
+
+### AI Configuration (`lib/ai-config.ts`)
+
+```typescript
+import { getValidModel, DEFAULT_MODEL, MODEL_ALLOWLIST } from '@/lib/ai-config';
+
+const model = getValidModel(userModel); // Returns valid model or default
+```
+
+### API Helpers (`lib/api-helpers.ts`)
+
+```typescript
+import {
+  badRequest,      // 400
+  unauthorized,    // 401
+  forbidden,       // 403
+  notFound,        // 404
+  badGateway,      // 502
+  serviceUnavailable, // 503
+  gatewayTimeout,  // 504
+  errorResponse,   // Custom status
+  getErrorMessage, // Extract message from unknown error
+} from '@/lib/api-helpers';
+```
+
+### Fetch with Timeout (`lib/fetch-with-timeout.ts`)
+
+```typescript
+import { fetchWithTimeout, TimeoutError } from '@/lib/fetch-with-timeout';
+
+try {
+  const response = await fetchWithTimeout(url, options);
+} catch (error) {
+  if (error instanceof TimeoutError) {
+    // Handle timeout
+  }
+}
+```
+
+### JSON Utilities (`lib/json-utils.ts`)
+
+```typescript
+import { parseJsonSafely, formatJson, isValidUrl } from '@/lib/json-utils';
+
+const { value, error, isValid } = parseJsonSafely(jsonString);
+const formatted = await formatJson(jsonString);
+const valid = isValidUrl(urlString);
+```
+
+### Copy to Clipboard Hook (`hooks/use-copy-to-clipboard.ts`)
+
+```typescript
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+
+const { copied, copy, reset } = useCopyToClipboard({
+  feedbackDuration: 2000,
+  onCopy: () => toast.success('Copied!'),
+});
+
+await copy(text);
+```
+
+### Editor Configuration (`lib/editor-config.ts`)
+
+```typescript
+import {
+  MONACO_DEFAULT_OPTIONS,
+  MONACO_JSON_OPTIONS,
+  MONACO_READONLY_OPTIONS,
+} from '@/lib/editor-config';
+
+<Editor options={MONACO_JSON_OPTIONS} />
 ```
 
 ## Authentication System
@@ -282,7 +395,7 @@ function MyComponent() {
 ### Pro-Only Feature Gating
 
 ```tsx
-import { ProAccessOnly } from '@/components/layouts/pro-access-only';
+import ProAccessOnly from '@/components/layouts/pro-access-only';
 
 function ProFeaturePage() {
   return (
@@ -362,6 +475,7 @@ const apiUrl = requireEnv('OPENAI_URL');
 2. Create API route if needed: `src/app/api/[tool-name]/route.ts`
 3. Add navigation entry in `src/components/layouts/nav-tools.tsx`
 4. Follow the existing tool page pattern with `MainLayout` and `ToolPageHeader`
+5. Use shared utilities: `useCopyToClipboard`, `parseJsonSafely`, etc.
 
 ### Adding a UI Component
 
@@ -396,6 +510,8 @@ Components are installed to `src/components/ui/`.
 - Handle loading and error states in UI
 - Use `toast` from sonner for user notifications
 - Keep components small and focused (single responsibility)
+- Use shared utilities from `/lib` to avoid code duplication
+- Import components directly (no barrel files)
 
 ### Don't
 
@@ -406,6 +522,7 @@ Components are installed to `src/components/ui/`.
 - Don't mutate state directly - use immutable updates
 - Don't use class components (except error boundaries)
 - Don't store sensitive data in client-side state
+- Don't duplicate constants - use `/lib/constants.ts`
 
 ## Testing
 
