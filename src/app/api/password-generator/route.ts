@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-interface CharacterOptions {
-  uppercase: boolean;
-  lowercase: boolean;
-  numbers: boolean;
-  symbols: boolean;
-}
-
-interface GeneratePasswordRequest {
-  length: number;
-  options: CharacterOptions;
-}
+import {
+  CHARSET,
+  PASSWORD_COUNT,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+} from '@/lib/constants';
+import type {
+  CharacterOptions,
+  GeneratePasswordRequest,
+} from '@/types/password-generator';
 
 /**
  * Generate a random password based on the selected options
@@ -19,16 +18,11 @@ const generatePassword = (
   length: number,
   options: CharacterOptions
 ): string => {
-  const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-  const numbers = '0123456789';
-  const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-
   let charset = '';
-  if (options.uppercase) charset += uppercase;
-  if (options.lowercase) charset += lowercase;
-  if (options.numbers) charset += numbers;
-  if (options.symbols) charset += symbols;
+  if (options.uppercase) charset += CHARSET.UPPERCASE;
+  if (options.lowercase) charset += CHARSET.LOWERCASE;
+  if (options.numbers) charset += CHARSET.NUMBERS;
+  if (options.symbols) charset += CHARSET.SYMBOLS;
 
   if (charset === '') return '';
 
@@ -49,9 +43,16 @@ export async function POST(request: NextRequest) {
     const { length, options } = body;
 
     // Validate input
-    if (!length || typeof length !== 'number' || length < 4 || length > 128) {
+    if (
+      !length ||
+      typeof length !== 'number' ||
+      length < PASSWORD_MIN_LENGTH ||
+      length > PASSWORD_MAX_LENGTH
+    ) {
       return NextResponse.json(
-        { error: 'Invalid length. Must be between 4 and 128.' },
+        {
+          error: `Invalid length. Must be between ${PASSWORD_MIN_LENGTH} and ${PASSWORD_MAX_LENGTH}.`,
+        },
         { status: 400 }
       );
     }
@@ -72,9 +73,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate 5 passwords
+    // Generate passwords
     const passwords: string[] = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < PASSWORD_COUNT; i++) {
       passwords.push(generatePassword(length, options));
     }
 

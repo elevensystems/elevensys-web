@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { MainLayout } from '@/components/layouts';
+import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

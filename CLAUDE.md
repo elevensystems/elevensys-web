@@ -143,7 +143,7 @@ import { useRouter } from 'next/navigation';
 
 import { toast } from 'sonner';
 
-import { MainLayout } from '@/components/layouts';
+import MainLayout from '@/components/layouts/main-layout';
 import { Button } from '@/components/ui/button';
 import type { AuthUser } from '@/types/auth';
 
@@ -176,7 +176,7 @@ Every tool page follows this structure:
 ```tsx
 'use client';
 
-import { MainLayout } from '@/components/layouts';
+import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 
 export default function ToolPage() {

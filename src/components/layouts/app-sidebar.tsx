@@ -36,10 +36,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { AuthUser } from '@/types/auth';
+import type { ToolConfig } from '@/lib/tools-config';
+import type { AuthUser } from '@/types/auth';
 
+/**
+ * Sidebar navigation and tools configuration
+ * showDropdown: Set to true to enable the dropdown menu for a tool
+ */
 const data = {
-  user: null as AuthUser | null, // Set to null for guest, or provide user object when authenticated
+  user: null as AuthUser | null,
   navMain: [
     {
       title: 'Home',
@@ -52,13 +57,13 @@ const data = {
       title: 'Support',
       url: '#',
       icon: LifeBuoy,
-      onClick: 'support', // Custom handler identifier
+      onClick: 'support',
     },
     {
       title: 'Feedback',
       url: '#',
       icon: Send,
-      onClick: 'feedback', // Custom handler identifier
+      onClick: 'feedback',
     },
   ],
   tools: [
@@ -81,6 +86,7 @@ const data = {
       name: 'AI Translator',
       url: '/tools/translate',
       icon: Languages,
+      isPro: true,
     },
     {
       name: 'NPM Converter',
@@ -106,13 +112,14 @@ const data = {
       name: 'Prompt Templates',
       url: '/tools/prompt-templates',
       icon: ScrollText,
+      isPro: true,
     },
     {
       name: 'Song Recommender',
       url: '/tools/song-recommender',
       icon: Music4,
     },
-  ],
+  ] satisfies ToolConfig[],
 };
 
 const hasData = <T,>(data: T[] | undefined | null): boolean => {
