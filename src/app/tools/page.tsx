@@ -14,7 +14,7 @@ import {
   Wrench,
 } from 'lucide-react';
 
-import { MainLayout } from '@/components/layouts';
+import MainLayout from '@/components/layouts/main-layout';
 import { Button } from '@/components/ui/button';
 import {
   Card,
