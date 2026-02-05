@@ -2,13 +2,7 @@
 
 import Link from 'next/link';
 
-import {
-  Folder,
-  type LucideIcon,
-  MoreHorizontal,
-  Share,
-  Trash2,
-} from 'lucide-react';
+import { Folder, MoreHorizontal, Share, Trash2 } from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -26,33 +20,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import type { ToolConfig } from '@/lib/tools-config';
 
-// Tools that should not have the dropdown menu
-const EXCLUDED_TOOLS = [
-  'URL Shortener',
-  'Password Generator',
-  'AI Translator',
-  'NPM Converter',
-  'PR Link Shrinker',
-  'Summary Smith',
-  'Prompt Templates',
-  'Song Recommender',
-  'JSON Diffinity',
-];
+interface NavToolsProps {
+  tools: ToolConfig[];
+}
 
-const shouldShowDropdown = (toolName: string): boolean => {
-  return !EXCLUDED_TOOLS.includes(toolName);
-};
-
-export function NavTools({
-  tools,
-}: {
-  tools: {
-    name: string;
-    url: string;
-    icon: LucideIcon;
-  }[];
-}) {
+export function NavTools({ tools }: NavToolsProps) {
   const { isMobile } = useSidebar();
 
   return (
@@ -67,7 +41,7 @@ export function NavTools({
                 <span>{item.name}</span>
               </Link>
             </SidebarMenuButton>
-            {shouldShowDropdown(item.name) && (
+            {item.showDropdown && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuAction showOnHover>

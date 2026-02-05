@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Check, Copy, Key, Settings as SettingsIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { MainLayout } from '@/components/layouts';
+import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,20 +13,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-
-const COPY_FEEDBACK_DURATION = 2000;
-
-interface CharacterOptions {
-  uppercase: boolean;
-  lowercase: boolean;
-  numbers: boolean;
-  symbols: boolean;
-}
-
-interface PasswordEntry {
-  id: string;
-  value: string;
-}
+import {
+  COPY_FEEDBACK_DURATION,
+  PASSWORD_DEFAULT_LENGTH,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+} from '@/lib/constants';
+import type { CharacterOptions, PasswordEntry } from '@/types/password-generator';
 
 /**
  * Calculate password strength based on length and character variety
@@ -56,7 +49,7 @@ const calculatePasswordStrength = (
 };
 
 export default function PasswordGeneratorPage() {
-  const [length, setLength] = useState(15);
+  const [length, setLength] = useState(PASSWORD_DEFAULT_LENGTH);
   const [options, setOptions] = useState<CharacterOptions>({
     uppercase: true,
     lowercase: true,
@@ -170,12 +163,15 @@ export default function PasswordGeneratorPage() {
                     <Input
                       id='length-input'
                       type='number'
-                      min='4'
-                      max='128'
+                      min={PASSWORD_MIN_LENGTH}
+                      max={PASSWORD_MAX_LENGTH}
                       value={length}
                       onChange={e =>
                         setLength(
-                          Math.min(128, Math.max(4, Number(e.target.value)))
+                          Math.min(
+                            PASSWORD_MAX_LENGTH,
+                            Math.max(PASSWORD_MIN_LENGTH, Number(e.target.value))
+                          )
                         )
                       }
                       className='w-20 h-9'
@@ -183,8 +179,8 @@ export default function PasswordGeneratorPage() {
                   </div>
                   <Slider
                     id='length'
-                    min={4}
-                    max={128}
+                    min={PASSWORD_MIN_LENGTH}
+                    max={PASSWORD_MAX_LENGTH}
                     step={1}
                     value={[length]}
                     onValueChange={values => setLength(values[0])}

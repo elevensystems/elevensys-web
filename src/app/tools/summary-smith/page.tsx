@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 
 import { Check, Copy, FileText } from 'lucide-react';
 
-import { MainLayout } from '@/components/layouts';
+import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

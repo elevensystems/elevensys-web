@@ -19,7 +19,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { MainLayout, ProAccessOnly } from '@/components/layouts';
+import MainLayout from '@/components/layouts/main-layout';
+import ProAccessOnly from '@/components/layouts/pro-access-only';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import {
   Accordion,

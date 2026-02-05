@@ -13,7 +13,8 @@ import {
   X,
 } from 'lucide-react';
 
-import { MainLayout, ProAccessOnly } from '@/components/layouts';
+import MainLayout from '@/components/layouts/main-layout';
+import ProAccessOnly from '@/components/layouts/pro-access-only';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
