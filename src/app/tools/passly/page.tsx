@@ -13,13 +13,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import {
-  COPY_FEEDBACK_DURATION,
   PASSWORD_DEFAULT_LENGTH,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
 } from '@/lib/constants';
-import type { CharacterOptions, PasswordEntry } from '@/types/password-generator';
+import type { CharacterOptions, PasswordEntry } from '@/types/passly';
 
 /**
  * Calculate password strength based on length and character variety
@@ -48,7 +48,7 @@ const calculatePasswordStrength = (
   return { label: 'Strong', color: 'text-green-500' };
 };
 
-export default function PasswordGeneratorPage() {
+export default function PasslyPage() {
   const [length, setLength] = useState(PASSWORD_DEFAULT_LENGTH);
   const [options, setOptions] = useState<CharacterOptions>({
     uppercase: true,
@@ -57,7 +57,7 @@ export default function PasswordGeneratorPage() {
     symbols: true,
   });
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { copiedId, copy, reset: resetCopied } = useCopyToClipboard();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -74,10 +74,10 @@ export default function PasswordGeneratorPage() {
   const handleGeneratePasswords = useCallback(async () => {
     setIsLoading(true);
     setError('');
-    setCopiedId(null);
+    resetCopied();
 
     try {
-      const response = await fetch('/api/password-generator', {
+      const response = await fetch('/api/passly', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -115,15 +115,16 @@ export default function PasswordGeneratorPage() {
     }
   }, [createPasswordEntries, length, options]);
 
-  const handleCopy = useCallback(async (password: string, id: string) => {
-    try {
-      await navigator.clipboard.writeText(password);
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), COPY_FEEDBACK_DURATION);
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
-    }
-  }, []);
+  const handleCopy = useCallback(
+    async (password: string, id: string) => {
+      try {
+        await copy(password, id);
+      } catch (err) {
+        console.error('Failed to copy to clipboard:', err);
+      }
+    },
+    [copy]
+  );
 
   const toggleOption = useCallback((key: keyof CharacterOptions) => {
     setOptions(prev => ({ ...prev, [key]: !prev[key] }));
@@ -138,7 +139,7 @@ export default function PasswordGeneratorPage() {
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-full mx-auto'>
           <ToolPageHeader
-            title='Password Generator'
+            title='Passly'
             description='Generate secure, random passwords with customizable options. Free tool for creating strong passwords.'
             infoMessage='Password generation is processed securely on the server. Passwords are not stored and are generated fresh each time.'
             error={error}
@@ -170,7 +171,10 @@ export default function PasswordGeneratorPage() {
                         setLength(
                           Math.min(
                             PASSWORD_MAX_LENGTH,
-                            Math.max(PASSWORD_MIN_LENGTH, Number(e.target.value))
+                            Math.max(
+                              PASSWORD_MIN_LENGTH,
+                              Number(e.target.value)
+                            )
                           )
                         )
                       }

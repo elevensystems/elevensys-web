@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 
 /**
  * Converts Lerna publish output to npm install command
@@ -63,7 +64,7 @@ export default function NpmConverterPage() {
     count: number;
   } | null>(null);
   const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
+  const { copiedId: copied, copy, reset: resetCopied } = useCopyToClipboard();
 
   const handleConvert = useCallback(() => {
     const trimmedInput = input.trim();
@@ -71,7 +72,7 @@ export default function NpmConverterPage() {
     // Clear previous results
     setResult(null);
     setError('');
-    setCopied(false);
+    resetCopied();
 
     if (!trimmedInput) {
       setError('Please paste Lerna output to convert');
@@ -98,21 +99,19 @@ export default function NpmConverterPage() {
     if (!result?.command) return;
 
     try {
-      await navigator.clipboard.writeText(result.command);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await copy(result.command);
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
       setError('Failed to copy to clipboard');
     }
-  }, [result]);
+  }, [result, copy]);
 
   const handleClear = useCallback(() => {
     setInput('');
     setResult(null);
     setError('');
-    setCopied(false);
-  }, []);
+    resetCopied();
+  }, [resetCopied]);
 
   return (
     <MainLayout>

@@ -41,7 +41,6 @@ import type { AuthUser } from '@/types/auth';
 
 /**
  * Sidebar navigation and tools configuration
- * showDropdown: Set to true to enable the dropdown menu for a tool
  */
 const data = {
   user: null as AuthUser | null,
@@ -68,8 +67,8 @@ const data = {
   ],
   tools: [
     {
-      name: 'URL Shortener',
-      url: '/tools/url-shortener',
+      name: 'Urlify',
+      url: '/tools/urlify',
       icon: LinkIcon,
     },
     {
@@ -83,8 +82,8 @@ const data = {
       icon: Sparkles,
     },
     {
-      name: 'AI Translator',
-      url: '/tools/translate',
+      name: 'Translately',
+      url: '/tools/translately',
       icon: Languages,
       isPro: true,
     },
@@ -94,8 +93,8 @@ const data = {
       icon: Package,
     },
     {
-      name: 'Password Generator',
-      url: '/tools/password-generator',
+      name: 'Passly',
+      url: '/tools/passly',
       icon: Key,
     },
     {
@@ -115,8 +114,8 @@ const data = {
       isPro: true,
     },
     {
-      name: 'Song Recommender',
-      url: '/tools/song-recommender',
+      name: 'Beatly',
+      url: '/tools/beatly',
       icon: Music4,
     },
   ] satisfies ToolConfig[],

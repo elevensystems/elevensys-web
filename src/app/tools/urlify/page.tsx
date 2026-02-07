@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import {
   CalendarClock,
@@ -18,8 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-const COPY_FEEDBACK_DURATION = 2000;
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 
 /**
  * Validates if a string is a valid HTTP/HTTPS URL
@@ -33,7 +32,7 @@ const isValidUrl = (urlString: string): boolean => {
   }
 };
 
-export default function UrlShortenerPage() {
+export default function UrlifyPage() {
   const [url, setUrl] = useState('');
   const [autoDelete, setAutoDelete] = useState(false);
   const [ttlDays, setTtlDays] = useState('');
@@ -44,20 +43,9 @@ export default function UrlShortenerPage() {
     createdAt?: string;
     expiresAt?: string;
   } | null>(null);
-  const [copied, setCopied] = useState(false);
+  const { copiedId: copied, copy } = useCopyToClipboard();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (copyTimeoutRef.current) {
-        clearTimeout(copyTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleUrlChange = useCallback((value: string) => {
     setUrl(value);
@@ -90,7 +78,7 @@ export default function UrlShortenerPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/url-shortener', {
+      const response = await fetch('/api/urlify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,27 +119,14 @@ export default function UrlShortenerPage() {
   }, [autoDelete, ttlDays, url]);
 
   const handleCopy = useCallback(async () => {
+    if (!result?.shortUrl) return;
+
     try {
-      if (!result?.shortUrl) {
-        return;
-      }
-
-      await navigator.clipboard.writeText(result.shortUrl);
-      setCopied(true);
-
-      // Clear any existing timeout
-      if (copyTimeoutRef.current) {
-        clearTimeout(copyTimeoutRef.current);
-      }
-
-      copyTimeoutRef.current = setTimeout(() => {
-        setCopied(false);
-        copyTimeoutRef.current = null;
-      }, COPY_FEEDBACK_DURATION);
+      await copy(result.shortUrl);
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
     }
-  }, [result?.shortUrl]);
+  }, [result?.shortUrl, copy]);
 
   const handleKeyPress = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -167,7 +142,7 @@ export default function UrlShortenerPage() {
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-full mx-auto'>
           <ToolPageHeader
-            title='URL Shortener'
+            title='Urlify'
             description='Make your URLs shorter and easier to share. Free tool for creating short links.'
             infoMessage='URL shortening is processed securely through our server. Your links are never stored permanently.'
             error={error}

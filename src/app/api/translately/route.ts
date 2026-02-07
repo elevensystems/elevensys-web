@@ -1,19 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getUserFromSession } from '@/lib/auth';
+import { MAX_TRANSLATE_INPUT_LENGTH, validateModel } from '@/lib/constants';
+import { fetchWithTimeout } from '@/lib/fetch-utils';
 import { requireEnv } from '@/lib/utils';
-
-interface TranslateRequestBody {
-  input?: string;
-  direction?: 'vi-en' | 'en-vi';
-  tones?: string[];
-  model?: string;
-}
-
-const DEFAULT_MODEL = 'gpt-5-nano';
-const MODEL_ALLOWLIST = new Set(['gpt-5', 'gpt-5-mini', 'gpt-5-nano']);
-const REQUEST_TIMEOUT_MS = 30000; // 30 seconds
-const MAX_INPUT_LENGTH = 10000;
+import type { TranslateRequestBody } from '@/types/translate';
 
 const buildPrompt = (
   input: string,
@@ -38,9 +29,7 @@ export async function POST(request: NextRequest) {
       Array.isArray(body.tones) && body.tones.length > 0
         ? body.tones
         : ['neutral'];
-    const model = MODEL_ALLOWLIST.has(body.model ?? '')
-      ? (body.model as string)
-      : DEFAULT_MODEL;
+    const model = validateModel(body.model);
 
     if (!input) {
       return NextResponse.json(
@@ -49,10 +38,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (input.length > MAX_INPUT_LENGTH) {
+    if (input.length > MAX_TRANSLATE_INPUT_LENGTH) {
       return NextResponse.json(
         {
-          error: `Input text exceeds maximum length of ${MAX_INPUT_LENGTH} characters.`,
+          error: `Input text exceeds maximum length of ${MAX_TRANSLATE_INPUT_LENGTH} characters.`,
         },
         { status: 400 }
       );
@@ -68,11 +57,8 @@ export async function POST(request: NextRequest) {
 
     const lambdaBase = requireEnv('OPENAI_URL');
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
     try {
-      const response = await fetch(lambdaBase, {
+      const response = await fetchWithTimeout(lambdaBase, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,9 +78,7 @@ export async function POST(request: NextRequest) {
           temperature: 1, // Using temperature 1 for natural, varied translations
           store: true,
         }),
-        signal: controller.signal,
       });
-      clearTimeout(timeoutId);
 
       const data = await response.json();
 
@@ -119,7 +103,6 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ outputText });
     } catch (fetchError) {
-      clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
         console.error('Translation request timeout');
         return NextResponse.json(

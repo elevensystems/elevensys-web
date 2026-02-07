@@ -10,58 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-
-interface PRItem {
-  org: string;
-  repo: string;
-  number: string;
-  url: string;
-}
-
-/**
- * Parse PR URLs from input (supports comma-separated, line-separated, or both)
- * @param {string} input - Raw input string with URLs separated by commas, newlines, or both
- * @returns {Object} - { plainText, items }
- */
-function parsePrUrls(input: string): {
-  plainText: string;
-  items: PRItem[];
-} {
-  const items: PRItem[] = [];
-
-  // Split by both newlines and commas, then clean up
-  const tokens = input
-    .split(/[\n,]+/) // Split by newlines OR commas (one or more)
-    .map(s => s.trim()) // Trim whitespace
-    .filter(s => s.length > 0); // Remove empty strings
-
-  tokens.forEach(token => {
-    try {
-      const url = new URL(token);
-      // Match pattern: /<org>/<repo>/pull/<number>
-      const pathMatch = url.pathname.match(
-        /^\/([^\/]+)\/([^\/]+)\/pull\/(\d+)$/
-      );
-
-      if (pathMatch) {
-        const [, org, repo, number] = pathMatch;
-        items.push({
-          org,
-          repo,
-          number,
-          url: token,
-        });
-      }
-    } catch (err) {
-      // Invalid URL, skip silently
-    }
-  });
-
-  // Build plain text
-  const plainText = items.map(item => `${item.repo}#${item.number}`).join(', ');
-
-  return { plainText, items };
-}
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { type PRItem, parsePrUrls } from '@/lib/pr-utils';
 
 export default function PRLinkShrinkerPage() {
   const [input, setInput] = useState('');
@@ -70,7 +20,7 @@ export default function PRLinkShrinkerPage() {
     items: PRItem[];
   } | null>(null);
   const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
+  const { copiedId: copied, copy, reset: resetCopied } = useCopyToClipboard();
 
   const handleShrink = useCallback(() => {
     const trimmedInput = input.trim();
@@ -78,7 +28,7 @@ export default function PRLinkShrinkerPage() {
     // Clear previous results
     setResult(null);
     setError('');
-    setCopied(false);
+    resetCopied();
 
     if (!trimmedInput) {
       setError('Please paste PR links to shorten');
@@ -101,21 +51,19 @@ export default function PRLinkShrinkerPage() {
     if (!result?.plainText) return;
 
     try {
-      await navigator.clipboard.writeText(result.plainText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await copy(result.plainText);
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
       setError('Failed to copy to clipboard');
     }
-  }, [result]);
+  }, [result, copy]);
 
   const handleClear = useCallback(() => {
     setInput('');
     setResult(null);
     setError('');
-    setCopied(false);
-  }, []);
+    resetCopied();
+  }, [resetCopied]);
 
   return (
     <MainLayout>

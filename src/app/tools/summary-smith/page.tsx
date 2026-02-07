@@ -12,60 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
-
-interface PRItem {
-  org: string;
-  repo: string;
-  number: string;
-  url: string;
-}
-
-/**
- * Parse PR URLs from input (supports comma-separated, line-separated, or both)
- */
-function parsePrUrls(input: string): {
-  plainText: string;
-  items: PRItem[];
-} {
-  const items: PRItem[] = [];
-
-  if (!input.trim()) {
-    return { plainText: '', items: [] };
-  }
-
-  // Split by both newlines and commas, then clean up
-  const tokens = input
-    .split(/[\n,]+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
-
-  tokens.forEach(token => {
-    try {
-      const url = new URL(token);
-      const pathMatch = url.pathname.match(
-        /^\/([^\/]+)\/([^\/]+)\/pull\/(\d+)$/
-      );
-
-      if (pathMatch) {
-        const [, org, repo, number] = pathMatch;
-        items.push({
-          org,
-          repo,
-          number,
-          url: token,
-        });
-      }
-    } catch (err) {
-      // Invalid URL, skip silently
-    }
-  });
-
-  const plainText = items
-    .map(item => `${item.repo} #${item.number}`)
-    .join(', ');
-
-  return { plainText, items };
-}
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { type PRItem, parsePrUrls } from '@/lib/pr-utils';
 
 /**
  * Build plain text version of summary with URLs in parentheses
@@ -135,7 +83,7 @@ export default function SummarySmithPage() {
     rallyLink?: string;
     reason?: string;
   }>({});
-  const [copied, setCopied] = useState(false);
+  const { copiedId: copied, copy, reset: resetCopied } = useCopyToClipboard();
 
   const validateForm = useCallback(() => {
     const newErrors: typeof errors = {};
@@ -219,20 +167,27 @@ export default function SummarySmithPage() {
     );
 
     setResult({ html: htmlResult, plainText: plainTextResult });
-    setCopied(false);
-  }, [rallyId, rallyLink, prLinks, status, reason, message, validateForm]);
+    resetCopied();
+  }, [
+    rallyId,
+    rallyLink,
+    prLinks,
+    status,
+    reason,
+    message,
+    validateForm,
+    resetCopied,
+  ]);
 
   const handleCopy = useCallback(async () => {
     if (!result?.plainText) return;
 
     try {
-      await navigator.clipboard.writeText(result.plainText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await copy(result.plainText);
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
     }
-  }, [result]);
+  }, [result, copy]);
 
   const handleClear = useCallback(() => {
     setRallyId('');
@@ -243,7 +198,7 @@ export default function SummarySmithPage() {
     setMessage('');
     setResult(null);
     setErrors({});
-    setCopied(false);
+    resetCopied();
   }, []);
 
   return (

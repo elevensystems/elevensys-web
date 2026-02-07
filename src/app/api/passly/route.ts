@@ -6,10 +6,7 @@ import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
 } from '@/lib/constants';
-import type {
-  CharacterOptions,
-  GeneratePasswordRequest,
-} from '@/types/password-generator';
+import type { CharacterOptions, GeneratePasswordRequest } from '@/types/passly';
 
 /**
  * Generate a random password based on the selected options

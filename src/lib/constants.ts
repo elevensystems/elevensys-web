@@ -13,8 +13,23 @@ export const PASSWORD_COUNT = 5;
 
 // AI Model Constants
 export const DEFAULT_AI_MODEL = 'gpt-5-nano';
-export const AI_MODEL_ALLOWLIST = ['gpt-5', 'gpt-5-mini', 'gpt-5-nano'] as const;
+export const AI_MODEL_ALLOWLIST = [
+  'gpt-5',
+  'gpt-5-mini',
+  'gpt-5-nano',
+] as const;
 export type AIModel = (typeof AI_MODEL_ALLOWLIST)[number];
+export const AI_MODEL_ALLOWLIST_SET = new Set<string>(AI_MODEL_ALLOWLIST);
+
+/**
+ * Validates a model string against the allowlist.
+ * Returns the model if valid, otherwise the default model.
+ */
+export function validateModel(model: string | undefined): string {
+  return AI_MODEL_ALLOWLIST_SET.has(model ?? '')
+    ? (model as string)
+    : DEFAULT_AI_MODEL;
+}
 
 // API Constants
 export const REQUEST_TIMEOUT_MS = 30000; // 30 seconds
@@ -40,7 +55,7 @@ export type TranslationDirection =
 // Tone Options for Translation
 export const TRANSLATION_TONES = [
   { value: 'neutral', label: 'Neutral' },
-  { value: 'friendly', label: 'Friendly' },
+  { value: 'friendly', label: 'Friendly 😊' },
   { value: 'formal', label: 'Formal' },
   { value: 'professional', label: 'Professional' },
   { value: 'casual', label: 'Casual' },

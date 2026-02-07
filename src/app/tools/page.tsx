@@ -26,9 +26,9 @@ import {
 
 const tools = [
   {
-    title: 'URL Shortener',
+    title: 'Urlify',
     description: 'Shorten long URLs to make them easier to share and manage',
-    href: '/tools/url-shortener',
+    href: '/tools/urlify',
     icon: Link2,
   },
   {
@@ -44,15 +44,15 @@ const tools = [
     icon: Sparkles,
   },
   {
-    title: 'AI Translator',
+    title: 'Translately',
     description: 'Translate between Vietnamese and English with tone control',
-    href: '/tools/translate',
+    href: '/tools/translately',
     icon: Languages,
   },
   {
-    title: 'Password Generator',
+    title: 'Passly',
     description: 'Generate secure, random passwords with customizable options',
-    href: '/tools/password-generator',
+    href: '/tools/passly',
     icon: Key,
   },
   {
@@ -80,9 +80,9 @@ const tools = [
     icon: FileText,
   },
   {
-    title: 'Song Recommender',
+    title: 'Beatly',
     description: 'Get song recommendations based on your favorite artists',
-    href: '/tools/song-recommender',
+    href: '/tools/beatly',
     icon: Music4,
   },
   // Add more tools here as they are created

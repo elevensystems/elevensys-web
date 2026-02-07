@@ -89,14 +89,22 @@ src/
 ├── contexts/
 │   └── auth-context.tsx    # Auth state via React Context
 ├── hooks/
-│   └── use-mobile.ts       # Mobile breakpoint detection
+│   ├── use-mobile.ts       # Mobile breakpoint detection
+│   └── use-copy-to-clipboard.ts  # Clipboard copy with feedback
 ├── lib/
 │   ├── auth.ts             # JWT decoding, session helpers
+│   ├── constants.ts        # Shared constants, validateModel()
+│   ├── fetch-utils.ts      # fetchWithTimeout() for API routes
+│   ├── pr-utils.ts         # PRItem, parsePrUrls() shared utility
+│   ├── song-recommender-data.ts  # GENRES, RANDOM_MOODS data
+│   ├── tools-config.ts     # ToolConfig type, TOOL_CATEGORIES
 │   ├── utils.ts            # cn(), hasRole(), requireEnv()
 │   ├── diff.ts             # JSON diff utilities
 │   └── shine-palettes.ts
 ├── types/
-│   └── auth.ts             # AuthUser, UserRole, JwtPayload types
+│   ├── auth.ts             # AuthUser, UserRole, JwtPayload types
+│   ├── translate.ts        # TranslateRequestBody
+│   └── song-recommender.ts # MoodRequest, ChatMessage, Song
 └── styles/
     └── globals.css         # Global styles, CSS variables
 

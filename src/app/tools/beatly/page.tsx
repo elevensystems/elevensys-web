@@ -35,133 +35,10 @@ import { RainbowButton } from '@/components/ui/rainbow-button';
 import { Separator } from '@/components/ui/separator';
 import { ShineBorder } from '@/components/ui/shine-border';
 import { Textarea } from '@/components/ui/textarea';
+import { GENRES, RANDOM_MOODS } from '@/lib/beatly-data';
+import type { Song } from '@/types/beatly';
 
-// Genre definitions
-const GENRES = [
-  {
-    name: 'Pop',
-    subgenres: [
-      'Teen Pop',
-      'Dance Pop',
-      'Electropop',
-      'Indie Pop',
-      'K-Pop',
-      'J-Pop',
-      'V-Pop',
-      'Synthpop',
-      'Art Pop',
-    ],
-  },
-  {
-    name: 'Rock',
-    subgenres: [
-      'Classic Rock',
-      'Alternative Rock',
-      'Indie Rock',
-      'Progressive Rock',
-      'Grunge',
-      'Post-Rock',
-    ],
-  },
-  {
-    name: 'Metal',
-    subgenres: [
-      'Heavy Metal',
-      'Thrash Metal',
-      'Death Metal',
-      'Black Metal',
-      'Progressive Metal',
-      'Nu Metal',
-    ],
-  },
-  {
-    name: 'Hip Hop',
-    subgenres: [
-      'Rap',
-      'Trap',
-      'Boom Bap',
-      'Lo-fi Hip Hop',
-      'Alternative Hip Hop',
-      'Drill',
-    ],
-  },
-  {
-    name: 'R&B / Soul',
-    subgenres: ['R&B', 'Neo-Soul', 'Soul', 'Funk', 'Contemporary R&B'],
-  },
-  {
-    name: 'Electronic',
-    subgenres: [
-      'EDM',
-      'House',
-      'Techno',
-      'Trance',
-      'Dubstep',
-      'Ambient',
-      'Synthwave',
-      'Drum & Bass',
-    ],
-  },
-  {
-    name: 'Jazz',
-    subgenres: ['Smooth Jazz', 'Bebop', 'Fusion', 'Latin Jazz', 'Cool Jazz'],
-  },
-  {
-    name: 'Blues',
-    subgenres: ['Delta Blues', 'Chicago Blues', 'Electric Blues', 'Blues Rock'],
-  },
-  {
-    name: 'Country',
-    subgenres: ['Traditional Country', 'Country Pop', 'Bluegrass', 'Americana'],
-  },
-  {
-    name: 'Folk',
-    subgenres: [
-      'Indie Folk',
-      'Contemporary Folk',
-      'Celtic',
-      'Singer-Songwriter',
-    ],
-  },
-  { name: 'Reggae', subgenres: ['Roots Reggae', 'Dancehall', 'Dub', 'Ska'] },
-  {
-    name: 'Latin',
-    subgenres: ['Latin Pop', 'Reggaeton', 'Bossa Nova', 'Salsa', 'Bachata'],
-  },
-  {
-    name: 'Classical',
-    subgenres: ['Baroque', 'Romantic', 'Contemporary Classical', 'Orchestral'],
-  },
-  {
-    name: 'Soundtrack',
-    subgenres: ['Film Score', 'Video Game Music', 'Anime OST'],
-  },
-  {
-    name: 'Lo-fi / Indie',
-    subgenres: ['Lo-fi', 'Bedroom Pop', 'Shoegaze', 'Dream Pop'],
-  },
-];
-
-const RANDOM_MOODS = [
-  'melancholic sunset drive',
-  'energetic morning workout',
-  'rainy day reading',
-  'late night coding session',
-  'peaceful meditation',
-  'party celebration',
-  'heartbreak healing',
-  'focused study time',
-  'road trip adventure',
-  'cozy winter evening',
-];
-
-interface Song {
-  title: string;
-  artist: string;
-  reason: string;
-}
-
-export default function SongRecommenderPage() {
+export default function BeatlyPage() {
   const [mood, setMood] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<Set<string>>(new Set());
   const [songs, setSongs] = useState<Song[]>([]);
@@ -212,13 +89,12 @@ export default function SongRecommenderPage() {
 
     try {
       const genresArray = Array.from(selectedGenres);
-      const songsResponse = await fetch('/api/song-recommender', {
+      const songsResponse = await fetch('/api/beatly', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'recommend-songs',
           mood: mood.trim(),
           genres: genresArray.length > 0 ? genresArray : undefined,
         }),
@@ -258,13 +134,12 @@ export default function SongRecommenderPage() {
       );
       const genresArray = Array.from(selectedGenres);
 
-      const songsResponse = await fetch('/api/song-recommender', {
+      const songsResponse = await fetch('/api/beatly', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'recommend-songs',
           mood: mood.trim(),
           genres: genresArray.length > 0 ? genresArray : undefined,
           excludedSongs,
@@ -297,7 +172,7 @@ export default function SongRecommenderPage() {
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-full mx-auto'>
           <ToolPageHeader
-            title='Song Recommender'
+            title='Beatly'
             description='Discover music that matches your vibe. Describe your mood, select genres, and get personalized song recommendations.'
             infoMessage='Powered by AI to understand your mood and recommend the perfect soundtrack for any moment.'
           />

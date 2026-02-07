@@ -32,60 +32,46 @@ import { NativeSelect } from '@/components/ui/native-select';
 import { RainbowButton } from '@/components/ui/rainbow-button';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import {
+  AI_MODELS,
+  MAX_TRANSLATE_INPUT_LENGTH,
+  STORAGE_KEYS,
+  TRANSLATION_DIRECTION,
+  TRANSLATION_TONES,
+  type TranslationDirection,
+} from '@/lib/constants';
 import { hasRole } from '@/lib/utils';
 
-const TONES = [
-  { value: 'neutral', label: 'Neutral' },
-  { value: 'friendly', label: 'Friendly 😊' },
-  { value: 'formal', label: 'Formal' },
-  { value: 'professional', label: 'Professional' },
-  { value: 'casual', label: 'Casual' },
-];
-
-const MODELS = [
-  { value: 'gpt-5', label: 'gpt-5' },
-  { value: 'gpt-5-mini', label: 'gpt-5-mini' },
-  { value: 'gpt-5-nano', label: 'gpt-5-nano' },
-];
-
-const STORAGE_KEY = 'translate-tool-preferences';
-const COPY_FEEDBACK_DURATION = 2000;
-const MAX_INPUT_LENGTH = 10000;
-
 const PAGE_METADATA = {
-  title: 'AI Translator',
+  title: 'Translately',
   description:
     'Translate between Vietnamese and English with tone control for natural, context-aware results.',
 };
 
-const DIRECTION = {
-  VI_EN: 'vi-en',
-  EN_VI: 'en-vi',
-} as const;
-
-type Direction = (typeof DIRECTION)[keyof typeof DIRECTION];
-
 interface Preferences {
-  direction: Direction;
+  direction: TranslationDirection;
   tones: string[];
   model: string;
 }
 
-export default function TranslatePage() {
+export default function TranslatelyPage() {
   const { user } = useAuth();
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
-  const [direction, setDirection] = useState<Direction>(DIRECTION.VI_EN);
+  const [direction, setDirection] = useState<TranslationDirection>(
+    TRANSLATION_DIRECTION.VI_EN
+  );
   const [tones, setTones] = useState<string[]>(['neutral']);
   const [model, setModel] = useState('gpt-5-nano');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
+  const { copiedId: copied, copy } = useCopyToClipboard();
   const [isToneModalOpen, setIsToneModalOpen] = useState(false);
 
   const directionLabel = useMemo(
     () =>
-      direction === DIRECTION.VI_EN
+      direction === TRANSLATION_DIRECTION.VI_EN
         ? '🇻🇳 Vietnamese → 🇺🇸 English'
         : '🇺🇸 English → 🇻🇳 Vietnamese',
     [direction]
@@ -93,7 +79,7 @@ export default function TranslatePage() {
 
   const inputPlaceholder = useMemo(
     () =>
-      direction === DIRECTION.VI_EN
+      direction === TRANSLATION_DIRECTION.VI_EN
         ? 'Enter Vietnamese text...'
         : 'Enter English text...',
     [direction]
@@ -101,7 +87,7 @@ export default function TranslatePage() {
 
   const outputLabel = useMemo(
     () =>
-      direction === DIRECTION.VI_EN
+      direction === TRANSLATION_DIRECTION.VI_EN
         ? 'English Translation'
         : 'Vietnamese Translation',
     [direction]
@@ -109,7 +95,10 @@ export default function TranslatePage() {
 
   const persistPreferences = useCallback((next: Preferences) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      localStorage.setItem(
+        STORAGE_KEYS.TRANSLATE_PREFERENCES,
+        JSON.stringify(next)
+      );
     } catch (storageError) {
       console.warn('Failed to persist preferences', storageError);
     }
@@ -117,13 +106,13 @@ export default function TranslatePage() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEYS.TRANSLATE_PREFERENCES);
       if (!raw) return;
       const parsed = JSON.parse(raw) as Partial<Preferences>;
 
       if (
-        parsed.direction === DIRECTION.VI_EN ||
-        parsed.direction === DIRECTION.EN_VI
+        parsed.direction === TRANSLATION_DIRECTION.VI_EN ||
+        parsed.direction === TRANSLATION_DIRECTION.EN_VI
       ) {
         setDirection(parsed.direction);
       }
@@ -133,7 +122,7 @@ export default function TranslatePage() {
       }
 
       if (typeof parsed.model === 'string') {
-        const nextModel = MODELS.find(item => item.value === parsed.model);
+        const nextModel = AI_MODELS.find(item => item.value === parsed.model);
         if (nextModel) {
           setModel(nextModel.value);
         }
@@ -149,7 +138,9 @@ export default function TranslatePage() {
 
   const handleSwap = useCallback(() => {
     setDirection(prev =>
-      prev === DIRECTION.VI_EN ? DIRECTION.EN_VI : DIRECTION.VI_EN
+      prev === TRANSLATION_DIRECTION.VI_EN
+        ? TRANSLATION_DIRECTION.EN_VI
+        : TRANSLATION_DIRECTION.VI_EN
     );
     setInputText(outputText);
     setOutputText(inputText);
@@ -179,10 +170,9 @@ export default function TranslatePage() {
 
     setLoading(true);
     setError('');
-    setCopied(false);
 
     try {
-      const response = await fetch('/api/translate', {
+      const response = await fetch('/api/translately', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -214,14 +204,12 @@ export default function TranslatePage() {
     if (!outputText) return;
 
     try {
-      await navigator.clipboard.writeText(outputText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION);
+      await copy(outputText);
     } catch (err) {
       console.error('Failed to copy translation:', err);
       setError('Failed to copy to clipboard. Please try again.');
     }
-  }, [outputText]);
+  }, [outputText, copy]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -278,7 +266,7 @@ export default function TranslatePage() {
                     value={inputText}
                     onChange={event => {
                       const newValue = event.target.value;
-                      if (newValue.length <= MAX_INPUT_LENGTH) {
+                      if (newValue.length <= MAX_TRANSLATE_INPUT_LENGTH) {
                         setInputText(newValue);
                       }
                     }}
@@ -286,18 +274,18 @@ export default function TranslatePage() {
                     placeholder={inputPlaceholder}
                     className='min-h-[180px]'
                     disabled={loading}
-                    maxLength={MAX_INPUT_LENGTH}
+                    maxLength={MAX_TRANSLATE_INPUT_LENGTH}
                   />
                   <div className='flex items-center justify-between text-xs text-muted-foreground'>
                     <span>Ctrl + Enter to translate</span>
                     <span
                       className={
-                        inputCount > MAX_INPUT_LENGTH * 0.9
+                        inputCount > MAX_TRANSLATE_INPUT_LENGTH * 0.9
                           ? 'text-warning'
                           : ''
                       }
                     >
-                      {inputCount} / {MAX_INPUT_LENGTH}
+                      {inputCount} / {MAX_TRANSLATE_INPUT_LENGTH}
                     </span>
                   </div>
                 </div>
@@ -310,7 +298,7 @@ export default function TranslatePage() {
                       onChange={event => setModel(event.target.value)}
                       containerClassName='w-full'
                     >
-                      {MODELS.map(item => (
+                      {AI_MODELS.map(item => (
                         <option key={item.value} value={item.value}>
                           {item.label}
                         </option>
@@ -347,7 +335,7 @@ export default function TranslatePage() {
                         </DialogHeader>
                         <div className='overflow-y-auto max-h-[60vh] pr-2'>
                           <div className='flex flex-wrap gap-2'>
-                            {TONES.map(tone => {
+                            {TRANSLATION_TONES.map(tone => {
                               const checked = tones.includes(tone.value);
                               return (
                                 <Badge
@@ -401,7 +389,8 @@ export default function TranslatePage() {
                   <div className='flex flex-wrap gap-1.5 p-3 bg-accent/50 rounded-lg'>
                     {tones.map(tone => {
                       const toneLabel =
-                        TONES.find(item => item.value === tone)?.label || tone;
+                        TRANSLATION_TONES.find(item => item.value === tone)
+                          ?.label || tone;
                       return (
                         <Badge
                           key={tone}

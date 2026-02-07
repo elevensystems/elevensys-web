@@ -117,7 +117,7 @@ const buildDecorationsForPaths = (
   });
 };
 
-export default function JsonDiffPage() {
+export default function JsonDiffinityPage() {
   const { resolvedTheme } = useTheme();
   const editorTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'light';
 
