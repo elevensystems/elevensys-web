@@ -78,7 +78,7 @@ export default function MyWorklogsPage() {
   const [hasSearched, setHasSearched] = useState(false);
 
   const totalHours = useMemo(
-    () => worklogs.reduce((sum, w) => sum + (w.worked || 0), 0),
+    () => worklogs.reduce((sum, w) => sum + (Number(w.worked) || 0), 0),
     [worklogs]
   );
 

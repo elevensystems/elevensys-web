@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import type { FetchWorklogsRequest } from '@/types/timesheet';
 
+const WORKLOGS_API_URL = 'https://api.elevensys.dev/timesheet/worklogs';
+
 export async function POST(request: NextRequest) {
   try {
     const body: FetchWorklogsRequest = await request.json();
@@ -17,31 +19,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build URL with params + cache buster
-    const url = new URL(`${baseUrl}/rest/tempo/1.0/user-worklogs/get-list`);
-    url.searchParams.set('fromDate', fromDate);
-    url.searchParams.set('toDate', toDate);
-    url.searchParams.set('user', username);
-    url.searchParams.set('statusWorklog', 'All');
-    url.searchParams.set('_', Date.now().toString());
+    // Extract jiraInstance from baseUrl (e.g., "https://insight.fsoft.com.vn/jiradc" → "jiradc")
+    const jiraInstance = baseUrl.split('/').pop() || 'jiradc';
 
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json',
-    };
+    const params = new URLSearchParams({
+      fromDate,
+      toDate,
+      user: username,
+      jiraInstance,
+    });
 
-    const response = await fetch(url.toString(), { headers });
-    console.log('response', response);
+    const response = await fetch(`${WORKLOGS_API_URL}?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText || `Jira API error: ${response.status}` },
+        { error: errorText || `API error: ${response.status}` },
         { status: response.status }
       );
     }
 
     const data = await response.json();
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json(
       {
