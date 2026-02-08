@@ -128,6 +128,34 @@ export default function TimesheetConfigPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-6'>
+              {/* Jira Instance */}
+              <div className='space-y-2'>
+                <Label htmlFor='jira-instance'>Jira Instance</Label>
+                <NativeSelect
+                  id='jira-instance'
+                  value={jiraInstance}
+                  onChange={e => setJiraInstance(e.target.value)}
+                >
+                  <option value='jiradc'>jiradc</option>
+                  <option value='jira3'>jira3</option>
+                  <option value='jira9'>jira9</option>
+                </NativeSelect>
+                <p className='text-xs text-muted-foreground'>
+                  Click{' '}
+                  <a
+                    href={`https://insight.fsoft.com.vn/${jiraInstance}/secure/ViewProfile.jspa`}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='font-medium text-blue-600 underline underline-offset-4 hover:text-blue-800'
+                  >
+                    here
+                  </a>
+                  , → Then Click on{' '}
+                  <span className='font-medium'>Personal Access Tokens</span> →{' '}
+                  <span className='font-medium'>Create Token</span>
+                </p>
+              </div>
+
               {/* Username */}
               <div className='space-y-2'>
                 <Label htmlFor='username'>Username</Label>
@@ -171,23 +199,6 @@ export default function TimesheetConfigPage() {
                 </div>
                 <p className='text-xs text-muted-foreground'>
                   Token from for API authentication.
-                </p>
-              </div>
-
-              {/* Jira Instance */}
-              <div className='space-y-2'>
-                <Label htmlFor='jira-instance'>Jira Instance</Label>
-                <NativeSelect
-                  id='jira-instance'
-                  value={jiraInstance}
-                  onChange={e => setJiraInstance(e.target.value)}
-                >
-                  <option value='jiradc'>jiradc</option>
-                  <option value='jira3'>jira3</option>
-                  <option value='jira9'>jira9</option>
-                </NativeSelect>
-                <p className='text-xs text-muted-foreground'>
-                  Select the Jira instance your project is hosted on.
                 </p>
               </div>
             </CardContent>
