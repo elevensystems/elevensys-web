@@ -7,20 +7,17 @@ const WORKLOGS_API_URL = 'https://api.elevensys.dev/timesheet/worklogs';
 export async function POST(request: NextRequest) {
   try {
     const body: FetchWorklogsRequest = await request.json();
-    const { baseUrl, token, username, fromDate, toDate } = body;
+    const { token, username, fromDate, toDate, jiraInstance } = body;
 
-    if (!baseUrl || !token || !username || !fromDate || !toDate) {
+    if (!token || !username || !fromDate || !toDate || !jiraInstance) {
       return NextResponse.json(
         {
           error:
-            'Missing required fields: baseUrl, token, username, fromDate, toDate',
+            'Missing required fields: token, username, fromDate, toDate, jiraInstance',
         },
         { status: 400 }
       );
     }
-
-    // Extract jiraInstance from baseUrl (e.g., "https://insight.fsoft.com.vn/jiradc" → "jiradc")
-    const jiraInstance = baseUrl.split('/').pop() || 'jiradc';
 
     const params = new URLSearchParams({
       fromDate,

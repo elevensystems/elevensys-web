@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import type { LogWorkRequest } from '@/types/timesheet';
 
+const LOG_WORK_API_URL = 'https://api.elevensys.dev/timesheet/logwork';
+
 export async function POST(request: NextRequest) {
   try {
     const body: LogWorkRequest = await request.json();
-    const { baseUrl, token, worklog } = body;
+    const { token, worklog, jiraInstance } = body;
 
-    if (!baseUrl || !token || !worklog) {
+    if (!token || !worklog || !jiraInstance) {
       return NextResponse.json(
-        { error: 'Missing required fields: baseUrl, token, and worklog' },
+        { error: 'Missing required fields: token, worklog, and jiraInstance' },
         { status: 400 }
       );
     }
@@ -21,42 +23,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    };
+    const params = new URLSearchParams({ jiraInstance });
 
-    const response = await fetch(
-      `${baseUrl}/rest/tempo/1.0/log-work/create-log-work`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(worklog),
-      }
-    );
+    const response = await fetch(`${LOG_WORK_API_URL}?${params.toString()}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(worklog),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText || `Jira API error: ${response.status}` },
+        { error: errorText || `API error: ${response.status}` },
         { status: response.status }
       );
     }
 
-    let data;
-    const contentType = response.headers.get('content-type');
-    if (contentType?.includes('application/json')) {
-      data = await response.json();
-    } else {
-      data = await response.text();
-    }
-
-    return NextResponse.json({ success: true, data });
+    const data = await response.json();
+    return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Internal server error',
+        error: error instanceof Error ? error.message : 'Internal server error',
       },
       { status: 500 }
     );

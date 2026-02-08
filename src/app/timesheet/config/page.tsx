@@ -34,7 +34,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
 import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
-import { JIRA_BASE_URLS } from '@/lib/timesheet';
 
 export default function TimesheetConfigPage() {
   const { settings, saveSettings, isConfigured, isLoaded } =
@@ -42,7 +41,7 @@ export default function TimesheetConfigPage() {
 
   const [username, setUsername] = useState('');
   const [token, setToken] = useState('');
-  const [baseUrl, setBaseUrl] = useState<string>(JIRA_BASE_URLS[0].value);
+  const [jiraInstance, setJiraInstance] = useState<string>('jiradc');
   const [showToken, setShowToken] = useState(false);
 
   // Sync local form state with loaded settings
@@ -50,7 +49,7 @@ export default function TimesheetConfigPage() {
   if (isLoaded && !initialized) {
     setUsername(settings.username);
     setToken(settings.token);
-    setBaseUrl(settings.baseUrl || JIRA_BASE_URLS[0].value);
+    setJiraInstance(settings.jiraInstance || 'jiradc');
     setInitialized(true);
   }
 
@@ -58,7 +57,7 @@ export default function TimesheetConfigPage() {
     initialized &&
     (username !== settings.username ||
       token !== settings.token ||
-      baseUrl !== settings.baseUrl);
+      jiraInstance !== settings.jiraInstance);
 
   const handleSave = useCallback(() => {
     if (!username.trim()) {
@@ -72,16 +71,16 @@ export default function TimesheetConfigPage() {
     saveSettings({
       username: username.trim(),
       token: token.trim(),
-      baseUrl,
+      jiraInstance,
     });
     toast.success('Settings saved successfully');
-  }, [username, token, baseUrl, saveSettings]);
+  }, [username, token, jiraInstance, saveSettings]);
 
   const handleClear = useCallback(() => {
     setUsername('');
     setToken('');
-    setBaseUrl(JIRA_BASE_URLS[0].value);
-    saveSettings({ username: '', token: '', baseUrl: JIRA_BASE_URLS[0].value });
+    setJiraInstance('jiradc');
+    saveSettings({ username: '', token: '', jiraInstance: 'jiradc' });
     toast.success('Settings cleared');
   }, [saveSettings]);
 
@@ -102,7 +101,7 @@ export default function TimesheetConfigPage() {
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-2xl mx-auto space-y-8'>
           <ToolPageHeader
-            title='Timesheet Configs'
+            title='Timesheet Configurations'
             description='Configure your credentials to connect with Jira. These configs are stored locally in your browser.'
             infoMessage="Your credentials are stored only in your browser's local storage and are never sent to our servers — they are passed directly to the Jira API."
           />
@@ -177,17 +176,15 @@ export default function TimesheetConfigPage() {
 
               {/* Jira Instance */}
               <div className='space-y-2'>
-                <Label htmlFor='base-url'>Jira Instance</Label>
+                <Label htmlFor='jira-instance'>Jira Instance</Label>
                 <NativeSelect
-                  id='base-url'
-                  value={baseUrl}
-                  onChange={e => setBaseUrl(e.target.value)}
+                  id='jira-instance'
+                  value={jiraInstance}
+                  onChange={e => setJiraInstance(e.target.value)}
                 >
-                  {JIRA_BASE_URLS.map(url => (
-                    <option key={url.value} value={url.value}>
-                      {url.label} — {url.value}
-                    </option>
-                  ))}
+                  <option value='jiradc'>jiradc</option>
+                  <option value='jira3'>jira3</option>
+                  <option value='jira9'>jira9</option>
                 </NativeSelect>
                 <p className='text-xs text-muted-foreground'>
                   Select the Jira instance your project is hosted on.

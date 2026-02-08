@@ -8,7 +8,7 @@ import type { TimesheetSettings } from '@/types/timesheet';
 const DEFAULT_SETTINGS: TimesheetSettings = {
   username: '',
   token: '',
-  baseUrl: 'https://insight.fsoft.com.vn/jira9',
+  jiraInstance: 'jiradc',
 };
 
 export function useTimesheetSettings() {
@@ -33,7 +33,7 @@ export function useTimesheetSettings() {
   }, []);
 
   const isConfigured = Boolean(
-    settings.username && settings.token && settings.baseUrl
+    settings.username && settings.token && settings.jiraInstance
   );
 
   return { settings, saveSettings, isConfigured, isLoaded };

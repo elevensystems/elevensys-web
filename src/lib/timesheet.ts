@@ -13,12 +13,6 @@ const MONTH_ABBRS = [
   'Dec',
 ];
 
-export const JIRA_BASE_URLS = [
-  { label: 'jiradc', value: 'https://insight.fsoft.com.vn/jiradc' },
-  { label: 'jira3', value: 'https://insight.fsoft.com.vn/jira3' },
-  { label: 'jira9', value: 'https://insight.fsoft.com.vn/jira9' },
-] as const;
-
 export const STANDARD_HOURS = 8;
 export const MIN_HOURS = 0.25;
 export const MAX_HOURS = 24;
@@ -58,10 +52,30 @@ export function isValidIssueKey(key: string): boolean {
 }
 
 /**
- * Format an ISO date string to a human-readable date
- * e.g. "2025-01-15" → "Jan 15, 2025"
+ * Format a date string to a human-readable date
+ * Supports: "2025-01-15" (ISO) or "06/Feb/26" (Jira DD/Mon/YY)
+ * → "Jan 15, 2025" or "Feb 6, 2026"
  */
 export function formatDisplayDate(dateStr: string): string {
+  // Handle Jira format: "DD/Mon/YY"
+  const tempoMatch = dateStr.match(/^(\d{1,2})\/([A-Za-z]{3})\/(\d{2})$/);
+  if (tempoMatch) {
+    const [, day, monthAbbr, yearShort] = tempoMatch;
+    const monthIndex = MONTH_ABBRS.findIndex(
+      m => m.toLowerCase() === monthAbbr.toLowerCase()
+    );
+    if (monthIndex !== -1) {
+      const fullYear = 2000 + parseInt(yearShort, 10);
+      const date = new Date(fullYear, monthIndex, parseInt(day, 10));
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    }
+  }
+
+  // Fallback: ISO format "YYYY-MM-DD"
   const date = new Date(dateStr + 'T00:00:00');
   return date.toLocaleDateString('en-US', {
     year: 'numeric',

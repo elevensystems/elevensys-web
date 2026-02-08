@@ -10,13 +10,24 @@ import {
   Download,
   Loader2,
   Search,
-  SettingsIcon,
+  Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,8 +38,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { DatePicker } from '@/components/ui/date-picker';
-import { Label } from '@/components/ui/label';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 import {
   Table,
   TableBody,
@@ -60,6 +70,27 @@ function getStatusVariant(
   }
 }
 
+function getWorkTypeBadgeClass(type: string): string {
+  switch (type.toLowerCase()) {
+    case 'create':
+      return 'border-transparent bg-gradient-to-r from-violet-500/15 to-fuchsia-500/15 text-violet-700 dark:from-violet-500/25 dark:to-fuchsia-500/25 dark:text-violet-300';
+    case 'test':
+      return 'border-transparent bg-gradient-to-r from-emerald-500/15 to-teal-500/15 text-emerald-700 dark:from-emerald-500/25 dark:to-teal-500/25 dark:text-emerald-300';
+    case 'analysis':
+      return 'border-transparent bg-gradient-to-r from-sky-500/15 to-cyan-500/15 text-sky-700 dark:from-sky-500/25 dark:to-cyan-500/25 dark:text-sky-300';
+    case 'management':
+      return 'border-transparent bg-gradient-to-r from-amber-500/15 to-orange-500/15 text-amber-700 dark:from-amber-500/25 dark:to-orange-500/25 dark:text-amber-300';
+    case 'review':
+      return 'border-transparent bg-gradient-to-r from-pink-500/15 to-rose-500/15 text-pink-700 dark:from-pink-500/25 dark:to-rose-500/25 dark:text-pink-300';
+    case 'study':
+      return 'border-transparent bg-gradient-to-r from-indigo-500/15 to-blue-500/15 text-indigo-700 dark:from-indigo-500/25 dark:to-blue-500/25 dark:text-indigo-300';
+    case 'correct':
+      return 'border-transparent bg-gradient-to-r from-red-500/15 to-orange-500/15 text-red-700 dark:from-red-500/25 dark:to-orange-500/25 dark:text-red-300';
+    default:
+      return 'border-transparent bg-gradient-to-r from-slate-500/15 to-gray-500/15 text-slate-700 dark:from-slate-500/25 dark:to-gray-500/25 dark:text-slate-300';
+  }
+}
+
 function getMonthStart(): string {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), 1)
@@ -74,6 +105,7 @@ export default function MyWorklogsPage() {
   const [toDate, setToDate] = useState(getTodayISO());
   const [worklogs, setWorklogs] = useState<WorklogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -107,11 +139,11 @@ export default function MyWorklogsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          baseUrl: settings.baseUrl,
           token: settings.token,
           username: settings.username,
           fromDate: formatDateForApi(fromDate),
           toDate: formatDateForApi(toDate),
+          jiraInstance: settings.jiraInstance,
         }),
       });
 
@@ -157,6 +189,51 @@ export default function MyWorklogsPage() {
       setIsLoading(false);
     }
   }, [isConfigured, fromDate, toDate, settings]);
+
+  const handleDelete = useCallback(
+    async (worklogId: number, issueId: number) => {
+      if (!isConfigured) {
+        toast.error('Jira settings not configured.');
+        return;
+      }
+
+      const key = `${worklogId}_${issueId}`;
+      setDeletingId(key);
+
+      try {
+        const response = await fetch('/api/timesheet/worklogs/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: settings.token,
+            issueId,
+            timesheetId: worklogId,
+            jiraInstance: settings.jiraInstance,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.error ||
+              `Failed to delete worklog: HTTP ${response.status}`
+          );
+        }
+
+        setWorklogs(prev =>
+          prev.filter(w => !(w.id === worklogId && w.issueId === issueId))
+        );
+        toast.success('Worklog deleted successfully');
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Failed to delete worklog';
+        toast.error(message);
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [isConfigured, settings]
+  );
 
   const handleExportCSV = useCallback(() => {
     if (worklogs.length === 0) return;
@@ -244,22 +321,16 @@ export default function MyWorklogsPage() {
             </CardHeader>
             <CardContent>
               <div className='flex flex-col sm:flex-row items-end gap-4'>
-                <div className='space-y-2 flex-1 w-full sm:w-auto'>
-                  <Label htmlFor='from-date'>From</Label>
-                  <DatePicker
-                    id='from-date'
-                    value={fromDate}
-                    onChange={setFromDate}
-                  />
-                </div>
-                <div className='space-y-2 flex-1 w-full sm:w-auto'>
-                  <Label htmlFor='to-date'>To</Label>
-                  <DatePicker
-                    id='to-date'
-                    value={toDate}
-                    onChange={setToDate}
-                  />
-                </div>
+                <DateRangePicker
+                  id='date-range'
+                  from={fromDate}
+                  to={toDate}
+                  onRangeChange={(from, to) => {
+                    setFromDate(from);
+                    setToDate(to);
+                  }}
+                  className='flex-1 w-full sm:w-auto'
+                />
                 <Button
                   onClick={handleSearch}
                   disabled={isLoading || !isConfigured}
@@ -317,7 +388,7 @@ export default function MyWorklogsPage() {
               ) : (
                 <div className='rounded-md border'>
                   <Table>
-                    <TableHeader>
+                    <TableHeader className='bg-muted/50'>
                       <TableRow>
                         <TableHead>Issue Key</TableHead>
                         <TableHead>Date</TableHead>
@@ -325,6 +396,7 @@ export default function MyWorklogsPage() {
                         <TableHead>Type</TableHead>
                         <TableHead>Description</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead className='w-[60px]' />
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -339,9 +411,18 @@ export default function MyWorklogsPage() {
                               : worklog.startDate}
                           </TableCell>
                           <TableCell className='text-right font-medium'>
-                            {worklog.worked}h
+                            {parseFloat(String(worklog.worked))}h
                           </TableCell>
-                          <TableCell>{worklog.typeOfWork}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant='outline'
+                              className={getWorkTypeBadgeClass(
+                                worklog.typeOfWork
+                              )}
+                            >
+                              {worklog.typeOfWork}
+                            </Badge>
+                          </TableCell>
                           <TableCell className='max-w-[200px] truncate'>
                             {worklog.description || '-'}
                           </TableCell>
@@ -351,6 +432,59 @@ export default function MyWorklogsPage() {
                             >
                               {worklog.statusWorklog}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant='ghost'
+                                  size='icon'
+                                  className='h-8 w-8 text-muted-foreground hover:text-destructive'
+                                  disabled={
+                                    deletingId ===
+                                    `${worklog.id}_${worklog.issueId}`
+                                  }
+                                >
+                                  {deletingId ===
+                                  `${worklog.id}_${worklog.issueId}` ? (
+                                    <Loader2 className='h-4 w-4 animate-spin' />
+                                  ) : (
+                                    <Trash2 className='h-4 w-4' />
+                                  )}
+                                  <span className='sr-only'>Delete</span>
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Delete Worklog
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this worklog
+                                    for{' '}
+                                    <span className='font-semibold'>
+                                      {worklog.issueKey}
+                                    </span>{' '}
+                                    ({parseFloat(String(worklog.worked))}h on{' '}
+                                    {worklog.startDateEdit
+                                      ? formatDisplayDate(worklog.startDateEdit)
+                                      : worklog.startDate}
+                                    )? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    variant='destructive'
+                                    onClick={() =>
+                                      handleDelete(worklog.id, worklog.issueId)
+                                    }
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </TableCell>
                         </TableRow>
                       ))}

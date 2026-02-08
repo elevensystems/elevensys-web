@@ -47,23 +47,23 @@ export interface WorklogEntry {
 }
 
 export interface LogWorkRequest {
-  baseUrl: string;
   token: string;
   worklog: WorklogPayload;
+  jiraInstance: string;
 }
 
 export interface FetchWorklogsRequest {
-  baseUrl: string;
   token: string;
   username: string;
   fromDate: string;
   toDate: string;
+  jiraInstance: string;
 }
 
 export interface TimesheetSettings {
   username: string;
   token: string;
-  baseUrl: string;
+  jiraInstance: string;
 }
 
 export interface LogWorkResult {

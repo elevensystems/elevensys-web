@@ -163,12 +163,12 @@ export default function LogWorkPage() {
       setProgress(Math.round((i / total) * 100));
 
       try {
-        const response = await fetch('/api/timesheet/log-work', {
+        const response = await fetch('/api/timesheet/logwork', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            baseUrl: settings.baseUrl,
             token: settings.token,
+            jiraInstance: settings.jiraInstance,
             worklog: {
               username: settings.username,
               issueKey: entry.issueKey.trim(),
@@ -318,9 +318,9 @@ export default function LogWorkPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className='w-[180px]'>Issue Key</TableHead>
+                      <TableHead>Description</TableHead>
                       <TableHead className='w-[150px]'>Type of Work</TableHead>
                       <TableHead className='w-[100px]'>Hours</TableHead>
-                      <TableHead>Description</TableHead>
                       <TableHead className='w-[50px]' />
                     </TableRow>
                   </TableHeader>
@@ -329,7 +329,7 @@ export default function LogWorkPage() {
                       <TableRow key={entry.id}>
                         <TableCell>
                           <Input
-                            placeholder='PRJ-123'
+                            placeholder='C99CMSMKPCM1-01'
                             value={entry.issueKey}
                             onChange={e =>
                               updateEntry(
@@ -339,6 +339,21 @@ export default function LogWorkPage() {
                               )
                             }
                             className='h-8 font-mono'
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            placeholder='Description of work done'
+                            value={entry.description}
+                            onChange={e =>
+                              updateEntry(
+                                entry.id,
+                                'description',
+                                e.target.value
+                              )
+                            }
+                            maxLength={500}
+                            className='h-8'
                           />
                         </TableCell>
                         <TableCell>
@@ -374,21 +389,6 @@ export default function LogWorkPage() {
                               )
                             }
                             className='h-8 w-20'
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            placeholder='Description of work done'
-                            value={entry.description}
-                            onChange={e =>
-                              updateEntry(
-                                entry.id,
-                                'description',
-                                e.target.value
-                              )
-                            }
-                            maxLength={500}
-                            className='h-8'
                           />
                         </TableCell>
                         <TableCell>
@@ -472,7 +472,7 @@ export default function LogWorkPage() {
                 ) : (
                   <Send className='h-4 w-4' />
                 )}
-                {isSubmitting ? 'Logging Work...' : 'Log All Work'}
+                {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
               </Button>
 
               {!isConfigured && (
