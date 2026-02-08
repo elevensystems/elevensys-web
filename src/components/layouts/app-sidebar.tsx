@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import {
   Braces,
+  Clock,
   Command,
   FileText,
   Home,
@@ -49,6 +50,26 @@ const data = {
       title: 'Home',
       url: '/',
       icon: Home,
+    },
+    {
+      title: 'Timesheet',
+      url: '/timesheet',
+      icon: Clock,
+      isActive: true,
+      items: [
+        {
+          title: 'Log Work',
+          url: '/timesheet/logwork',
+        },
+        {
+          title: 'My Worklogs',
+          url: '/timesheet/worklogs',
+        },
+        {
+          title: 'Configs',
+          url: '/timesheet/config',
+        },
+      ],
     },
   ],
   navSecondary: [
