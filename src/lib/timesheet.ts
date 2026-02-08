@@ -97,6 +97,39 @@ export function formatDisplayDate(dateStr: string): string {
 }
 
 /**
+ * Validate a date string in Jira API format: D/Mon/YY or DD/Mon/YY
+ * e.g. "2/Feb/26", "15/Jan/25"
+ */
+export function isValidApiDate(dateStr: string): boolean {
+  const match = dateStr.match(/^(\d{1,2})\/([A-Za-z]{3})\/(\d{2})$/);
+  if (!match) return false;
+  const [, dayStr, monthAbbr, yearStr] = match;
+  const monthIndex = MONTH_ABBRS.findIndex(
+    m => m.toLowerCase() === monthAbbr.toLowerCase()
+  );
+  if (monthIndex === -1) return false;
+  const day = parseInt(dayStr, 10);
+  const year = 2000 + parseInt(yearStr, 10);
+  const date = new Date(year, monthIndex, day);
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === monthIndex &&
+    date.getDate() === day
+  );
+}
+
+/**
+ * Parse a comma-separated string of dates in DD/Mon/YY format.
+ * Returns trimmed, non-empty date strings.
+ */
+export function parseSpecificDates(text: string): string[] {
+  return text
+    .split(',')
+    .map(d => d.trim())
+    .filter(Boolean);
+}
+
+/**
  * Get today's date as YYYY-MM-DD
  */
 export function getTodayISO(): string {

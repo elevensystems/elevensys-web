@@ -1,11 +1,13 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
 import {
   AlertCircle,
+  CalendarDays,
+  CalendarRange,
   Clock,
   Loader2,
   Plus,
@@ -37,6 +39,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 import {
   HOUR_STEP,
@@ -49,7 +53,9 @@ import {
   generateEntryId,
   getCurrentTime,
   getTodayISO,
+  isValidApiDate,
   isValidIssueKey,
+  parseSpecificDates,
 } from '@/lib/timesheet';
 import {
   type LogWorkResult,
@@ -57,6 +63,8 @@ import {
   type WorkEntry,
   type WorkType,
 } from '@/types/timesheet';
+
+const SAVED_ENTRIES_KEY = 'timesheet_saved_entries';
 
 const createDefaultEntry = (): WorkEntry => ({
   id: generateEntryId(),
@@ -66,13 +74,47 @@ const createDefaultEntry = (): WorkEntry => ({
   hours: 0,
 });
 
+function loadSavedEntries(): WorkEntry[] {
+  if (typeof window === 'undefined') return [createDefaultEntry()];
+  try {
+    const saved = localStorage.getItem(SAVED_ENTRIES_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved) as Omit<WorkEntry, 'id'>[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(entry => ({
+          ...entry,
+          id: generateEntryId(),
+        }));
+      }
+    }
+  } catch {
+    // Ignore corrupted data
+  }
+  return [createDefaultEntry()];
+}
+
+function saveEntriesToStorage(entries: WorkEntry[]): void {
+  try {
+    const toSave = entries
+      .filter(e => e.issueKey.trim())
+      .map(({ id: _id, ...rest }) => rest);
+    if (toSave.length > 0) {
+      localStorage.setItem(SAVED_ENTRIES_KEY, JSON.stringify(toSave));
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export default function LogWorkPage() {
   const { settings, isConfigured, isLoaded } = useTimesheetSettings();
 
   // Work entries state
   const [entries, setEntries] = useState<WorkEntry[]>([createDefaultEntry()]);
+  const [dateMode, setDateMode] = useState<'range' | 'specific'>('specific');
   const [startDate, setStartDate] = useState(getTodayISO());
   const [endDate, setEndDate] = useState(getTodayISO());
+  const [datesText, setDatesText] = useState('');
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,6 +123,14 @@ export default function LogWorkPage() {
   const [results, setResults] = useState<LogWorkResult[]>([]);
 
   const [error, setError] = useState('');
+
+  // Load saved entries from localStorage on mount
+  useEffect(() => {
+    const saved = loadSavedEntries();
+    if (saved.length > 0 && saved[0].issueKey) {
+      setEntries(saved);
+    }
+  }, []);
 
   const totalHours = useMemo(
     () => entries.reduce((sum, entry) => sum + (entry.hours || 0), 0),
@@ -112,11 +162,24 @@ export default function LogWorkPage() {
     if (!isConfigured) {
       return 'Please configure your Jira settings first.';
     }
-    if (!startDate || !endDate) {
-      return 'Please select a date range.';
-    }
-    if (new Date(startDate) > new Date(endDate)) {
-      return 'Start date must be before or equal to end date.';
+
+    if (dateMode === 'range') {
+      if (!startDate || !endDate) {
+        return 'Please select a date range.';
+      }
+      if (new Date(startDate) > new Date(endDate)) {
+        return 'Start date must be before or equal to end date.';
+      }
+    } else {
+      const dates = parseSpecificDates(datesText);
+      if (dates.length === 0) {
+        return 'Please enter at least one date (e.g., 20/Aug/25, 21/Aug/25, 22/Aug/25, 25/Aug/25).';
+      }
+      for (const date of dates) {
+        if (!isValidApiDate(date)) {
+          return `Invalid date: "${date}". Expected format: DD/Mon/YY (e.g., 02/Feb/26).`;
+        }
+      }
     }
 
     const validEntries = entries.filter(e => e.issueKey.trim());
@@ -134,7 +197,146 @@ export default function LogWorkPage() {
     }
 
     return null;
-  }, [isConfigured, startDate, endDate, entries]);
+  }, [isConfigured, dateMode, startDate, endDate, datesText, entries]);
+
+  const submitDateRange = useCallback(
+    async (
+      validEntries: WorkEntry[],
+      logResults: LogWorkResult[],
+      time: string
+    ) => {
+      const apiStartDate = formatDateForApi(startDate);
+      const apiEndDate = formatDateForApi(endDate);
+      const total = validEntries.length;
+
+      for (let i = 0; i < validEntries.length; i++) {
+        const entry = validEntries[i];
+        setProgressText(`Logging ${entry.issueKey} (${i + 1}/${total})...`);
+        setProgress(Math.round((i / total) * 100));
+
+        try {
+          const response = await fetch('/api/timesheet/logwork', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              token: settings.token,
+              jiraInstance: settings.jiraInstance,
+              worklog: {
+                username: settings.username,
+                issueKey: entry.issueKey.trim(),
+                timeSpend: entry.hours * 3600,
+                startDate: apiStartDate,
+                endDate: apiEndDate,
+                typeOfWork: entry.typeOfWork,
+                description: entry.description,
+                time,
+                remainingTime: 0,
+                period: true,
+              },
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.error || `HTTP ${response.status}`);
+          }
+
+          logResults.push({ entry, success: true });
+        } catch (err) {
+          logResults.push({
+            entry,
+            success: false,
+            error: err instanceof Error ? err.message : 'Unknown error',
+          });
+        }
+
+        if (i < validEntries.length - 1) {
+          await delay(REQUEST_DELAY_MS);
+        }
+      }
+    },
+    [startDate, endDate, settings]
+  );
+
+  const submitSpecificDates = useCallback(
+    async (
+      validEntries: WorkEntry[],
+      logResults: LogWorkResult[],
+      time: string
+    ) => {
+      const dates = parseSpecificDates(datesText);
+      const totalRequests = validEntries.length * dates.length;
+      let requestIndex = 0;
+
+      for (const entry of validEntries) {
+        const entryErrors: string[] = [];
+        let entrySuccessCount = 0;
+
+        for (const date of dates) {
+          requestIndex++;
+          setProgressText(
+            `Logging ${entry.issueKey} for ${date} (${requestIndex}/${totalRequests})...`
+          );
+          setProgress(Math.round((requestIndex / totalRequests) * 100));
+
+          try {
+            const response = await fetch('/api/timesheet/logwork', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                token: settings.token,
+                jiraInstance: settings.jiraInstance,
+                worklog: {
+                  username: settings.username,
+                  issueKey: entry.issueKey.trim(),
+                  timeSpend: entry.hours * 3600,
+                  startDate: date,
+                  endDate: date,
+                  typeOfWork: entry.typeOfWork,
+                  description: entry.description,
+                  time,
+                  remainingTime: 0,
+                  period: false,
+                },
+              }),
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => null);
+              throw new Error(errorData?.error || `HTTP ${response.status}`);
+            }
+
+            entrySuccessCount++;
+          } catch (err) {
+            entryErrors.push(
+              `${date}: ${err instanceof Error ? err.message : 'Unknown error'}`
+            );
+          }
+
+          if (requestIndex < totalRequests) {
+            await delay(REQUEST_DELAY_MS);
+          }
+        }
+
+        if (entryErrors.length === 0) {
+          logResults.push({ entry, success: true });
+        } else if (entrySuccessCount > 0) {
+          logResults.push({
+            entry,
+            success: false,
+            error: `${entrySuccessCount}/${dates.length} dates succeeded. Failures: ${entryErrors.join('; ')}`,
+          });
+        } else {
+          logResults.push({
+            entry,
+            success: false,
+            error: entryErrors.join('; '),
+          });
+        }
+      }
+    },
+    [datesText, settings]
+  );
 
   const handleLogWork = useCallback(async () => {
     const validationError = validateEntries();
@@ -150,58 +352,13 @@ export default function LogWorkPage() {
     setResults([]);
 
     const validEntries = entries.filter(e => e.issueKey.trim());
-    const total = validEntries.length;
     const logResults: LogWorkResult[] = [];
-
-    const apiStartDate = formatDateForApi(startDate);
-    const apiEndDate = formatDateForApi(endDate);
     const time = getCurrentTime();
 
-    for (let i = 0; i < validEntries.length; i++) {
-      const entry = validEntries[i];
-      setProgressText(`Logging ${entry.issueKey} (${i + 1}/${total})...`);
-      setProgress(Math.round((i / total) * 100));
-
-      try {
-        const response = await fetch('/api/timesheet/logwork', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token: settings.token,
-            jiraInstance: settings.jiraInstance,
-            worklog: {
-              username: settings.username,
-              issueKey: entry.issueKey.trim(),
-              timeSpend: entry.hours * 3600,
-              startDate: apiStartDate,
-              endDate: apiEndDate,
-              typeOfWork: entry.typeOfWork,
-              description: entry.description,
-              time,
-              remainingTime: 0,
-              period: true,
-            },
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.error || `HTTP ${response.status}`);
-        }
-
-        logResults.push({ entry, success: true });
-      } catch (err) {
-        logResults.push({
-          entry,
-          success: false,
-          error: err instanceof Error ? err.message : 'Unknown error',
-        });
-      }
-
-      // Rate limiting delay between requests
-      if (i < validEntries.length - 1) {
-        await delay(REQUEST_DELAY_MS);
-      }
+    if (dateMode === 'range') {
+      await submitDateRange(validEntries, logResults, time);
+    } else {
+      await submitSpecificDates(validEntries, logResults, time);
     }
 
     setProgress(100);
@@ -210,6 +367,9 @@ export default function LogWorkPage() {
 
     const successCount = logResults.filter(r => r.success).length;
     const errorCount = logResults.filter(r => !r.success).length;
+
+    // Save entries to localStorage for next session
+    saveEntriesToStorage(validEntries);
 
     if (errorCount === 0) {
       toast.success(`All ${successCount} entries logged successfully!`);
@@ -223,7 +383,13 @@ export default function LogWorkPage() {
       toast.error(`All ${errorCount} entries failed`);
       setProgressText(`All ${errorCount} entries failed. Check results below.`);
     }
-  }, [validateEntries, entries, startDate, endDate, settings]);
+  }, [
+    validateEntries,
+    entries,
+    dateMode,
+    submitDateRange,
+    submitSpecificDates,
+  ]);
 
   if (!isLoaded) {
     return (
@@ -290,26 +456,64 @@ export default function LogWorkPage() {
               </CardAction>
             </CardHeader>
             <CardContent className='space-y-6'>
-              {/* Date Range */}
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='start-date'>Start Date</Label>
-                  <Input
-                    id='start-date'
-                    type='date'
-                    value={startDate}
-                    onChange={e => setStartDate(e.target.value)}
-                  />
+              {/* Date Mode Selection */}
+              <div className='space-y-4'>
+                <div className='flex items-center gap-3'>
+                  <Label>Date Selection</Label>
+                  <Tabs
+                    value={dateMode}
+                    onValueChange={v => setDateMode(v as 'range' | 'specific')}
+                  >
+                    <TabsList>
+                      <TabsTrigger value='specific' className='gap-1.5'>
+                        <CalendarDays className='h-3.5 w-3.5' />
+                        Specific Dates
+                      </TabsTrigger>
+                      <TabsTrigger value='range' className='gap-1.5'>
+                        <CalendarRange className='h-3.5 w-3.5' />
+                        Date Range
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='end-date'>End Date</Label>
-                  <Input
-                    id='end-date'
-                    type='date'
-                    value={endDate}
-                    onChange={e => setEndDate(e.target.value)}
-                  />
-                </div>
+
+                {dateMode === 'range' ? (
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                    <div className='space-y-2'>
+                      <Label htmlFor='start-date'>Start Date</Label>
+                      <Input
+                        id='start-date'
+                        type='date'
+                        value={startDate}
+                        onChange={e => setStartDate(e.target.value)}
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <Label htmlFor='end-date'>End Date</Label>
+                      <Input
+                        id='end-date'
+                        type='date'
+                        value={endDate}
+                        onChange={e => setEndDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className='space-y-2'>
+                    <Label htmlFor='specific-dates'>Dates</Label>
+                    <Textarea
+                      id='specific-dates'
+                      value={datesText}
+                      onChange={e => setDatesText(e.target.value)}
+                      placeholder='E.g., 20/Aug/25, 21/Aug/25, 22/Aug/25, 25/Aug/25'
+                      rows={3}
+                    />
+                    <p className='text-xs text-muted-foreground'>
+                      Enter dates separated by commas in DD/Mon/YY format. Each
+                      entry will be logged individually for each date.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Entries Table */}
