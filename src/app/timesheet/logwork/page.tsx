@@ -126,7 +126,7 @@ export default function LogWorkPage() {
 
     for (const entry of validEntries) {
       if (!isValidIssueKey(entry.issueKey)) {
-        return `Invalid issue key: "${entry.issueKey}". Expected format: PROJECT-123`;
+        return `Invalid issue key: "${entry.issueKey}". Expected format: PROJECT-123 (e.g., C99CMSMKPCM1-01)`;
       }
       if (entry.hours < MIN_HOURS || entry.hours > MAX_HOURS) {
         return `Hours for ${entry.issueKey} must be between ${MIN_HOURS} and ${MAX_HOURS}.`;
@@ -315,12 +315,20 @@ export default function LogWorkPage() {
               {/* Entries Table */}
               <div className='rounded-md border'>
                 <Table>
-                  <TableHeader>
+                  <TableHeader className='bg-muted'>
                     <TableRow>
-                      <TableHead className='w-[180px]'>Issue Key</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className='w-[150px]'>Type of Work</TableHead>
-                      <TableHead className='w-[100px]'>Hours</TableHead>
+                      <TableHead className='w-[180px] font-semibold'>
+                        Ticket ID
+                      </TableHead>
+                      <TableHead className='font-semibold'>
+                        Description
+                      </TableHead>
+                      <TableHead className='w-[150px] font-semibold'>
+                        Type of Work
+                      </TableHead>
+                      <TableHead className='w-[100px] font-semibold'>
+                        Hours
+                      </TableHead>
                       <TableHead className='w-[50px]' />
                     </TableRow>
                   </TableHeader>
@@ -394,25 +402,17 @@ export default function LogWorkPage() {
                         <TableCell>
                           <Button
                             variant='ghost'
-                            size='icon-sm'
+                            size='icon'
+                            className='h-8 w-8 text-muted-foreground hover:text-destructive'
                             onClick={() => removeEntry(entry.id)}
-                            disabled={entries.length <= 1}
-                            aria-label='Remove entry'
                           >
-                            <Trash2 className='h-4 w-4 text-muted-foreground' />
+                            <Trash2 className='h-4 w-4' />
                           </Button>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-
-              <div className='flex items-center justify-between'>
-                <Button variant='outline' size='sm' onClick={addEntry}>
-                  <Plus className='h-4 w-4' />
-                  Add Entry
-                </Button>
               </div>
 
               {/* Progress */}
@@ -461,19 +461,30 @@ export default function LogWorkPage() {
               )}
 
               {/* Submit Button */}
-              <Button
-                onClick={handleLogWork}
-                disabled={isSubmitting || !isConfigured}
-                className='w-full'
-                size='lg'
-              >
-                {isSubmitting ? (
-                  <Loader2 className='h-4 w-4 animate-spin' />
-                ) : (
-                  <Send className='h-4 w-4' />
-                )}
-                {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
-              </Button>
+              <div className='flex items-center gap-3'>
+                <Button
+                  onClick={handleLogWork}
+                  disabled={isSubmitting || !isConfigured}
+                  className='flex-1'
+                  size='lg'
+                >
+                  {isSubmitting ? (
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                  ) : (
+                    <Send className='h-4 w-4' />
+                  )}
+                  {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
+                </Button>
+                <Button
+                  variant='outline'
+                  size='lg'
+                  onClick={addEntry}
+                  className='flex-shrink-0 text-primary hover:bg-green-100'
+                >
+                  <Plus className='h-4 w-4' />
+                  Add Entry
+                </Button>
+              </div>
 
               {!isConfigured && (
                 <p className='text-xs text-muted-foreground text-center'>

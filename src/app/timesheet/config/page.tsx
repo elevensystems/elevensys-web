@@ -194,6 +194,7 @@ export default function TimesheetConfigPage() {
             <CardFooter className='flex justify-end gap-3'>
               <Button
                 variant='outline'
+                className='text-destructive hover:bg-destructive/10 hover:text-destructive'
                 onClick={handleClear}
                 disabled={!isConfigured}
               >

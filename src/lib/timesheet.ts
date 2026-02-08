@@ -15,7 +15,7 @@ const MONTH_ABBRS = [
 
 export const STANDARD_HOURS = 8;
 export const MIN_HOURS = 0.25;
-export const MAX_HOURS = 24;
+export const MAX_HOURS = 8;
 export const HOUR_STEP = 0.25;
 export const REQUEST_DELAY_MS = 1500;
 export const SETTINGS_STORAGE_KEY = 'timesheet_settings';
@@ -47,8 +47,20 @@ export function generateEntryId(): string {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+/**
+ * Jira ticket format regex: uppercase alphanumerics + dash + number
+ * Examples: C99CMSMKPCM1-01, C99KBBATC2025-37
+ */
+export const JIRA_TICKET_REGEX = /^[A-Z0-9]+-\d+$/;
+
+/**
+ * Validate Jira issue key format
+ * @param key - The issue key to validate (e.g., "C99CMSMKPCM1-01")
+ * @returns true if valid, false otherwise
+ */
 export function isValidIssueKey(key: string): boolean {
-  return /^[A-Z][A-Z0-9]+-\d+$/.test(key.trim());
+  const trimmed = key.trim().toUpperCase();
+  return JIRA_TICKET_REGEX.test(trimmed);
 }
 
 /**

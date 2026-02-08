@@ -1,11 +1,10 @@
 export const WORK_TYPES = [
   'Create',
-  'Test',
-  'Analysis',
-  'Management',
   'Review',
   'Study',
   'Correct',
+  'Translate',
+  'Test',
 ] as const;
 
 export type WorkType = (typeof WORK_TYPES)[number];

@@ -98,11 +98,18 @@ function getMonthStart(): string {
     .split('T')[0];
 }
 
+function getMonthEnd(): string {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    .toISOString()
+    .split('T')[0];
+}
+
 export default function MyWorklogsPage() {
   const { settings, isConfigured, isLoaded } = useTimesheetSettings();
 
   const [fromDate, setFromDate] = useState(getMonthStart());
-  const [toDate, setToDate] = useState(getTodayISO());
+  const [toDate, setToDate] = useState(getMonthEnd());
   const [worklogs, setWorklogs] = useState<WorklogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -239,7 +246,7 @@ export default function MyWorklogsPage() {
     if (worklogs.length === 0) return;
 
     const headers = [
-      'Issue Key',
+      'Ticket ID',
       'Date',
       'Hours',
       'Type of Work',
@@ -390,7 +397,7 @@ export default function MyWorklogsPage() {
                   <Table>
                     <TableHeader className='bg-muted/50'>
                       <TableRow>
-                        <TableHead>Issue Key</TableHead>
+                        <TableHead>Ticket ID</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead className='text-right'>Hours</TableHead>
                         <TableHead>Type</TableHead>
