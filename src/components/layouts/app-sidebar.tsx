@@ -2,9 +2,11 @@
 
 import * as React from 'react';
 
+import App from 'next/app';
 import Link from 'next/link';
 
 import {
+  BadgeCheck,
   Braces,
   Clock,
   Command,
@@ -71,6 +73,18 @@ const data = {
         },
       ],
     },
+    {
+      title: 'QA/SM Check (Soon)',
+      url: '#',
+      icon: BadgeCheck,
+      isActive: false,
+    },
+    {
+      title: 'Auto fetch tickets (Soon)',
+      url: '#',
+      icon: Sparkles,
+      isActive: false,
+    },
   ],
   navSecondary: [
     {
@@ -87,58 +101,58 @@ const data = {
     },
   ],
   tools: [
-    {
-      name: 'Urlify',
-      url: '/tools/urlify',
-      icon: LinkIcon,
-    },
-    {
-      name: 'JSON Diffinity',
-      url: '/tools/json-diffinity',
-      icon: Braces,
-    },
-    {
-      name: 'JSON Objectify',
-      url: '/tools/json-objectify',
-      icon: Sparkles,
-    },
-    {
-      name: 'Translately',
-      url: '/tools/translately',
-      icon: Languages,
-      isPro: true,
-    },
-    {
-      name: 'NPM Converter',
-      url: '/tools/npm-converter',
-      icon: Package,
-    },
-    {
-      name: 'Passly',
-      url: '/tools/passly',
-      icon: Key,
-    },
-    {
-      name: 'PR Link Shrinker',
-      url: '/tools/pr-link-shrinker',
-      icon: Link2,
-    },
-    {
-      name: 'Summary Smith',
-      url: '/tools/summary-smith',
-      icon: FileText,
-    },
-    {
-      name: 'Prompt Templates',
-      url: '/tools/prompt-templates',
-      icon: ScrollText,
-      isPro: true,
-    },
-    {
-      name: 'Beatly',
-      url: '/tools/beatly',
-      icon: Music4,
-    },
+    // {
+    //   name: 'Urlify',
+    //   url: '/tools/urlify',
+    //   icon: LinkIcon,
+    // },
+    // {
+    //   name: 'JSON Diffinity',
+    //   url: '/tools/json-diffinity',
+    //   icon: Braces,
+    // },
+    // {
+    //   name: 'JSON Objectify',
+    //   url: '/tools/json-objectify',
+    //   icon: Sparkles,
+    // },
+    // {
+    //   name: 'Translately',
+    //   url: '/tools/translately',
+    //   icon: Languages,
+    //   isPro: true,
+    // },
+    // {
+    //   name: 'NPM Converter',
+    //   url: '/tools/npm-converter',
+    //   icon: Package,
+    // },
+    // {
+    //   name: 'Passly',
+    //   url: '/tools/passly',
+    //   icon: Key,
+    // },
+    // {
+    //   name: 'PR Link Shrinker',
+    //   url: '/tools/pr-link-shrinker',
+    //   icon: Link2,
+    // },
+    // {
+    //   name: 'Summary Smith',
+    //   url: '/tools/summary-smith',
+    //   icon: FileText,
+    // },
+    // {
+    //   name: 'Prompt Templates',
+    //   url: '/tools/prompt-templates',
+    //   icon: ScrollText,
+    //   isPro: true,
+    // },
+    // {
+    //   name: 'Beatly',
+    //   url: '/tools/beatly',
+    //   icon: Music4,
+    // },
   ] satisfies ToolConfig[],
 };
 
@@ -176,7 +190,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                   </div>
                   <div className='grid flex-1 text-left text-sm leading-tight'>
                     <span className='truncate font-medium'>Eleven Systems</span>
-                    <span className='truncate text-xs'>Trial</span>
+                    <span className='truncate text-xs'>Verion 5.3.2</span>
                   </div>
                 </Link>
               </SidebarMenuButton>

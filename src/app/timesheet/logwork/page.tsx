@@ -7,27 +7,31 @@ import Link from 'next/link';
 import {
   AlertCircle,
   CalendarDays,
-  CalendarRange,
   Clock,
   Loader2,
   Plus,
+  Search,
   Send,
   Settings as SettingsIcon,
   Trash2,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
   CardAction,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
@@ -39,7 +43,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 import {
@@ -58,10 +61,12 @@ import {
   parseSpecificDates,
 } from '@/lib/timesheet';
 import {
+  type JiraProject,
   type LogWorkResult,
   WORK_TYPES,
   type WorkEntry,
   type WorkType,
+  type WorklogsWarningEntry,
 } from '@/types/timesheet';
 
 const SAVED_ENTRIES_KEY = 'timesheet_saved_entries';
@@ -123,6 +128,111 @@ export default function LogWorkPage() {
   const [results, setResults] = useState<LogWorkResult[]>([]);
 
   const [error, setError] = useState('');
+
+  // Project & worklogs warning state
+  const [projects, setProjects] = useState<JiraProject[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [warningFromDate, setWarningFromDate] = useState(getTodayISO());
+  const [warningToDate, setWarningToDate] = useState(getTodayISO());
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+  const [isSearchingWarnings, setIsSearchingWarnings] = useState(false);
+
+  const parsedDates = useMemo(() => parseSpecificDates(datesText), [datesText]);
+
+  const removeDate = useCallback(
+    (dateToRemove: string) => {
+      const updated = parsedDates.filter(d => d !== dateToRemove).join(', ');
+      setDatesText(updated);
+    },
+    [parsedDates]
+  );
+
+  const clearAllDates = useCallback(() => {
+    setDatesText('');
+  }, []);
+
+  // Fetch projects on mount when configured
+  useEffect(() => {
+    if (!isConfigured) return;
+    setIsLoadingProjects(true);
+    fetch(`/api/timesheet/projects?jiraInstance=${settings.jiraInstance}`, {
+      headers: { Authorization: `Bearer ${settings.token}` },
+    })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && Array.isArray(result.data)) {
+          setProjects(result.data);
+          if (result.data.length > 0) {
+            setSelectedProjectId(result.data[0].id);
+          }
+        }
+      })
+      .catch(() => {
+        // Ignore fetch errors
+      })
+      .finally(() => setIsLoadingProjects(false));
+  }, [isConfigured, settings.jiraInstance]);
+
+  const handleSearchWarnings = useCallback(async () => {
+    if (!selectedProjectId) {
+      toast.error('Please select a project.');
+      return;
+    }
+    if (!warningFromDate || !warningToDate) {
+      toast.error('Please select a date range.');
+      return;
+    }
+
+    setIsSearchingWarnings(true);
+    try {
+      const response = await fetch('/api/timesheet/worklogs-warning', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: settings.token,
+          pid: selectedProjectId,
+          startDate: formatDateForApi(warningFromDate),
+          endDate: formatDateForApi(warningToDate),
+          jiraInstance: settings.jiraInstance,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success && Array.isArray(result.data)) {
+        const allDates = result.data
+          .map((entry: WorklogsWarningEntry) => entry.value)
+          .filter(Boolean)
+          .join(', ');
+        if (allDates) {
+          setDatesText(allDates);
+          setDateMode('specific');
+          toast.success(
+            `Found missing dates for ${result.data.length} user(s)`
+          );
+        } else {
+          toast.info('No missing worklog dates found.');
+        }
+      } else {
+        toast.info('No missing worklog dates found.');
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to search warnings';
+      toast.error(message);
+    } finally {
+      setIsSearchingWarnings(false);
+    }
+  }, [
+    selectedProjectId,
+    warningFromDate,
+    warningToDate,
+    settings.jiraInstance,
+  ]);
 
   // Load saved entries from localStorage on mount
   useEffect(() => {
@@ -408,7 +518,7 @@ export default function LogWorkPage() {
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-full mx-auto space-y-8'>
           <ToolPageHeader
-            title='Timesheet Logger'
+            title='Log Work'
             description='Log your work entries to Jira timesheet. Add work entries and submit them in bulk.'
             error={error}
           />
@@ -429,6 +539,158 @@ export default function LogWorkPage() {
                 </span>
               </AlertDescription>
             </Alert>
+          )}
+
+          {/* Find Missing Worklogs */}
+          {isConfigured && (
+            <Card>
+              <CardHeader>
+                <div className='flex flex-col gap-1'>
+                  <CardTitle className='flex items-center gap-2'>
+                    <CalendarDays className='h-5 w-5 text-primary' />
+                    Find Missing Worklogs
+                    {parsedDates.length > 0 && (
+                      <Badge
+                        variant='secondary'
+                        className='ml-1 bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-300 border-green-200 dark:border-green-800'
+                      >
+                        {parsedDates.length} date
+                        {parsedDates.length !== 1 ? 's' : ''}
+                      </Badge>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    Search for dates with missing worklogs in a project and
+                    auto-fill the dates below
+                  </CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className='space-y-6'>
+                {/* Step 1 — Search Controls */}
+                <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
+                  <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
+                    1
+                  </span>
+                  Select project & date range
+                </div>
+
+                <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 items-end'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='project-select'>Project</Label>
+                    <NativeSelect
+                      id='project-select'
+                      value={selectedProjectId}
+                      onChange={e => setSelectedProjectId(e.target.value)}
+                      disabled={isLoadingProjects}
+                    >
+                      <option value=''>
+                        {isLoadingProjects
+                          ? 'Loading projects...'
+                          : 'Select a project'}
+                      </option>
+                      {projects.map(project => (
+                        <option key={project.id} value={project.id}>
+                          {project.key} — {project.name}
+                        </option>
+                      ))}
+                    </NativeSelect>
+                  </div>
+                  <div className='space-y-2 sm:col-span-2'>
+                    <Label>Date Range</Label>
+                    <div className='flex flex-col sm:flex-row items-end gap-3'>
+                      <DateRangePicker
+                        id='warning-date-range'
+                        from={warningFromDate}
+                        to={warningToDate}
+                        onRangeChange={(from, to) => {
+                          setWarningFromDate(from);
+                          setWarningToDate(to);
+                        }}
+                        className='flex-1 w-full'
+                      />
+                      <Button
+                        onClick={handleSearchWarnings}
+                        disabled={
+                          isSearchingWarnings ||
+                          !selectedProjectId ||
+                          !warningFromDate ||
+                          !warningToDate
+                        }
+                        className='w-full sm:w-auto'
+                      >
+                        {isSearchingWarnings ? (
+                          <Loader2 className='h-4 w-4 animate-spin' />
+                        ) : (
+                          <Search className='h-4 w-4' />
+                        )}
+                        {isSearchingWarnings
+                          ? 'Searching...'
+                          : 'Find Missing Dates'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 2 — Dates Editor */}
+                <div className='space-y-3'>
+                  <div className='flex items-center justify-between'>
+                    <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
+                      <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
+                        2
+                      </span>
+                      Review & edit dates
+                    </div>
+                    {parsedDates.length > 0 && (
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        onClick={clearAllDates}
+                        className='h-7 text-xs text-muted-foreground hover:text-destructive'
+                      >
+                        <Trash2 className='h-3 w-3' />
+                        Clear all
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Date Badges */}
+                  {parsedDates.length > 0 && (
+                    <div className='flex flex-wrap gap-2'>
+                      {parsedDates.map(date => (
+                        <Badge
+                          key={date}
+                          variant='outline'
+                          className='gap-1 pr-1 font-mono text-xs'
+                        >
+                          {date}
+                          <button
+                            type='button'
+                            onClick={() => removeDate(date)}
+                            className='ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors'
+                            aria-label={`Remove ${date}`}
+                          >
+                            <X className='h-3 w-3' />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  <Textarea
+                    id='specific-dates'
+                    value={datesText}
+                    onChange={e => setDatesText(e.target.value)}
+                    placeholder='E.g., 20/Aug/25, 21/Aug/25, 22/Aug/25, 25/Aug/25'
+                    rows={2}
+                    className='font-mono text-sm'
+                  />
+                  <p className='text-xs text-muted-foreground'>
+                    Comma-separated dates in DD/Mon/YY format. Each work entry
+                    will be logged for every date listed above.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Work Entries Card */}
@@ -456,66 +718,6 @@ export default function LogWorkPage() {
               </CardAction>
             </CardHeader>
             <CardContent className='space-y-6'>
-              {/* Date Mode Selection */}
-              <div className='space-y-4'>
-                <div className='flex items-center gap-3'>
-                  <Label>Date Selection</Label>
-                  <Tabs
-                    value={dateMode}
-                    onValueChange={v => setDateMode(v as 'range' | 'specific')}
-                  >
-                    <TabsList>
-                      <TabsTrigger value='specific' className='gap-1.5'>
-                        <CalendarDays className='h-3.5 w-3.5' />
-                        Specific Dates
-                      </TabsTrigger>
-                      <TabsTrigger value='range' className='gap-1.5'>
-                        <CalendarRange className='h-3.5 w-3.5' />
-                        Date Range
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-
-                {dateMode === 'range' ? (
-                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                    <div className='space-y-2'>
-                      <Label htmlFor='start-date'>Start Date</Label>
-                      <Input
-                        id='start-date'
-                        type='date'
-                        value={startDate}
-                        onChange={e => setStartDate(e.target.value)}
-                      />
-                    </div>
-                    <div className='space-y-2'>
-                      <Label htmlFor='end-date'>End Date</Label>
-                      <Input
-                        id='end-date'
-                        type='date'
-                        value={endDate}
-                        onChange={e => setEndDate(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className='space-y-2'>
-                    <Label htmlFor='specific-dates'>Dates</Label>
-                    <Textarea
-                      id='specific-dates'
-                      value={datesText}
-                      onChange={e => setDatesText(e.target.value)}
-                      placeholder='E.g., 20/Aug/25, 21/Aug/25, 22/Aug/25, 25/Aug/25'
-                      rows={3}
-                    />
-                    <p className='text-xs text-muted-foreground'>
-                      Enter dates separated by commas in DD/Mon/YY format. Each
-                      entry will be logged individually for each date.
-                    </p>
-                  </div>
-                )}
-              </div>
-
               {/* Entries Table */}
               <div className='rounded-md border'>
                 <Table>
@@ -589,8 +791,6 @@ export default function LogWorkPage() {
                         <TableCell>
                           <Input
                             type='number'
-                            min={MIN_HOURS}
-                            max={MAX_HOURS}
                             step={HOUR_STEP}
                             value={entry.hours || ''}
                             onChange={e =>

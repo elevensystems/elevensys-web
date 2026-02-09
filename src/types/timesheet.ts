@@ -70,3 +70,14 @@ export interface LogWorkResult {
   success: boolean;
   error?: string;
 }
+
+export interface JiraProject {
+  id: string;
+  key: string;
+  name: string;
+}
+
+export interface WorklogsWarningEntry {
+  key: string;
+  value: string;
+}
