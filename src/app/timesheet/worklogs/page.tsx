@@ -38,6 +38,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import {
   Table,
@@ -49,6 +50,8 @@ import {
 } from '@/components/ui/table';
 import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 import {
+  REQUEST_DELAY_MS,
+  delay,
   formatDateForApi,
   formatDisplayDate,
   getTodayISO,
@@ -115,6 +118,34 @@ export default function MyWorklogsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [bulkDeleteProgress, setBulkDeleteProgress] = useState(0);
+
+  const allSelected =
+    worklogs.length > 0 && selectedIds.size === worklogs.length;
+  const someSelected =
+    selectedIds.size > 0 && selectedIds.size < worklogs.length;
+
+  const toggleSelectAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(worklogs.map(w => `${w.id}_${w.issueId}`)));
+    }
+  }, [allSelected, worklogs]);
+
+  const toggleSelect = useCallback((key: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
 
   const totalHours = useMemo(
     () => worklogs.reduce((sum, w) => sum + (Number(w.worked) || 0), 0),
@@ -182,6 +213,7 @@ export default function MyWorklogsPage() {
         });
 
         setWorklogs(unique);
+        setSelectedIds(new Set());
         toast.success(`Found ${unique.length} worklog entries`);
       } else {
         setWorklogs([]);
@@ -241,6 +273,74 @@ export default function MyWorklogsPage() {
     },
     [isConfigured, settings]
   );
+
+  const handleBulkDelete = useCallback(async () => {
+    if (!isConfigured || selectedIds.size === 0) return;
+
+    setIsBulkDeleting(true);
+    setBulkDeleteProgress(0);
+
+    const selected = worklogs.filter(w =>
+      selectedIds.has(`${w.id}_${w.issueId}`)
+    );
+    const total = selected.length;
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < selected.length; i++) {
+      const worklog = selected[i];
+      const key = `${worklog.id}_${worklog.issueId}`;
+      setDeletingId(key);
+      setBulkDeleteProgress(Math.round(((i + 1) / total) * 100));
+
+      try {
+        const response = await fetch('/api/timesheet/worklogs/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: settings.token,
+            issueId: worklog.issueId,
+            timesheetId: worklog.id,
+            jiraInstance: settings.jiraInstance,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.error ||
+              `Failed to delete worklog: HTTP ${response.status}`
+          );
+        }
+
+        setWorklogs(prev =>
+          prev.filter(
+            w => !(w.id === worklog.id && w.issueId === worklog.issueId)
+          )
+        );
+        successCount++;
+      } catch {
+        failCount++;
+      }
+
+      if (i < selected.length - 1) {
+        await delay(REQUEST_DELAY_MS);
+      }
+    }
+
+    setDeletingId(null);
+    setSelectedIds(new Set());
+    setIsBulkDeleting(false);
+    setBulkDeleteProgress(0);
+
+    if (failCount === 0) {
+      toast.success(`Deleted ${successCount} worklog(s) successfully`);
+    } else if (successCount > 0) {
+      toast.warning(`${successCount} deleted, ${failCount} failed`);
+    } else {
+      toast.error(`Failed to delete ${failCount} worklog(s)`);
+    }
+  }, [isConfigured, selectedIds, worklogs, settings]);
 
   const handleExportCSV = useCallback(() => {
     if (worklogs.length === 0) return;
@@ -393,111 +493,221 @@ export default function MyWorklogsPage() {
                   )}
                 </div>
               ) : (
-                <div className='rounded-md border'>
-                  <Table>
-                    <TableHeader className='bg-muted/50'>
-                      <TableRow>
-                        <TableHead>Ticket ID</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className='text-right'>Hours</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className='w-[60px]' />
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {worklogs.map(worklog => (
-                        <TableRow key={`${worklog.id}_${worklog.issueId}`}>
-                          <TableCell className='font-mono font-medium'>
-                            {worklog.issueKey}
-                          </TableCell>
-                          <TableCell className='text-nowrap'>
-                            {worklog.startDateEdit
-                              ? formatDisplayDate(worklog.startDateEdit)
-                              : worklog.startDate}
-                          </TableCell>
-                          <TableCell className='text-right font-medium'>
-                            {parseFloat(String(worklog.worked))}h
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant='outline'
-                              className={getWorkTypeBadgeClass(
-                                worklog.typeOfWork
+                <>
+                  {/* Bulk Action Bar */}
+                  {selectedIds.size > 0 && (
+                    <div className='mb-4 flex items-center justify-between rounded-lg border bg-muted/50 px-4 py-3'>
+                      <span className='text-sm font-medium'>
+                        {selectedIds.size} worklog
+                        {selectedIds.size !== 1 ? 's' : ''} selected
+                      </span>
+                      <div className='flex items-center gap-2'>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant='destructive'
+                              size='sm'
+                              disabled={isBulkDeleting}
+                            >
+                              {isBulkDeleting ? (
+                                <Loader2 className='h-4 w-4 animate-spin' />
+                              ) : (
+                                <Trash2 className='h-4 w-4' />
                               )}
-                            >
-                              {worklog.typeOfWork}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className='max-w-[200px] truncate'>
-                            {worklog.description || '-'}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={getStatusVariant(worklog.statusWorklog)}
-                            >
-                              {worklog.statusWorklog}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant='ghost'
-                                  size='icon'
-                                  className='h-8 w-8 text-muted-foreground hover:text-destructive'
-                                  disabled={
-                                    deletingId ===
+                              {isBulkDeleting
+                                ? `Deleting... ${bulkDeleteProgress}%`
+                                : `Delete ${selectedIds.size}`}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Delete {selectedIds.size} Worklog
+                                {selectedIds.size !== 1 ? 's' : ''}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete{' '}
+                                <span className='font-semibold'>
+                                  {selectedIds.size}
+                                </span>{' '}
+                                selected worklog
+                                {selectedIds.size !== 1 ? 's' : ''}? This action
+                                cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                variant='destructive'
+                                onClick={handleBulkDelete}
+                              >
+                                Delete {selectedIds.size} Worklog
+                                {selectedIds.size !== 1 ? 's' : ''}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => setSelectedIds(new Set())}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className='rounded-md border'>
+                    <Table>
+                      <TableHeader className='bg-muted/50'>
+                        <TableRow>
+                          <TableHead className='w-[40px]'>
+                            <Checkbox
+                              checked={
+                                allSelected
+                                  ? true
+                                  : someSelected
+                                    ? 'indeterminate'
+                                    : false
+                              }
+                              onCheckedChange={toggleSelectAll}
+                              aria-label='Select all'
+                            />
+                          </TableHead>
+                          <TableHead>Ticket ID</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead className='text-right'>Hours</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className='w-[60px]' />
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {worklogs.map(worklog => (
+                          <TableRow
+                            key={`${worklog.id}_${worklog.issueId}`}
+                            data-state={
+                              selectedIds.has(
+                                `${worklog.id}_${worklog.issueId}`
+                              )
+                                ? 'selected'
+                                : undefined
+                            }
+                          >
+                            <TableCell>
+                              <Checkbox
+                                checked={selectedIds.has(
+                                  `${worklog.id}_${worklog.issueId}`
+                                )}
+                                onCheckedChange={() =>
+                                  toggleSelect(
                                     `${worklog.id}_${worklog.issueId}`
-                                  }
-                                >
-                                  {deletingId ===
-                                  `${worklog.id}_${worklog.issueId}` ? (
-                                    <Loader2 className='h-4 w-4 animate-spin' />
-                                  ) : (
-                                    <Trash2 className='h-4 w-4' />
-                                  )}
-                                  <span className='sr-only'>Delete</span>
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Delete Worklog
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this worklog
-                                    for{' '}
-                                    <span className='font-semibold'>
-                                      {worklog.issueKey}
-                                    </span>{' '}
-                                    ({parseFloat(String(worklog.worked))}h on{' '}
-                                    {worklog.startDateEdit
-                                      ? formatDisplayDate(worklog.startDateEdit)
-                                      : worklog.startDate}
-                                    )? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    variant='destructive'
-                                    onClick={() =>
-                                      handleDelete(worklog.id, worklog.issueId)
+                                  )
+                                }
+                                aria-label={`Select ${worklog.issueKey}`}
+                              />
+                            </TableCell>
+                            <TableCell className='font-mono font-medium'>
+                              {worklog.issueKey}
+                            </TableCell>
+                            <TableCell className='text-nowrap'>
+                              {worklog.startDateEdit
+                                ? formatDisplayDate(worklog.startDateEdit)
+                                : worklog.startDate}
+                            </TableCell>
+                            <TableCell className='text-right font-medium'>
+                              {parseFloat(String(worklog.worked))}h
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant='outline'
+                                className={getWorkTypeBadgeClass(
+                                  worklog.typeOfWork
+                                )}
+                              >
+                                {worklog.typeOfWork}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className='max-w-[200px] truncate'>
+                              {worklog.description || '-'}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={getStatusVariant(
+                                  worklog.statusWorklog
+                                )}
+                              >
+                                {worklog.statusWorklog}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant='ghost'
+                                    size='icon'
+                                    className='h-8 w-8 text-muted-foreground hover:text-destructive'
+                                    disabled={
+                                      deletingId ===
+                                      `${worklog.id}_${worklog.issueId}`
                                     }
                                   >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                                    {deletingId ===
+                                    `${worklog.id}_${worklog.issueId}` ? (
+                                      <Loader2 className='h-4 w-4 animate-spin' />
+                                    ) : (
+                                      <Trash2 className='h-4 w-4' />
+                                    )}
+                                    <span className='sr-only'>Delete</span>
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Delete Worklog
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete this
+                                      worklog for{' '}
+                                      <span className='font-semibold'>
+                                        {worklog.issueKey}
+                                      </span>{' '}
+                                      ({parseFloat(String(worklog.worked))}h on{' '}
+                                      {worklog.startDateEdit
+                                        ? formatDisplayDate(
+                                            worklog.startDateEdit
+                                          )
+                                        : worklog.startDate}
+                                      )? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      variant='destructive'
+                                      onClick={() =>
+                                        handleDelete(
+                                          worklog.id,
+                                          worklog.issueId
+                                        )
+                                      }
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
