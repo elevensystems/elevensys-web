@@ -63,6 +63,8 @@ import {
   formatDateForApi,
   generateEntryId,
   getCurrentTime,
+  getMonthEnd,
+  getMonthStart,
   getTodayISO,
   isValidApiDate,
   isValidIssueKey,
@@ -140,8 +142,8 @@ export default function LogWorkPage() {
   // Project & worklogs warning state
   const [projects, setProjects] = useState<JiraProject[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState('');
-  const [warningFromDate, setWarningFromDate] = useState(getTodayISO());
-  const [warningToDate, setWarningToDate] = useState(getTodayISO());
+  const [warningFromDate, setWarningFromDate] = useState(getMonthStart());
+  const [warningToDate, setWarningToDate] = useState(getMonthEnd());
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [isSearchingWarnings, setIsSearchingWarnings] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -890,9 +892,9 @@ export default function LogWorkPage() {
                 ) : (
                   <>
                     <Button
-                      className='flex-1'
-                      disabled={isSubmitting || !isConfigured}
                       onClick={handleSubmitClick}
+                      disabled={isSubmitting || !isConfigured}
+                      className='flex-1'
                       size='lg'
                     >
                       {isSubmitting ? (

@@ -137,6 +137,26 @@ export function getTodayISO(): string {
 }
 
 /**
+ * Get the first day of the current month as YYYY-MM-DD
+ */
+export function getMonthStart(): string {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1)
+    .toISOString()
+    .split('T')[0];
+}
+
+/**
+ * Get the last day of the current month as YYYY-MM-DD
+ */
+export function getMonthEnd(): string {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    .toISOString()
+    .split('T')[0];
+}
+
+/**
  * Delay execution for a given number of milliseconds
  */
 export function delay(ms: number): Promise<void> {
