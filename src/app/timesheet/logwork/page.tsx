@@ -32,6 +32,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
@@ -136,6 +144,7 @@ export default function LogWorkPage() {
   const [warningToDate, setWarningToDate] = useState(getTodayISO());
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [isSearchingWarnings, setIsSearchingWarnings] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const parsedDates = useMemo(() => parseSpecificDates(datesText), [datesText]);
 
@@ -448,15 +457,24 @@ export default function LogWorkPage() {
     [datesText, settings]
   );
 
-  const handleLogWork = useCallback(async () => {
+  const selectedProject = useMemo(
+    () => projects.find(p => p.id === selectedProjectId),
+    [projects, selectedProjectId]
+  );
+
+  const handleSubmitClick = useCallback(() => {
     const validationError = validateEntries();
     if (validationError) {
       setError(validationError);
       toast.error(validationError);
       return;
     }
-
     setError('');
+    setShowConfirmDialog(true);
+  }, [validateEntries]);
+
+  const handleLogWork = useCallback(async () => {
+    setShowConfirmDialog(false);
     setIsSubmitting(true);
     setProgress(0);
     setResults([]);
@@ -493,13 +511,7 @@ export default function LogWorkPage() {
       toast.error(`All ${errorCount} entries failed`);
       setProgressText(`All ${errorCount} entries failed. Check results below.`);
     }
-  }, [
-    validateEntries,
-    entries,
-    dateMode,
-    submitDateRange,
-    submitSpecificDates,
-  ]);
+  }, [entries, dateMode, submitDateRange, submitSpecificDates]);
 
   if (!isLoaded) {
     return (
@@ -864,30 +876,43 @@ export default function LogWorkPage() {
                 </div>
               )}
 
-              {/* Submit Button */}
+              {/* Action Buttons */}
               <div className='flex items-center gap-3'>
-                <Button
-                  onClick={handleLogWork}
-                  disabled={isSubmitting || !isConfigured}
-                  className='flex-1'
-                  size='lg'
-                >
-                  {isSubmitting ? (
-                    <Loader2 className='h-4 w-4 animate-spin' />
-                  ) : (
-                    <Send className='h-4 w-4' />
-                  )}
-                  {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
-                </Button>
-                <Button
-                  variant='outline'
-                  size='lg'
-                  onClick={addEntry}
-                  className='flex-shrink-0 text-primary hover:bg-green-100'
-                >
-                  <Plus className='h-4 w-4' />
-                  Add Entry
-                </Button>
+                {results.length > 0 &&
+                results.every(r => r.success) &&
+                !isSubmitting ? (
+                  <Button asChild className='flex-1' size='lg'>
+                    <Link href='/timesheet/worklogs'>
+                      <CalendarDays className='h-4 w-4' />
+                      View My Worklogs
+                    </Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      onClick={handleSubmitClick}
+                      disabled={isSubmitting || !isConfigured}
+                      className='flex-1'
+                      size='lg'
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className='h-4 w-4 animate-spin' />
+                      ) : (
+                        <Send className='h-4 w-4' />
+                      )}
+                      {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
+                    </Button>
+                    <Button
+                      variant='outline'
+                      size='lg'
+                      onClick={addEntry}
+                      className='flex-shrink-0 text-primary hover:bg-green-100'
+                    >
+                      <Plus className='h-4 w-4' />
+                      Add Entry
+                    </Button>
+                  </>
+                )}
               </div>
 
               {!isConfigured && (
@@ -905,6 +930,112 @@ export default function LogWorkPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Confirmation Dialog */}
+        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <DialogContent className='sm:max-w-lg'>
+            <DialogHeader>
+              <DialogTitle>Confirm</DialogTitle>
+              <DialogDescription>
+                You are about to log the following tickets
+                {selectedProject ? (
+                  <>
+                    {' '}
+                    in <strong>{selectedProject.key}</strong> —{' '}
+                    <strong>{selectedProject.name}</strong>
+                  </>
+                ) : (
+                  ''
+                )}
+                .
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className='space-y-3 py-2'>
+              {/* Dates */}
+              <div className='space-y-1'>
+                <p className='text-sm font-medium text-muted-foreground'>
+                  Dates
+                </p>
+                <div className='flex flex-wrap gap-1.5'>
+                  {dateMode === 'range' ? (
+                    <Badge variant='outline' className='font-mono text-xs'>
+                      {formatDateForApi(startDate)} →{' '}
+                      {formatDateForApi(endDate)}
+                    </Badge>
+                  ) : (
+                    parsedDates.map(date => (
+                      <Badge
+                        key={date}
+                        variant='outline'
+                        className='font-mono text-xs'
+                      >
+                        {date}
+                      </Badge>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Tickets */}
+              <div className='space-y-1'>
+                <p className='text-sm font-medium text-muted-foreground'>
+                  Tickets
+                </p>
+                <div className='rounded-md border'>
+                  <Table>
+                    <TableHeader className='bg-muted'>
+                      <TableRow>
+                        <TableHead className='font-semibold text-xs h-8'>
+                          Ticket
+                        </TableHead>
+                        <TableHead className='font-semibold text-xs h-8'>
+                          Type
+                        </TableHead>
+                        <TableHead className='font-semibold text-xs h-8 text-right'>
+                          Hours
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {entries
+                        .filter(e => e.issueKey.trim())
+                        .map(entry => (
+                          <TableRow key={entry.id}>
+                            <TableCell className='font-mono text-sm py-1.5'>
+                              {entry.issueKey}
+                            </TableCell>
+                            <TableCell className='text-sm py-1.5'>
+                              {entry.typeOfWork}
+                            </TableCell>
+                            <TableCell className='text-sm py-1.5 text-right'>
+                              {entry.hours}h
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <p className='text-xs text-muted-foreground text-right'>
+                  Total: {totalHours}h
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter className='gap-2'>
+              <Button
+                variant='outline'
+                onClick={() => setShowConfirmDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleLogWork}>
+                <Send className='h-4 w-4' />
+                Confirm
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </section>
     </MainLayout>
   );
