@@ -190,7 +190,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                   </div>
                   <div className='grid flex-1 text-left text-sm leading-tight'>
                     <span className='truncate font-medium'>Eleven Systems</span>
-                    <span className='truncate text-xs'>Verion 5.3.2</span>
+                    <span className='truncate text-xs'>Version 5.3.2</span>
                   </div>
                 </Link>
               </SidebarMenuButton>
