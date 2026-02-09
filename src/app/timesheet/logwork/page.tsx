@@ -890,9 +890,9 @@ export default function LogWorkPage() {
                 ) : (
                   <>
                     <Button
-                      onClick={handleSubmitClick}
-                      disabled={isSubmitting || !isConfigured}
                       className='flex-1'
+                      disabled={isSubmitting || !isConfigured}
+                      onClick={handleSubmitClick}
                       size='lg'
                     >
                       {isSubmitting ? (

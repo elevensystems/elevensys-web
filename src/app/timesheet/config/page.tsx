@@ -101,7 +101,7 @@ export default function TimesheetConfigPage() {
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-2xl mx-auto space-y-8'>
           <ToolPageHeader
-            title='Timesheet Configurations'
+            title='Configurations'
             description='Configure your credentials to connect with Jira. These configs are stored locally in your browser.'
             infoMessage="Your credentials are stored only in your browser's local storage and are never sent to our servers — they are passed directly to the Jira API."
           />
