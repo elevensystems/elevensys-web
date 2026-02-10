@@ -18,6 +18,7 @@ import {
 
 import MainLayout from '@/components/layouts/main-layout';
 import { Badge } from '@/components/ui/badge';
+import { useDomain } from '@/contexts/domain-context';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -66,6 +67,7 @@ const quickTools = [
 
 export default function Home() {
   const { isConfigured, isLoaded } = useTimesheetSettings();
+  const { appName, showTools } = useDomain();
 
   return (
     <MainLayout>
@@ -74,7 +76,7 @@ export default function Home() {
           {/* Hero */}
           <div className='space-y-3'>
             <h1 className='text-4xl font-bold tracking-tight'>
-              Welcome to Eleven Systems
+              Welcome to {appName}
             </h1>
             <p className='text-lg text-muted-foreground max-w-2xl'>
               Log your Jira timesheets, track worklogs, and access a suite of
@@ -168,39 +170,45 @@ export default function Home() {
             </div>
           </section>
 
-          <Separator />
+          {showTools && (
+            <>
+              <Separator />
 
-          {/* Quick Tools */}
-          <section className='space-y-5'>
-            <div className='flex items-center justify-between'>
-              <div className='flex items-center gap-2.5'>
-                <Wrench className='h-5 w-5 text-muted-foreground' />
-                <h2 className='text-xl font-semibold'>Quick Tools</h2>
-              </div>
-              <Button variant='ghost' size='sm' asChild>
-                <Link href='/tools'>
-                  View all tools
-                  <ArrowRight className='h-4 w-4' />
-                </Link>
-              </Button>
-            </div>
+              {/* Quick Tools */}
+              <section className='space-y-5'>
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-2.5'>
+                    <Wrench className='h-5 w-5 text-muted-foreground' />
+                    <h2 className='text-xl font-semibold'>Quick Tools</h2>
+                  </div>
+                  <Button variant='ghost' size='sm' asChild>
+                    <Link href='/tools'>
+                      View all tools
+                      <ArrowRight className='h-4 w-4' />
+                    </Link>
+                  </Button>
+                </div>
 
-            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3'>
-              {quickTools.map(tool => {
-                const Icon = tool.icon;
-                return (
-                  <Link key={tool.href} href={tool.href}>
-                    <Card className='h-full text-center hover:shadow-md transition-all cursor-pointer py-5'>
-                      <CardContent className='flex flex-col items-center gap-2 p-0'>
-                        <Icon className='h-6 w-6 text-primary' />
-                        <span className='text-sm font-medium'>{tool.name}</span>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
+                <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3'>
+                  {quickTools.map(tool => {
+                    const Icon = tool.icon;
+                    return (
+                      <Link key={tool.href} href={tool.href}>
+                        <Card className='h-full text-center hover:shadow-md transition-all cursor-pointer py-5'>
+                          <CardContent className='flex flex-col items-center gap-2 p-0'>
+                            <Icon className='h-6 w-6 text-primary' />
+                            <span className='text-sm font-medium'>
+                              {tool.name}
+                            </span>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            </>
+          )}
         </div>
       </div>
     </MainLayout>
