@@ -347,20 +347,20 @@ export default function MyWorklogsPage() {
 
     const headers = [
       'Ticket ID',
-      'Date',
+      'Description',
       'Hours',
       'Type of Work',
-      'Description',
+      'Date',
       'Status',
       'Author',
     ];
 
     const rows = worklogs.map(w => [
       w.issueKey,
-      w.startDateEdit || w.startDate,
+      `"${(w.description || '').replace(/"/g, '""')}"`,
       String(w.worked),
       w.typeOfWork,
-      `"${(w.description || '').replace(/"/g, '""')}"`,
+      w.startDateEdit || w.startDate,
       w.statusWorklog,
       w.author,
     ]);
@@ -576,10 +576,10 @@ export default function MyWorklogsPage() {
                             />
                           </TableHead>
                           <TableHead>Ticket ID</TableHead>
-                          <TableHead>Date</TableHead>
+                          <TableHead>Description</TableHead>
                           <TableHead className='text-right'>Hours</TableHead>
                           <TableHead>Type</TableHead>
-                          <TableHead>Description</TableHead>
+                          <TableHead>Date</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className='w-[60px]' />
                         </TableRow>
@@ -612,10 +612,8 @@ export default function MyWorklogsPage() {
                             <TableCell className='font-mono font-medium'>
                               {worklog.issueKey}
                             </TableCell>
-                            <TableCell className='text-nowrap'>
-                              {worklog.startDateEdit
-                                ? formatDisplayDate(worklog.startDateEdit)
-                                : worklog.startDate}
+                            <TableCell className='max-w-[200px] truncate'>
+                              {worklog.description || '-'}
                             </TableCell>
                             <TableCell className='text-right font-medium'>
                               {parseFloat(String(worklog.worked))}h
@@ -630,8 +628,10 @@ export default function MyWorklogsPage() {
                                 {worklog.typeOfWork}
                               </Badge>
                             </TableCell>
-                            <TableCell className='max-w-[200px] truncate'>
-                              {worklog.description || '-'}
+                            <TableCell className='text-nowrap'>
+                              {worklog.startDateEdit
+                                ? formatDisplayDate(worklog.startDateEdit)
+                                : worklog.startDate}
                             </TableCell>
                             <TableCell>
                               <Badge

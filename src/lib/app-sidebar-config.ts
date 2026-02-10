@@ -56,12 +56,6 @@ export const appSidebarData = {
       icon: BadgeCheck,
       isActive: false,
     },
-    {
-      title: 'Auto fetch tickets (Soon)',
-      url: '#',
-      icon: Sparkles,
-      isActive: false,
-    },
   ],
   navSecondary: [
     {

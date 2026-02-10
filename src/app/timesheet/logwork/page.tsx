@@ -31,6 +31,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '@/components/ui/combobox';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import {
   Dialog,
@@ -71,6 +79,7 @@ import {
   parseSpecificDates,
 } from '@/lib/timesheet';
 import {
+  type JiraIssue,
   type JiraProject,
   type LogWorkResult,
   WORK_TYPES,
@@ -148,6 +157,12 @@ export default function LogWorkPage() {
   const [isSearchingWarnings, setIsSearchingWarnings] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
+  // Issues state for combobox
+  const [issues, setIssues] = useState<JiraIssue[]>([]);
+  const [isLoadingIssues, setIsLoadingIssues] = useState(false);
+
+  const issueKeys = useMemo(() => issues.map(i => i.key), [issues]);
+
   const parsedDates = useMemo(() => parseSpecificDates(datesText), [datesText]);
 
   const removeDate = useCallback(
@@ -183,6 +198,43 @@ export default function LogWorkPage() {
       })
       .finally(() => setIsLoadingProjects(false));
   }, [isConfigured, settings.jiraInstance]);
+
+  // Fetch issues when a project is selected
+  useEffect(() => {
+    if (!isConfigured || !selectedProjectId) {
+      setIssues([]);
+      return;
+    }
+
+    const project = projects.find(p => p.id === selectedProjectId);
+    if (!project) return;
+
+    setIsLoadingIssues(true);
+    fetch(
+      `/api/timesheet/projects/${project.key}/issues?startIndex=0&jiraInstance=${settings.jiraInstance}`,
+      {
+        headers: { Authorization: `Bearer ${settings.token}` },
+      }
+    )
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && Array.isArray(result.data?.issues)) {
+          setIssues(result.data.issues);
+        } else {
+          setIssues([]);
+        }
+      })
+      .catch(() => {
+        setIssues([]);
+      })
+      .finally(() => setIsLoadingIssues(false));
+  }, [
+    isConfigured,
+    selectedProjectId,
+    projects,
+    settings.jiraInstance,
+    settings.token,
+  ]);
 
   const handleSearchWarnings = useCallback(async () => {
     if (!selectedProjectId) {
@@ -737,7 +789,7 @@ export default function LogWorkPage() {
                 <Table>
                   <TableHeader className='bg-muted'>
                     <TableRow>
-                      <TableHead className='w-[180px] font-semibold'>
+                      <TableHead className='w-[230px] font-semibold'>
                         Ticket ID
                       </TableHead>
                       <TableHead className='font-semibold'>
@@ -756,18 +808,50 @@ export default function LogWorkPage() {
                     {entries.map(entry => (
                       <TableRow key={entry.id}>
                         <TableCell>
-                          <Input
-                            placeholder='C99CMSMKPCM1-01'
+                          <Combobox
                             value={entry.issueKey}
-                            onChange={e =>
-                              updateEntry(
-                                entry.id,
-                                'issueKey',
-                                e.target.value.toUpperCase()
-                              )
-                            }
-                            className='h-8 font-mono'
-                          />
+                            items={issueKeys}
+                            onValueChange={newValue => {
+                              updateEntry(entry.id, 'issueKey', newValue ?? '');
+                              const matched = issues.find(
+                                i => i.key === newValue
+                              );
+                              if (matched) {
+                                updateEntry(
+                                  entry.id,
+                                  'description',
+                                  matched.summary
+                                );
+                              }
+                            }}
+                          >
+                            <ComboboxInput
+                              placeholder={
+                                isLoadingIssues ? 'Loading...' : 'Select ticket'
+                              }
+                              className='h-8 font-mono'
+                              disabled={isLoadingIssues}
+                              showClear
+                            />
+                            <ComboboxContent>
+                              <ComboboxList>
+                                {issues.map(issue => (
+                                  <ComboboxItem
+                                    key={issue.id}
+                                    value={issue.key}
+                                  >
+                                    <span className='font-mono shrink-0'>
+                                      {issue.key}
+                                    </span>
+                                    {/* <span className='text-muted-foreground truncate'>
+                                      {issue.summary}
+                                    </span> */}
+                                  </ComboboxItem>
+                                ))}
+                              </ComboboxList>
+                              <ComboboxEmpty>No issues found</ComboboxEmpty>
+                            </ComboboxContent>
+                          </Combobox>
                         </TableCell>
                         <TableCell>
                           <Input

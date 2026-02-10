@@ -81,3 +81,17 @@ export interface WorklogsWarningEntry {
   key: string;
   value: string;
 }
+
+export interface JiraIssueType {
+  description: string;
+  name: string;
+  iconUrl: string;
+}
+
+export interface JiraIssue {
+  id: number;
+  key: string;
+  status: string;
+  summary: string;
+  type: JiraIssueType;
+}
