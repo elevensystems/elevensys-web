@@ -16,7 +16,7 @@ const MONTH_ABBRS = [
 export const STANDARD_HOURS = 8;
 export const MIN_HOURS = 0.1;
 export const MAX_HOURS = 8;
-export const HOUR_STEP = 0.25;
+export const HOUR_STEP = 0.1;
 export const REQUEST_DELAY_MS = 1500;
 export const SETTINGS_STORAGE_KEY = 'timesheet_settings';
 

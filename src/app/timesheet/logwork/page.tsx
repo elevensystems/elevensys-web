@@ -98,10 +98,16 @@ const createDefaultEntry = (): WorkEntry => ({
   hours: 0,
 });
 
-function loadSavedEntries(): WorkEntry[] {
+function getSavedEntriesKey(projectId?: string): string {
+  return projectId
+    ? `${SAVED_ENTRIES_KEY}::project::${projectId}`
+    : SAVED_ENTRIES_KEY;
+}
+
+function loadSavedEntries(projectId?: string): WorkEntry[] {
   if (typeof window === 'undefined') return [createDefaultEntry()];
   try {
-    const saved = localStorage.getItem(SAVED_ENTRIES_KEY);
+    const saved = localStorage.getItem(getSavedEntriesKey(projectId));
     if (saved) {
       const parsed = JSON.parse(saved) as Omit<WorkEntry, 'id'>[];
       if (Array.isArray(parsed) && parsed.length > 0) {
@@ -117,13 +123,16 @@ function loadSavedEntries(): WorkEntry[] {
   return [createDefaultEntry()];
 }
 
-function saveEntriesToStorage(entries: WorkEntry[]): void {
+function saveEntriesToStorage(entries: WorkEntry[], projectId?: string): void {
   try {
     const toSave = entries
       .filter(e => e.issueKey.trim())
       .map(({ id: _id, ...rest }) => rest);
     if (toSave.length > 0) {
-      localStorage.setItem(SAVED_ENTRIES_KEY, JSON.stringify(toSave));
+      localStorage.setItem(
+        getSavedEntriesKey(projectId),
+        JSON.stringify(toSave)
+      );
     }
   } catch {
     // Ignore storage errors
@@ -160,8 +169,6 @@ export default function LogWorkPage() {
   // Issues state for combobox
   const [issues, setIssues] = useState<JiraIssue[]>([]);
   const [isLoadingIssues, setIsLoadingIssues] = useState(false);
-
-  const issueKeys = useMemo(() => issues.map(i => i.key), [issues]);
 
   const parsedDates = useMemo(() => parseSpecificDates(datesText), [datesText]);
 
@@ -297,18 +304,26 @@ export default function LogWorkPage() {
     settings.jiraInstance,
   ]);
 
-  // Load saved entries from localStorage on mount
+  // Load saved entries from localStorage when project changes
   useEffect(() => {
-    const saved = loadSavedEntries();
+    if (!selectedProjectId) return;
+    const saved = loadSavedEntries(selectedProjectId);
     if (saved.length > 0 && saved[0].issueKey) {
       setEntries(saved);
+    } else {
+      setEntries([createDefaultEntry()]);
     }
-  }, []);
+  }, [selectedProjectId]);
 
   const totalHours = useMemo(
     () => entries.reduce((sum, entry) => sum + (entry.hours || 0), 0),
     [entries]
   );
+
+  const formatHours = useCallback((value: number) => {
+    if (Number.isInteger(value)) return value.toString();
+    return value.toFixed(2).replace(/\.?0+$/, '');
+  }, []);
 
   const addEntry = useCallback(() => {
     setEntries(prev => [...prev, createDefaultEntry()]);
@@ -551,7 +566,7 @@ export default function LogWorkPage() {
     const errorCount = logResults.filter(r => !r.success).length;
 
     // Save entries to localStorage for next session
-    saveEntriesToStorage(validEntries);
+    saveEntriesToStorage(validEntries, selectedProjectId);
 
     if (errorCount === 0) {
       toast.success(`All ${successCount} entries logged successfully!`);
@@ -689,9 +704,7 @@ export default function LogWorkPage() {
                         ) : (
                           <Search className='h-4 w-4' />
                         )}
-                        {isSearchingWarnings
-                          ? 'Searching...'
-                          : 'Find Missing Dates'}
+                        {isSearchingWarnings ? 'Searching...' : 'Find Dates'}
                       </Button>
                     </div>
                   </div>
@@ -706,18 +719,16 @@ export default function LogWorkPage() {
                       </span>
                       Review & edit dates
                     </div>
-                    {parsedDates.length > 0 && (
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        onClick={clearAllDates}
-                        className='h-7 text-xs text-muted-foreground hover:text-destructive'
-                      >
-                        <Trash2 className='h-3 w-3' />
-                        Clear all
-                      </Button>
-                    )}
                   </div>
+
+                  <Textarea
+                    id='specific-dates'
+                    value={datesText}
+                    onChange={e => setDatesText(e.target.value)}
+                    placeholder='E.g., 20/Aug/25, 21/Aug/25, 22/Aug/25, 25/Aug/25'
+                    rows={2}
+                    className='font-mono text-sm'
+                  />
 
                   {/* Date Badges */}
                   {parsedDates.length > 0 && (
@@ -725,7 +736,7 @@ export default function LogWorkPage() {
                       {parsedDates.map(date => (
                         <Badge
                           key={date}
-                          variant='outline'
+                          variant='secondary'
                           className='gap-1 pr-1 font-mono text-xs'
                         >
                           {date}
@@ -739,17 +750,19 @@ export default function LogWorkPage() {
                           </button>
                         </Badge>
                       ))}
+                      {parsedDates.length > 0 && (
+                        <Button
+                          variant='ghost'
+                          onClick={clearAllDates}
+                          className='h-7 text-xs text-muted-foreground hover:text-destructive'
+                        >
+                          <Trash2 className='h-3 w-3' />
+                          Clear all
+                        </Button>
+                      )}
                     </div>
                   )}
 
-                  <Textarea
-                    id='specific-dates'
-                    value={datesText}
-                    onChange={e => setDatesText(e.target.value)}
-                    placeholder='E.g., 20/Aug/25, 21/Aug/25, 22/Aug/25, 25/Aug/25'
-                    rows={2}
-                    className='font-mono text-sm'
-                  />
                   <p className='text-xs text-muted-foreground'>
                     Comma-separated dates in DD/Mon/YY format. Each work entry
                     will be logged for every date listed above.
@@ -778,7 +791,7 @@ export default function LogWorkPage() {
                           : 'text-foreground'
                     }`}
                   >
-                    {totalHours}h / {STANDARD_HOURS}h
+                    {formatHours(totalHours)}h / {formatHours(STANDARD_HOURS)}h
                   </span>
                 </div>
               </CardAction>
@@ -809,21 +822,29 @@ export default function LogWorkPage() {
                       <TableRow key={entry.id}>
                         <TableCell>
                           <Combobox
-                            value={entry.issueKey}
-                            items={issueKeys}
-                            onValueChange={newValue => {
-                              updateEntry(entry.id, 'issueKey', newValue ?? '');
-                              const matched = issues.find(
-                                i => i.key === newValue
+                            items={issues}
+                            value={
+                              issues.find(
+                                issue => issue.key === entry.issueKey
+                              ) ?? null
+                            }
+                            inputValue={entry.issueKey}
+                            onInputValueChange={value =>
+                              updateEntry(entry.id, 'issueKey', value)
+                            }
+                            onValueChange={(value: JiraIssue | null) => {
+                              updateEntry(
+                                entry.id,
+                                'issueKey',
+                                value?.key ?? ''
                               );
-                              if (matched) {
-                                updateEntry(
-                                  entry.id,
-                                  'description',
-                                  matched.summary
-                                );
-                              }
+                              updateEntry(
+                                entry.id,
+                                'description',
+                                value?.summary ?? ''
+                              );
                             }}
+                            itemToStringLabel={(issue: JiraIssue) => issue.key}
                           >
                             <ComboboxInput
                               placeholder={
@@ -835,19 +856,13 @@ export default function LogWorkPage() {
                             />
                             <ComboboxContent>
                               <ComboboxList>
-                                {issues.map(issue => (
-                                  <ComboboxItem
-                                    key={issue.id}
-                                    value={issue.key}
-                                  >
+                                {issue => (
+                                  <ComboboxItem key={issue.id} value={issue}>
                                     <span className='font-mono shrink-0'>
                                       {issue.key}
                                     </span>
-                                    {/* <span className='text-muted-foreground truncate'>
-                                      {issue.summary}
-                                    </span> */}
                                   </ComboboxItem>
-                                ))}
+                                )}
                               </ComboboxList>
                               <ComboboxEmpty>No issues found</ComboboxEmpty>
                             </ComboboxContent>
@@ -889,6 +904,7 @@ export default function LogWorkPage() {
                         <TableCell>
                           <Input
                             type='number'
+                            min={MIN_HOURS}
                             step={HOUR_STEP}
                             value={entry.hours || ''}
                             onChange={e =>
@@ -1103,7 +1119,7 @@ export default function LogWorkPage() {
                   </Table>
                 </div>
                 <p className='text-xs text-muted-foreground text-right'>
-                  Total: {totalHours}h
+                  Total: {formatHours(totalHours)}h
                 </p>
               </div>
             </div>
