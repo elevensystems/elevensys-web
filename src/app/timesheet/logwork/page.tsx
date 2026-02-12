@@ -7,87 +7,51 @@ import Link from 'next/link';
 import {
   AlertCircle,
   CalendarDays,
-  CheckCheckIcon,
   Clock,
   Loader2,
   Plus,
-  Search,
   Send,
-  Trash2,
-  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from '@/components/ui/combobox';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { NativeSelect } from '@/components/ui/native-select';
-import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
+import { useLogWorkSubmission } from '@/hooks/use-log-work-submission';
+import { useMissingWorklogs } from '@/hooks/use-missing-worklogs';
 import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 import {
-  HOUR_STEP,
   MAX_HOURS,
   MIN_HOURS,
-  REQUEST_DELAY_MS,
   STANDARD_HOURS,
-  delay,
-  formatDateForApi,
+  formatHours,
   generateEntryId,
-  getCurrentTime,
-  getMonthEnd,
-  getMonthStart,
   getTodayISO,
-  getWorkTypeBadgeClass,
   isValidApiDate,
   isValidIssueKey,
   parseSpecificDates,
 } from '@/lib/timesheet';
-import {
-  type JiraIssue,
-  type JiraProject,
-  type LogWorkResult,
-  WORK_TYPES,
-  type WorkEntry,
-  type WorkType,
-  type WorklogsWarningEntry,
-} from '@/types/timesheet';
+import type { WorkEntry } from '@/types/timesheet';
+
+import { LogWorkConfirmDialog } from './_components/confirm-dialog';
+import { MissingWorklogsCard } from './_components/missing-worklogs-card';
+import { SubmissionProgress } from './_components/submission-progress';
+import { WorkEntryRow } from './_components/work-entry-row';
 
 const SAVED_ENTRIES_KEY = 'timesheet_saved_entries';
 
@@ -124,7 +88,10 @@ function loadSavedEntries(projectId?: string): WorkEntry[] {
   return [createDefaultEntry()];
 }
 
-function saveEntriesToStorage(entries: WorkEntry[], projectId?: string): void {
+function saveEntriesToStorage(
+  entries: WorkEntry[],
+  projectId?: string
+): void {
   try {
     const toSave = entries
       .filter(e => e.issueKey.trim())
@@ -143,177 +110,53 @@ function saveEntriesToStorage(entries: WorkEntry[], projectId?: string): void {
 export default function LogWorkPage() {
   const { settings, isConfigured, isLoaded } = useTimesheetSettings();
 
+  const {
+    projects,
+    selectedProjectId,
+    setSelectedProjectId,
+    selectedProject,
+    issues,
+    issuesByKey,
+    isLoadingProjects,
+    isLoadingIssues,
+    warningFromDate,
+    setWarningFromDate,
+    warningToDate,
+    setWarningToDate,
+    isSearchingWarnings,
+    handleSearchWarnings,
+  } = useMissingWorklogs({ settings, isConfigured });
+
+  const { isSubmitting, progress, progressText, results, submitEntries } =
+    useLogWorkSubmission(settings);
+
   // Work entries state
-  const [entries, setEntries] = useState<WorkEntry[]>([createDefaultEntry()]);
-  const [dateMode, setDateMode] = useState<'range' | 'specific'>('specific');
-  const [startDate, setStartDate] = useState(getTodayISO());
-  const [endDate, setEndDate] = useState(getTodayISO());
+  const [entries, setEntries] = useState<WorkEntry[]>([
+    createDefaultEntry(),
+  ]);
+  const [dateMode] = useState<'range' | 'specific'>('specific');
+  const [startDate] = useState(getTodayISO());
+  const [endDate] = useState(getTodayISO());
   const [datesText, setDatesText] = useState('');
-
-  // Submission state
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [progressText, setProgressText] = useState('');
-  const [results, setResults] = useState<LogWorkResult[]>([]);
-
   const [error, setError] = useState('');
-
-  // Project & worklogs warning state
-  const [projects, setProjects] = useState<JiraProject[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState('');
-  const [warningFromDate, setWarningFromDate] = useState(getMonthStart());
-  const [warningToDate, setWarningToDate] = useState(getMonthEnd());
-  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
-  const [isSearchingWarnings, setIsSearchingWarnings] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  // Issues state for combobox
-  const [issues, setIssues] = useState<JiraIssue[]>([]);
-  const [isLoadingIssues, setIsLoadingIssues] = useState(false);
-
-  const parsedDates = useMemo(() => parseSpecificDates(datesText), [datesText]);
+  const parsedDates = useMemo(
+    () => parseSpecificDates(datesText),
+    [datesText]
+  );
 
   const removeDate = useCallback(
     (dateToRemove: string) => {
-      const updated = parsedDates.filter(d => d !== dateToRemove).join(', ');
+      const updated = parsedDates
+        .filter(d => d !== dateToRemove)
+        .join(', ');
       setDatesText(updated);
     },
     [parsedDates]
   );
 
-  const clearAllDates = useCallback(() => {
-    setDatesText('');
-  }, []);
-
-  // Fetch projects on mount when configured
-  useEffect(() => {
-    if (!isConfigured) return;
-    setIsLoadingProjects(true);
-    fetch(`/api/timesheet/projects?jiraInstance=${settings.jiraInstance}`, {
-      headers: { Authorization: `Bearer ${settings.token}` },
-    })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && Array.isArray(result.data)) {
-          setProjects(result.data);
-          if (result.data.length > 0) {
-            setSelectedProjectId(result.data[0].id);
-          }
-        }
-      })
-      .catch(() => {
-        // Ignore fetch errors
-      })
-      .finally(() => setIsLoadingProjects(false));
-  }, [isConfigured, settings.jiraInstance]);
-
-  // Fetch issues when a project is selected
-  useEffect(() => {
-    if (!isConfigured || !selectedProjectId) {
-      setIssues([]);
-      return;
-    }
-
-    const project = projects.find(p => p.id === selectedProjectId);
-    if (!project) return;
-
-    setIsLoadingIssues(true);
-    fetch('/api/timesheet/projects', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${settings.token}`,
-      },
-      body: JSON.stringify({
-        jiraInstance: settings.jiraInstance,
-        jql: `project = ${selectedProjectId} ORDER BY created DESC`,
-        columnConfig: 'explicit',
-        layoutKey: 'split-view',
-        startIndex: '0',
-      }),
-    })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && Array.isArray(result.data?.issues)) {
-          setIssues(result.data.issues);
-        } else {
-          setIssues([]);
-        }
-      })
-      .catch(() => {
-        setIssues([]);
-      })
-      .finally(() => setIsLoadingIssues(false));
-  }, [
-    isConfigured,
-    selectedProjectId,
-    projects,
-    settings.jiraInstance,
-    settings.token,
-  ]);
-
-  const handleSearchWarnings = useCallback(async () => {
-    if (!selectedProjectId) {
-      toast.error('Please select a project.');
-      return;
-    }
-    if (!warningFromDate || !warningToDate) {
-      toast.error('Please select a date range.');
-      return;
-    }
-
-    setIsSearchingWarnings(true);
-    try {
-      const response = await fetch('/api/timesheet/worklogs-warning', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${settings.token}`,
-        },
-        body: JSON.stringify({
-          pid: selectedProjectId,
-          startDate: formatDateForApi(warningFromDate),
-          endDate: formatDateForApi(warningToDate),
-          jiraInstance: settings.jiraInstance,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.error || `HTTP ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (result.success && Array.isArray(result.data)) {
-        const allDates = result.data
-          .map((entry: WorklogsWarningEntry) => entry.value)
-          .filter(Boolean)
-          .join(', ');
-        if (allDates) {
-          setDatesText(allDates);
-          setDateMode('specific');
-          toast.success(
-            `Found missing dates for ${result.data.length} user(s)`
-          );
-        } else {
-          toast.info('No missing worklog dates found.');
-        }
-      } else {
-        toast.info('No missing worklog dates found.');
-      }
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Failed to search warnings';
-      toast.error(message);
-    } finally {
-      setIsSearchingWarnings(false);
-    }
-  }, [
-    selectedProjectId,
-    warningFromDate,
-    warningToDate,
-    settings.jiraInstance,
-  ]);
+  const clearAllDates = useCallback(() => setDatesText(''), []);
 
   // Load saved entries from localStorage when project changes
   useEffect(() => {
@@ -330,11 +173,6 @@ export default function LogWorkPage() {
     () => entries.reduce((sum, entry) => sum + (entry.hours || 0), 0),
     [entries]
   );
-
-  const formatHours = useCallback((value: number) => {
-    if (Number.isInteger(value)) return value.toString();
-    return value.toFixed(2).replace(/\.?0+$/, '');
-  }, []);
 
   const addEntry = useCallback(() => {
     setEntries(prev => [...prev, createDefaultEntry()]);
@@ -398,152 +236,6 @@ export default function LogWorkPage() {
     return null;
   }, [isConfigured, dateMode, startDate, endDate, datesText, entries]);
 
-  const submitDateRange = useCallback(
-    async (
-      validEntries: WorkEntry[],
-      logResults: LogWorkResult[],
-      time: string
-    ) => {
-      const apiStartDate = formatDateForApi(startDate);
-      const apiEndDate = formatDateForApi(endDate);
-      const total = validEntries.length;
-
-      for (let i = 0; i < validEntries.length; i++) {
-        const entry = validEntries[i];
-        setProgressText(`Logging ${entry.issueKey} (${i + 1}/${total})...`);
-        setProgress(Math.round((i / total) * 100));
-
-        try {
-          const response = await fetch('/api/timesheet/logwork', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${settings.token}`,
-            },
-            body: JSON.stringify({
-              jiraInstance: settings.jiraInstance,
-              worklog: {
-                username: settings.username,
-                issueKey: entry.issueKey.trim(),
-                timeSpend: entry.hours * 3600,
-                startDate: apiStartDate,
-                endDate: apiEndDate,
-                typeOfWork: entry.typeOfWork,
-                description: entry.description,
-                time,
-                remainingTime: 0,
-                period: true,
-              },
-            }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => null);
-            throw new Error(errorData?.error || `HTTP ${response.status}`);
-          }
-
-          logResults.push({ entry, success: true });
-        } catch (err) {
-          logResults.push({
-            entry,
-            success: false,
-            error: err instanceof Error ? err.message : 'Unknown error',
-          });
-        }
-
-        if (i < validEntries.length - 1) {
-          await delay(REQUEST_DELAY_MS);
-        }
-      }
-    },
-    [startDate, endDate, settings]
-  );
-
-  const submitSpecificDates = useCallback(
-    async (
-      validEntries: WorkEntry[],
-      logResults: LogWorkResult[],
-      time: string
-    ) => {
-      const dates = parseSpecificDates(datesText);
-      const totalRequests = validEntries.length * dates.length;
-      let requestIndex = 0;
-
-      for (const entry of validEntries) {
-        const entryErrors: string[] = [];
-        let entrySuccessCount = 0;
-
-        for (const date of dates) {
-          requestIndex++;
-          setProgressText(
-            `Logging ${entry.issueKey} for ${date} (${requestIndex}/${totalRequests})...`
-          );
-          setProgress(Math.round((requestIndex / totalRequests) * 100));
-
-          try {
-            const response = await fetch('/api/timesheet/logwork', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                token: settings.token,
-                jiraInstance: settings.jiraInstance,
-                worklog: {
-                  username: settings.username,
-                  issueKey: entry.issueKey.trim(),
-                  timeSpend: entry.hours * 3600,
-                  startDate: date,
-                  endDate: date,
-                  typeOfWork: entry.typeOfWork,
-                  description: entry.description,
-                  time,
-                  remainingTime: 0,
-                  period: false,
-                },
-              }),
-            });
-
-            if (!response.ok) {
-              const errorData = await response.json().catch(() => null);
-              throw new Error(errorData?.error || `HTTP ${response.status}`);
-            }
-
-            entrySuccessCount++;
-          } catch (err) {
-            entryErrors.push(
-              `${date}: ${err instanceof Error ? err.message : 'Unknown error'}`
-            );
-          }
-
-          if (requestIndex < totalRequests) {
-            await delay(REQUEST_DELAY_MS);
-          }
-        }
-
-        if (entryErrors.length === 0) {
-          logResults.push({ entry, success: true });
-        } else if (entrySuccessCount > 0) {
-          logResults.push({
-            entry,
-            success: false,
-            error: `${entrySuccessCount}/${dates.length} dates succeeded. Failures: ${entryErrors.join('; ')}`,
-          });
-        } else {
-          logResults.push({
-            entry,
-            success: false,
-            error: entryErrors.join('; '),
-          });
-        }
-      }
-    },
-    [datesText, settings]
-  );
-
-  const selectedProject = useMemo(
-    () => projects.find(p => p.id === selectedProjectId),
-    [projects, selectedProjectId]
-  );
-
   const handleSubmitClick = useCallback(() => {
     const validationError = validateEntries();
     if (validationError) {
@@ -557,43 +249,42 @@ export default function LogWorkPage() {
 
   const handleLogWork = useCallback(async () => {
     setShowConfirmDialog(false);
-    setIsSubmitting(true);
-    setProgress(0);
-    setResults([]);
 
-    const validEntries = entries.filter(e => e.issueKey.trim());
-    const logResults: LogWorkResult[] = [];
-    const time = getCurrentTime();
-
-    if (dateMode === 'range') {
-      await submitDateRange(validEntries, logResults, time);
-    } else {
-      await submitSpecificDates(validEntries, logResults, time);
-    }
-
-    setProgress(100);
-    setResults(logResults);
-    setIsSubmitting(false);
+    const logResults = await submitEntries({
+      entries,
+      dateMode,
+      datesText,
+      startDate,
+      endDate,
+    });
 
     const successCount = logResults.filter(r => r.success).length;
     const errorCount = logResults.filter(r => !r.success).length;
 
     // Save entries to localStorage for next session
+    const validEntries = entries.filter(e => e.issueKey.trim());
     saveEntriesToStorage(validEntries, selectedProjectId);
 
     if (errorCount === 0) {
-      toast.success(`All ${successCount} entries logged successfully!`);
-      setProgressText(`All ${successCount} entries logged successfully!`);
+      toast.success(
+        `All ${successCount} entries logged successfully!`
+      );
     } else if (successCount > 0) {
-      toast.warning(`${successCount} succeeded, ${errorCount} failed`);
-      setProgressText(
-        `${successCount} succeeded, ${errorCount} failed. Check results below.`
+      toast.warning(
+        `${successCount} succeeded, ${errorCount} failed`
       );
     } else {
       toast.error(`All ${errorCount} entries failed`);
-      setProgressText(`All ${errorCount} entries failed. Check results below.`);
     }
-  }, [entries, dateMode, submitDateRange, submitSpecificDates]);
+  }, [
+    entries,
+    dateMode,
+    datesText,
+    startDate,
+    endDate,
+    selectedProjectId,
+    submitEntries,
+  ]);
 
   if (!isLoaded) {
     return (
@@ -635,154 +326,24 @@ export default function LogWorkPage() {
             </Alert>
           )}
 
-          {/* Find Missing Worklogs */}
           {isConfigured && (
-            <Card>
-              <CardHeader>
-                <div className='flex flex-col gap-1'>
-                  <CardTitle className='flex items-center gap-2'>
-                    <CalendarDays className='h-5 w-5 text-primary' />
-                    Find Missing Worklogs
-                    {parsedDates.length > 0 && (
-                      <Badge
-                        variant='secondary'
-                        className='ml-1 bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-300 border-green-200 dark:border-green-800'
-                      >
-                        {parsedDates.length} date
-                        {parsedDates.length !== 1 ? 's' : ''}
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription>
-                    Search for dates with missing worklogs in a project and
-                    auto-fill the dates below
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className='space-y-6'>
-                {/* Step 1 — Search Controls */}
-                <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
-                  <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
-                    1
-                  </span>
-                  Select project & date range
-                </div>
-
-                <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 items-end'>
-                  <div className='space-y-2'>
-                    <Label htmlFor='project-select'>Project</Label>
-                    <NativeSelect
-                      id='project-select'
-                      value={selectedProjectId}
-                      onChange={e => setSelectedProjectId(e.target.value)}
-                      disabled={isLoadingProjects}
-                    >
-                      <option value=''>
-                        {isLoadingProjects
-                          ? 'Loading projects...'
-                          : 'Select a project'}
-                      </option>
-                      {projects.map(project => (
-                        <option key={project.id} value={project.id}>
-                          {project.key} — {project.name}
-                        </option>
-                      ))}
-                    </NativeSelect>
-                  </div>
-                  <div className='space-y-2 sm:col-span-2'>
-                    <Label>Date Range</Label>
-                    <div className='flex flex-col sm:flex-row items-end gap-3'>
-                      <DateRangePicker
-                        id='warning-date-range'
-                        from={warningFromDate}
-                        to={warningToDate}
-                        onRangeChange={(from, to) => {
-                          setWarningFromDate(from);
-                          setWarningToDate(to);
-                        }}
-                        className='flex-1 w-full'
-                      />
-                      <Button
-                        onClick={handleSearchWarnings}
-                        disabled={
-                          isSearchingWarnings ||
-                          !selectedProjectId ||
-                          !warningFromDate ||
-                          !warningToDate
-                        }
-                        className='w-full sm:w-auto'
-                      >
-                        {isSearchingWarnings ? (
-                          <Loader2 className='h-4 w-4 animate-spin' />
-                        ) : (
-                          <Search className='h-4 w-4' />
-                        )}
-                        {isSearchingWarnings ? 'Searching...' : 'Find Dates'}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Step 2 — Dates Editor */}
-                <div className='space-y-3'>
-                  <div className='flex items-center justify-between'>
-                    <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
-                      <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
-                        2
-                      </span>
-                      Review & edit dates
-                    </div>
-                  </div>
-
-                  <Textarea
-                    id='specific-dates'
-                    value={datesText}
-                    onChange={e => setDatesText(e.target.value)}
-                    placeholder='E.g., 20/Aug/25, 21/Aug/25, 22/Aug/25, 25/Aug/25'
-                    rows={2}
-                    className='font-mono text-sm'
-                  />
-
-                  {/* Date Badges */}
-                  {parsedDates.length > 0 && (
-                    <div className='flex flex-wrap gap-2'>
-                      {parsedDates.map(date => (
-                        <Badge
-                          key={date}
-                          variant='secondary'
-                          className='gap-1 pr-1 font-mono text-xs'
-                        >
-                          {date}
-                          <button
-                            type='button'
-                            onClick={() => removeDate(date)}
-                            className='ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors'
-                            aria-label={`Remove ${date}`}
-                          >
-                            <X className='h-3 w-3' />
-                          </button>
-                        </Badge>
-                      ))}
-                      {parsedDates.length > 0 && (
-                        <Button
-                          variant='ghost'
-                          onClick={clearAllDates}
-                          className='h-7 text-xs text-muted-foreground hover:text-destructive'
-                        >
-                          <Trash2 className='h-3 w-3' />
-                          Clear all
-                        </Button>
-                      )}
-                    </div>
-                  )}
-
-                  <p className='text-xs text-muted-foreground'>
-                    Comma-separated dates in DD/Mon/YY format. Each work entry
-                    will be logged for every date listed above.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <MissingWorklogsCard
+              projects={projects}
+              selectedProjectId={selectedProjectId}
+              onProjectChange={setSelectedProjectId}
+              isLoadingProjects={isLoadingProjects}
+              warningFromDate={warningFromDate}
+              warningToDate={warningToDate}
+              onWarningFromDateChange={setWarningFromDate}
+              onWarningToDateChange={setWarningToDate}
+              isSearchingWarnings={isSearchingWarnings}
+              onSearchWarnings={handleSearchWarnings}
+              datesText={datesText}
+              onDatesTextChange={setDatesText}
+              parsedDates={parsedDates}
+              onRemoveDate={removeDate}
+              onClearAllDates={clearAllDates}
+            />
           )}
 
           {/* Work Entries Card */}
@@ -804,7 +365,8 @@ export default function LogWorkPage() {
                           : 'text-foreground'
                     }`}
                   >
-                    {formatHours(totalHours)}h / {formatHours(STANDARD_HOURS)}h
+                    {formatHours(totalHours)}h /{' '}
+                    {formatHours(STANDARD_HOURS)}h
                   </span>
                 </div>
               </CardAction>
@@ -832,164 +394,26 @@ export default function LogWorkPage() {
                   </TableHeader>
                   <TableBody>
                     {entries.map(entry => (
-                      <TableRow key={entry.id}>
-                        <TableCell>
-                          <Combobox
-                            items={issues}
-                            value={
-                              issues.find(
-                                issue => issue.key === entry.issueKey
-                              ) ?? null
-                            }
-                            inputValue={entry.issueKey}
-                            onInputValueChange={value =>
-                              updateEntry(entry.id, 'issueKey', value)
-                            }
-                            onValueChange={(value: JiraIssue | null) => {
-                              updateEntry(
-                                entry.id,
-                                'issueKey',
-                                value?.key ?? ''
-                              );
-                              updateEntry(
-                                entry.id,
-                                'description',
-                                value?.summary ?? ''
-                              );
-                            }}
-                            itemToStringLabel={(issue: JiraIssue) => issue.key}
-                          >
-                            <ComboboxInput
-                              placeholder={
-                                isLoadingIssues ? 'Loading...' : 'Select ticket'
-                              }
-                              className='h-8 font-mono'
-                              disabled={isLoadingIssues}
-                              showClear
-                            />
-                            <ComboboxContent>
-                              <ComboboxList>
-                                {issue => (
-                                  <ComboboxItem key={issue.id} value={issue}>
-                                    <span className='font-mono shrink-0'>
-                                      {issue.key}
-                                    </span>
-                                  </ComboboxItem>
-                                )}
-                              </ComboboxList>
-                              <ComboboxEmpty>No issues found</ComboboxEmpty>
-                            </ComboboxContent>
-                          </Combobox>
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            placeholder='Description of work done'
-                            value={entry.description}
-                            onChange={e =>
-                              updateEntry(
-                                entry.id,
-                                'description',
-                                e.target.value
-                              )
-                            }
-                            maxLength={500}
-                            className='h-8'
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <NativeSelect
-                            value={entry.typeOfWork}
-                            onChange={e =>
-                              updateEntry(
-                                entry.id,
-                                'typeOfWork',
-                                e.target.value as WorkType
-                              )
-                            }
-                          >
-                            {WORK_TYPES.map(type => (
-                              <option key={type} value={type}>
-                                {type}
-                              </option>
-                            ))}
-                          </NativeSelect>
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type='number'
-                            min={MIN_HOURS}
-                            step={HOUR_STEP}
-                            value={entry.hours || ''}
-                            onChange={e =>
-                              updateEntry(
-                                entry.id,
-                                'hours',
-                                parseFloat(e.target.value) || 0
-                              )
-                            }
-                            className='h-8 w-20'
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8 text-muted-foreground hover:text-destructive'
-                            onClick={() => removeEntry(entry.id)}
-                          >
-                            <Trash2 className='h-4 w-4' />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
+                      <WorkEntryRow
+                        key={entry.id}
+                        entry={entry}
+                        issues={issues}
+                        issuesByKey={issuesByKey}
+                        isLoadingIssues={isLoadingIssues}
+                        onUpdate={updateEntry}
+                        onRemove={removeEntry}
+                      />
                     ))}
                   </TableBody>
                 </Table>
               </div>
 
-              {/* Progress */}
-              {(isSubmitting || results.length > 0) && (
-                <div className='space-y-3'>
-                  <div className='space-y-2'>
-                    <div className='flex items-center justify-between text-sm'>
-                      <span className='text-muted-foreground'>
-                        {progressText}
-                      </span>
-                      <span className='font-medium'>{progress}%</span>
-                    </div>
-                    <div className='h-2 w-full rounded-full bg-muted'>
-                      <div
-                        className='h-full rounded-full bg-primary transition-all duration-300'
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Results */}
-                  {results.length > 0 && !isSubmitting && (
-                    <div className='space-y-2'>
-                      {results.map(result => (
-                        <div
-                          key={result.entry.id}
-                          className={`flex items-center justify-between rounded-md px-3 py-2 text-sm ${
-                            result.success
-                              ? 'bg-green-50 text-green-800 dark:bg-green-950/30 dark:text-green-300'
-                              : 'bg-red-50 text-red-800 dark:bg-red-950/30 dark:text-red-300'
-                          }`}
-                        >
-                          <span className='font-mono'>
-                            {result.entry.issueKey}
-                          </span>
-                          <span>
-                            {result.success
-                              ? 'Logged successfully'
-                              : result.error}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+              <SubmissionProgress
+                isSubmitting={isSubmitting}
+                progress={progress}
+                progressText={progressText}
+                results={results}
+              />
 
               {/* Action Buttons */}
               <div className='flex items-center gap-3'>
@@ -1015,7 +439,9 @@ export default function LogWorkPage() {
                       ) : (
                         <Send className='h-4 w-4' />
                       )}
-                      {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
+                      {isSubmitting
+                        ? 'Submitting...'
+                        : 'Submit Work Logs'}
                     </Button>
                     <Button
                       variant='outline'
@@ -1046,118 +472,18 @@ export default function LogWorkPage() {
           </Card>
         </div>
 
-        {/* Confirmation Dialog */}
-        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-          <DialogContent className='sm:max-w-lg'>
-            <DialogHeader>
-              <DialogTitle>Confirm</DialogTitle>
-              <DialogDescription>
-                You are about to log the following tickets
-                {selectedProject ? (
-                  <>
-                    {' '}
-                    in <strong>{selectedProject.key}</strong> —{' '}
-                    <strong>{selectedProject.name}</strong>
-                  </>
-                ) : (
-                  ''
-                )}
-                .
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className='space-y-3 py-2'>
-              {/* Dates */}
-              <div className='space-y-1'>
-                <p className='text-sm font-medium text-muted-foreground'>
-                  Dates
-                </p>
-                <div className='flex flex-wrap gap-1.5'>
-                  {dateMode === 'range' ? (
-                    <Badge variant='outline' className='font-mono text-xs'>
-                      {formatDateForApi(startDate)} →{' '}
-                      {formatDateForApi(endDate)}
-                    </Badge>
-                  ) : (
-                    parsedDates.map(date => (
-                      <Badge
-                        key={date}
-                        variant='outline'
-                        className='font-mono text-xs'
-                      >
-                        {date}
-                      </Badge>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              {/* Tickets */}
-              <div className='space-y-1'>
-                <p className='text-sm font-medium text-muted-foreground'>
-                  Tickets
-                </p>
-                <div className='rounded-md border'>
-                  <Table>
-                    <TableHeader className='bg-muted'>
-                      <TableRow>
-                        <TableHead className='font-semibold text-xs h-8'>
-                          Ticket
-                        </TableHead>
-                        <TableHead className='font-semibold text-xs h-8'>
-                          Type
-                        </TableHead>
-                        <TableHead className='font-semibold text-xs h-8 text-right'>
-                          Hours
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {entries
-                        .filter(e => e.issueKey.trim())
-                        .map(entry => (
-                          <TableRow key={entry.id}>
-                            <TableCell className='font-mono text-sm py-1.5'>
-                              {entry.issueKey}
-                            </TableCell>
-                            <TableCell className='text-sm py-1.5'>
-                              <Badge
-                                variant='outline'
-                                className={getWorkTypeBadgeClass(
-                                  entry.typeOfWork
-                                )}
-                              >
-                                {entry.typeOfWork}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className='text-sm py-1.5 text-right'>
-                              {entry.hours}h
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                <p className='text-xs text-muted-foreground text-right'>
-                  Total: {formatHours(totalHours)}h
-                </p>
-              </div>
-            </div>
-
-            <DialogFooter className='gap-2'>
-              <Button
-                variant='outline'
-                onClick={() => setShowConfirmDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleLogWork}>
-                <CheckCheckIcon className='h-4 w-4' />
-                Confirm
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <LogWorkConfirmDialog
+          open={showConfirmDialog}
+          onOpenChange={setShowConfirmDialog}
+          onConfirm={handleLogWork}
+          entries={entries}
+          dateMode={dateMode}
+          startDate={startDate}
+          endDate={endDate}
+          parsedDates={parsedDates}
+          selectedProject={selectedProject}
+          totalHours={totalHours}
+        />
       </section>
     </MainLayout>
   );

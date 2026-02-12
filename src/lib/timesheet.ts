@@ -208,3 +208,13 @@ export function getWorkTypeBadgeClass(type: string): string {
       return 'border-transparent bg-gradient-to-r from-slate-500/15 to-gray-500/15 text-slate-700 dark:from-slate-500/25 dark:to-gray-500/25 dark:text-slate-300';
   }
 }
+
+/**
+ * Format a numeric hours value for display.
+ * Integers are shown without decimals; decimals are trimmed of trailing zeros.
+ * e.g. 8 → "8", 1.5 → "1.5", 1.10 → "1.1"
+ */
+export function formatHours(value: number): string {
+  if (Number.isInteger(value)) return value.toString();
+  return value.toFixed(2).replace(/\.?0+$/, '');
+}
