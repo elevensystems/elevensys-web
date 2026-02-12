@@ -217,12 +217,20 @@ export default function LogWorkPage() {
     if (!project) return;
 
     setIsLoadingIssues(true);
-    fetch(
-      `/api/timesheet/projects/${project.key}/issues?startIndex=0&jiraInstance=${settings.jiraInstance}`,
-      {
-        headers: { Authorization: `Bearer ${settings.token}` },
-      }
-    )
+    fetch('/api/timesheet/projects', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${settings.token}`,
+      },
+      body: JSON.stringify({
+        jiraInstance: settings.jiraInstance,
+        jql: `project = ${selectedProjectId} ORDER BY created DESC`,
+        columnConfig: 'explicit',
+        layoutKey: 'split-view',
+        startIndex: '0',
+      }),
+    })
       .then(res => res.json())
       .then(result => {
         if (result.success && Array.isArray(result.data?.issues)) {
