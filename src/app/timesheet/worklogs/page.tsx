@@ -7,7 +7,6 @@ import Link from 'next/link';
 import {
   AlertCircle,
   ClipboardList,
-  Download,
   Loader2,
   Search,
   Trash2,
@@ -339,42 +338,6 @@ export default function MyWorklogsPage() {
     }
   }, [isConfigured, selectedIds, worklogs, settings]);
 
-  const handleExportCSV = useCallback(() => {
-    if (worklogs.length === 0) return;
-
-    const headers = [
-      'Ticket ID',
-      'Description',
-      'Hours',
-      'Type of Work',
-      'Date',
-      'Status',
-      'Author',
-    ];
-
-    const rows = worklogs.map(w => [
-      w.issueKey,
-      `"${(w.description || '').replace(/"/g, '""')}"`,
-      String(w.worked),
-      w.typeOfWork,
-      w.startDateEdit || w.startDate,
-      w.statusWorklog,
-      w.author,
-    ]);
-
-    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `worklogs_${fromDate}_${toDate}.csv`;
-    link.click();
-
-    URL.revokeObjectURL(url);
-    toast.success('CSV exported successfully');
-  }, [worklogs, fromDate, toDate]);
-
   if (!isLoaded) {
     return (
       <MainLayout>
@@ -464,41 +427,12 @@ export default function MyWorklogsPage() {
                     {worklogs.length} entries &middot; {totalHours.toFixed(1)}{' '}
                     total hours
                   </CardDescription>
-                  <CardAction>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={handleExportCSV}
-                    >
-                      <Download className='h-4 w-4' />
-                      Export CSV
-                    </Button>
-                  </CardAction>
-                </>
-              )}
-            </CardHeader>
-            <CardContent>
-              {worklogs.length === 0 ? (
-                <div className='flex flex-col items-center justify-center h-40 text-muted-foreground'>
-                  {hasSearched ? (
-                    <p>No worklogs found for the selected date range.</p>
-                  ) : (
-                    <p>
-                      Select a date range and click &quot;Search&quot; to view
-                      your worklogs.
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <>
-                  {/* Bulk Action Bar */}
                   {selectedIds.size > 0 && (
-                    <div className='mb-4 flex items-center justify-between rounded-lg border bg-muted/50 px-4 py-3'>
-                      <span className='text-sm font-medium'>
-                        {selectedIds.size} worklog
-                        {selectedIds.size !== 1 ? 's' : ''} selected
-                      </span>
+                    <CardAction>
                       <div className='flex items-center gap-2'>
+                        <span className='text-sm text-muted-foreground'>
+                          {selectedIds.size} selected
+                        </span>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
@@ -513,7 +447,7 @@ export default function MyWorklogsPage() {
                               )}
                               {isBulkDeleting
                                 ? `Deleting... ${bulkDeleteProgress}%`
-                                : `Delete ${selectedIds.size}`}
+                                : 'Delete'}
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -552,9 +486,25 @@ export default function MyWorklogsPage() {
                           Clear
                         </Button>
                       </div>
-                    </div>
+                    </CardAction>
                   )}
-
+                </>
+              )}
+            </CardHeader>
+            <CardContent>
+              {worklogs.length === 0 ? (
+                <div className='flex flex-col items-center justify-center h-40 text-muted-foreground'>
+                  {hasSearched ? (
+                    <p>No worklogs found for the selected date range.</p>
+                  ) : (
+                    <p>
+                      Select a date range and click &quot;Search&quot; to view
+                      your worklogs.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <>
                   <div className='rounded-md border'>
                     <Table>
                       <TableHeader className='bg-muted/50'>
