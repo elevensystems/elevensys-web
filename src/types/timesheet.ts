@@ -57,10 +57,16 @@ export interface FetchWorklogsRequest {
   jiraInstance: string;
 }
 
+export interface TimesheetAuthData {
+  authentication: string;
+  refresh: string;
+}
+
 export interface TimesheetSettings {
   username: string;
   token: string;
   jiraInstance: string;
+  authData?: TimesheetAuthData;
 }
 
 export interface LogWorkResult {

@@ -53,13 +53,15 @@ export default function TimesheetConfigPage() {
     setInitialized(true);
   }
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const hasChanges =
     initialized &&
     (username !== settings.username ||
       token !== settings.token ||
       jiraInstance !== settings.jiraInstance);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (!username.trim()) {
       toast.error('Username is required');
       return;
@@ -68,12 +70,35 @@ export default function TimesheetConfigPage() {
       toast.error('Token is required');
       return;
     }
-    saveSettings({
-      username: username.trim(),
-      token: token.trim(),
-      jiraInstance,
-    });
-    toast.success('Settings saved successfully');
+
+    setIsSaving(true);
+    try {
+      const params = new URLSearchParams({ jiraInstance });
+      const response = await fetch(`/api/timesheet/auth?${params.toString()}`, {
+        headers: {
+          Authorization: `Bearer ${token.trim()}`,
+        },
+      });
+
+      if (!response.ok) {
+        toast.error('Token is not valid or not correct');
+        return;
+      }
+
+      const result = await response.json();
+
+      saveSettings({
+        username: username.trim(),
+        token: token.trim(),
+        jiraInstance,
+        authData: result.data,
+      });
+      toast.success('Settings saved successfully');
+    } catch {
+      toast.error('Token is not valid or not correct');
+    } finally {
+      setIsSaving(false);
+    }
   }, [username, token, jiraInstance, saveSettings]);
 
   const handleClear = useCallback(() => {
@@ -210,18 +235,24 @@ export default function TimesheetConfigPage() {
                 disabled={!isConfigured}
               >
                 <Trash2 className='h-4 w-4' />
-                Clear Settings
+                Clear
               </Button>
               <Button
                 onClick={handleSave}
-                disabled={!hasChanges && isConfigured}
+                disabled={isSaving || (!hasChanges && isConfigured)}
               >
-                {isConfigured && !hasChanges ? (
+                {isSaving ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : isConfigured && !hasChanges ? (
                   <Check className='h-4 w-4' />
                 ) : (
                   <Save className='h-4 w-4' />
                 )}
-                {isConfigured && !hasChanges ? 'Saved' : 'Save Settings'}
+                {isSaving
+                  ? 'Verifying...'
+                  : isConfigured && !hasChanges
+                    ? 'Saved'
+                    : 'Save'}
               </Button>
             </CardFooter>
           </Card>
