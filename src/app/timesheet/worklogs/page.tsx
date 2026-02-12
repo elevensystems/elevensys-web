@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -194,6 +194,12 @@ export default function MyWorklogsPage() {
       setIsLoading(false);
     }
   }, [isConfigured, fromDate, toDate, settings]);
+
+  useEffect(() => {
+    if (isLoaded && isConfigured) {
+      handleSearch();
+    }
+  }, [isLoaded, isConfigured]);
 
   const handleDelete = useCallback(
     async (worklogId: number, issueId: number) => {
