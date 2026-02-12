@@ -46,13 +46,11 @@ export interface WorklogEntry {
 }
 
 export interface LogWorkRequest {
-  token: string;
   worklog: WorklogPayload;
   jiraInstance: string;
 }
 
 export interface FetchWorklogsRequest {
-  token: string;
   username: string;
   fromDate: string;
   toDate: string;

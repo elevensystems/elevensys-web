@@ -6,14 +6,15 @@ const WORKLOGS_API_URL = 'https://api.elevensys.dev/timesheet/worklogs';
 
 export async function POST(request: NextRequest) {
   try {
+    const authHeader = request.headers.get('Authorization') || '';
     const body: FetchWorklogsRequest = await request.json();
-    const { token, username, fromDate, toDate, jiraInstance } = body;
+    const { username, fromDate, toDate, jiraInstance } = body;
 
-    if (!token || !username || !fromDate || !toDate || !jiraInstance) {
+    if (!authHeader || !username || !fromDate || !toDate || !jiraInstance) {
       return NextResponse.json(
         {
           error:
-            'Missing required fields: token, username, fromDate, toDate, jiraInstance',
+            'Missing required fields: Authorization header, username, fromDate, toDate, jiraInstance',
         },
         { status: 400 }
       );
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
     const response = await fetch(`${WORKLOGS_API_URL}?${params.toString()}`, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: authHeader,
       },
     });
 

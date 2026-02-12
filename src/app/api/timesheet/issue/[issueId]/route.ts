@@ -1,37 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const WORKLOGS_WARNING_API_URL =
-  'https://api.elevensys.dev/timesheet/project-worklogs-warning';
+const ISSUE_API_URL = 'https://api.elevensys.dev/timesheet/issue';
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ issueId: string }> }
+) {
   try {
+    const { issueId } = await params;
     const authHeader = request.headers.get('Authorization') || '';
     const body = await request.json();
-    const { pid, startDate, endDate, jiraInstance } = body;
+    const { jiraInstance } = body;
 
-    if (!authHeader || !pid || !startDate || !endDate) {
+    if (!authHeader || !jiraInstance) {
       return NextResponse.json(
         {
           error:
-            'Missing required fields: Authorization header, pid, startDate, endDate',
+            'Missing required fields: Authorization header, jiraInstance',
         },
         { status: 400 }
       );
     }
 
-    const params = new URLSearchParams({
-      jiraInstance: jiraInstance || 'jiradc',
-    });
+    const queryParams = new URLSearchParams({ jiraInstance });
 
     const response = await fetch(
-      `${WORKLOGS_WARNING_API_URL}?${params.toString()}`,
+      `${ISSUE_API_URL}/${issueId}?${queryParams.toString()}`,
       {
-        method: 'POST',
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: authHeader,
         },
-        body: JSON.stringify({ pid, startDate, endDate }),
       }
     );
 

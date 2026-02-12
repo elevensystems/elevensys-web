@@ -265,9 +265,11 @@ export default function LogWorkPage() {
     try {
       const response = await fetch('/api/timesheet/worklogs-warning', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${settings.token}`,
+        },
         body: JSON.stringify({
-          token: settings.token,
           pid: selectedProjectId,
           startDate: formatDateForApi(warningFromDate),
           endDate: formatDateForApi(warningToDate),
@@ -413,9 +415,11 @@ export default function LogWorkPage() {
         try {
           const response = await fetch('/api/timesheet/logwork', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${settings.token}`,
+            },
             body: JSON.stringify({
-              token: settings.token,
               jiraInstance: settings.jiraInstance,
               worklog: {
                 username: settings.username,
@@ -478,9 +482,11 @@ export default function LogWorkPage() {
           try {
             const response = await fetch('/api/timesheet/logwork', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${settings.token}`,
+              },
               body: JSON.stringify({
-                token: settings.token,
                 jiraInstance: settings.jiraInstance,
                 worklog: {
                   username: settings.username,

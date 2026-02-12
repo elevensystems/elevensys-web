@@ -4,7 +4,6 @@ const DELETE_API_BASE_URL =
   'https://api.elevensys.dev/timesheet/project-worklogs';
 
 interface DeleteWorklogRequest {
-  token: string;
   issueId: number;
   timesheetId: number;
   jiraInstance: string;
@@ -12,14 +11,15 @@ interface DeleteWorklogRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    const authHeader = request.headers.get('Authorization') || '';
     const body: DeleteWorklogRequest = await request.json();
-    const { token, issueId, timesheetId, jiraInstance } = body;
+    const { issueId, timesheetId, jiraInstance } = body;
 
-    if (!token || !issueId || !timesheetId || !jiraInstance) {
+    if (!authHeader || !issueId || !timesheetId || !jiraInstance) {
       return NextResponse.json(
         {
           error:
-            'Missing required fields: token, issueId, timesheetId, jiraInstance',
+            'Missing required fields: Authorization header, issueId, timesheetId, jiraInstance',
         },
         { status: 400 }
       );
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: authHeader,
         },
       }
     );

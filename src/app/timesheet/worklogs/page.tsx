@@ -175,9 +175,11 @@ export default function MyWorklogsPage() {
     try {
       const response = await fetch('/api/timesheet/worklogs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${settings.token}`,
+        },
         body: JSON.stringify({
-          token: settings.token,
           username: settings.username,
           fromDate: formatDateForApi(fromDate),
           toDate: formatDateForApi(toDate),
@@ -242,9 +244,11 @@ export default function MyWorklogsPage() {
       try {
         const response = await fetch('/api/timesheet/worklogs/delete', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${settings.token}`,
+          },
           body: JSON.stringify({
-            token: settings.token,
             issueId,
             timesheetId: worklogId,
             jiraInstance: settings.jiraInstance,
@@ -296,9 +300,11 @@ export default function MyWorklogsPage() {
       try {
         const response = await fetch('/api/timesheet/worklogs/delete', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${settings.token}`,
+          },
           body: JSON.stringify({
-            token: settings.token,
             issueId: worklog.issueId,
             timesheetId: worklog.id,
             jiraInstance: settings.jiraInstance,

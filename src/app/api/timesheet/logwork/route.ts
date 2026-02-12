@@ -6,12 +6,16 @@ const LOG_WORK_API_URL = 'https://api.elevensys.dev/timesheet/logwork';
 
 export async function POST(request: NextRequest) {
   try {
+    const authHeader = request.headers.get('Authorization') || '';
     const body: LogWorkRequest = await request.json();
-    const { token, worklog, jiraInstance } = body;
+    const { worklog, jiraInstance } = body;
 
-    if (!token || !worklog || !jiraInstance) {
+    if (!authHeader || !worklog || !jiraInstance) {
       return NextResponse.json(
-        { error: 'Missing required fields: token, worklog, and jiraInstance' },
+        {
+          error:
+            'Missing required fields: Authorization header, worklog, and jiraInstance',
+        },
         { status: 400 }
       );
     }
@@ -29,7 +33,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        Authorization: authHeader,
       },
       body: JSON.stringify(worklog),
     });
