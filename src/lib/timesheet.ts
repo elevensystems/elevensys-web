@@ -200,6 +200,10 @@ export function getWorkTypeBadgeClass(type: string): string {
       return 'border-transparent bg-gradient-to-r from-indigo-500/15 to-blue-500/15 text-indigo-700 dark:from-indigo-500/25 dark:to-blue-500/25 dark:text-indigo-300';
     case 'correct':
       return 'border-transparent bg-gradient-to-r from-red-500/15 to-orange-500/15 text-red-700 dark:from-red-500/25 dark:to-orange-500/25 dark:text-red-300';
+    case 'translate':
+      return 'border-transparent bg-gradient-to-r from-blue-500/15 to-indigo-500/15 text-blue-700 dark:from-blue-500/25 dark:to-indigo-500/25 dark:text-blue-300';
+    case 'research':
+      return 'border-transparent bg-gradient-to-r from-slate-500/15 to-zinc-500/15 text-slate-700 dark:from-slate-500/25 dark:to-zinc-500/25 dark:text-slate-300';
     default:
       return 'border-transparent bg-gradient-to-r from-slate-500/15 to-gray-500/15 text-slate-700 dark:from-slate-500/25 dark:to-gray-500/25 dark:text-slate-300';
   }
