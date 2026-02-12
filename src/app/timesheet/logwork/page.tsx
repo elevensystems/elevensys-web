@@ -7,12 +7,12 @@ import Link from 'next/link';
 import {
   AlertCircle,
   CalendarDays,
+  CheckCheckIcon,
   Clock,
   Loader2,
   Plus,
   Search,
   Send,
-  Settings as SettingsIcon,
   Trash2,
   X,
 } from 'lucide-react';
@@ -74,6 +74,7 @@ import {
   getMonthEnd,
   getMonthStart,
   getTodayISO,
+  getWorkTypeBadgeClass,
   isValidApiDate,
   isValidIssueKey,
   parseSpecificDates,
@@ -482,11 +483,9 @@ export default function LogWorkPage() {
           try {
             const response = await fetch('/api/timesheet/logwork', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${settings.token}`,
-              },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                token: settings.token,
                 jiraInstance: settings.jiraInstance,
                 worklog: {
                   username: settings.username,
@@ -1122,7 +1121,14 @@ export default function LogWorkPage() {
                               {entry.issueKey}
                             </TableCell>
                             <TableCell className='text-sm py-1.5'>
-                              {entry.typeOfWork}
+                              <Badge
+                                variant='outline'
+                                className={getWorkTypeBadgeClass(
+                                  entry.typeOfWork
+                                )}
+                              >
+                                {entry.typeOfWork}
+                              </Badge>
                             </TableCell>
                             <TableCell className='text-sm py-1.5 text-right'>
                               {entry.hours}h
@@ -1146,7 +1152,7 @@ export default function LogWorkPage() {
                 Cancel
               </Button>
               <Button onClick={handleLogWork}>
-                <Send className='h-4 w-4' />
+                <CheckCheckIcon className='h-4 w-4' />
                 Confirm
               </Button>
             </DialogFooter>

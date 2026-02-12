@@ -162,3 +162,45 @@ export function getMonthEnd(): string {
 export function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+/**
+ * Get badge variant for worklog status
+ */
+export function getStatusVariant(
+  status: string
+): 'default' | 'secondary' | 'destructive' | 'outline' {
+  switch (status.toLowerCase()) {
+    case 'approved':
+      return 'default';
+    case 'pending':
+      return 'secondary';
+    case 'rejected':
+      return 'destructive';
+    default:
+      return 'outline';
+  }
+}
+
+/**
+ * Get gradient badge class for work type
+ */
+export function getWorkTypeBadgeClass(type: string): string {
+  switch (type.toLowerCase()) {
+    case 'create':
+      return 'border-transparent bg-gradient-to-r from-violet-500/15 to-fuchsia-500/15 text-violet-700 dark:from-violet-500/25 dark:to-fuchsia-500/25 dark:text-violet-300';
+    case 'test':
+      return 'border-transparent bg-gradient-to-r from-emerald-500/15 to-teal-500/15 text-emerald-700 dark:from-emerald-500/25 dark:to-teal-500/25 dark:text-emerald-300';
+    case 'analysis':
+      return 'border-transparent bg-gradient-to-r from-sky-500/15 to-cyan-500/15 text-sky-700 dark:from-sky-500/25 dark:to-cyan-500/25 dark:text-sky-300';
+    case 'management':
+      return 'border-transparent bg-gradient-to-r from-amber-500/15 to-orange-500/15 text-amber-700 dark:from-amber-500/25 dark:to-orange-500/25 dark:text-amber-300';
+    case 'review':
+      return 'border-transparent bg-gradient-to-r from-pink-500/15 to-rose-500/15 text-pink-700 dark:from-pink-500/25 dark:to-rose-500/25 dark:text-pink-300';
+    case 'study':
+      return 'border-transparent bg-gradient-to-r from-indigo-500/15 to-blue-500/15 text-indigo-700 dark:from-indigo-500/25 dark:to-blue-500/25 dark:text-indigo-300';
+    case 'correct':
+      return 'border-transparent bg-gradient-to-r from-red-500/15 to-orange-500/15 text-red-700 dark:from-red-500/25 dark:to-orange-500/25 dark:text-red-300';
+    default:
+      return 'border-transparent bg-gradient-to-r from-slate-500/15 to-gray-500/15 text-slate-700 dark:from-slate-500/25 dark:to-gray-500/25 dark:text-slate-300';
+  }
+}
