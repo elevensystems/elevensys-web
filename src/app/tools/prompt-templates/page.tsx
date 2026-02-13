@@ -19,8 +19,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import GuestLoginAlert from '@/components/layouts/guest-login-alert';
 import MainLayout from '@/components/layouts/main-layout';
-import ProAccessOnly from '@/components/layouts/pro-access-only';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import {
   Accordion,
@@ -45,7 +45,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
-import { cn, hasRole } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 import {
   type TemplateInputConfig,
@@ -71,6 +71,7 @@ const PAGE_METADATA = {
 
 export default function PromptTemplatesPage() {
   const { user } = useAuth();
+  const isGuest = !user;
   const [templates, setTemplates] = useState<Template[]>([]);
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,7 +110,9 @@ export default function PromptTemplatesPage() {
 
   // Load templates on mount and categorize them
   useEffect(() => {
-    if (!hasRole(user, ['pro'])) {
+    if (!user) {
+      setTemplates([]);
+      setFilteredTemplates([]);
       setIsLoading(false);
       return;
     }
@@ -332,16 +335,6 @@ export default function PromptTemplatesPage() {
     },
   ];
 
-  if (!hasRole(user, ['pro'])) {
-    return (
-      <ProAccessOnly
-        title={PAGE_METADATA.title}
-        description={PAGE_METADATA.description}
-        toolName={PAGE_METADATA.title}
-      />
-    );
-  }
-
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
@@ -349,9 +342,12 @@ export default function PromptTemplatesPage() {
           <ToolPageHeader
             title={PAGE_METADATA.title}
             description={PAGE_METADATA.description}
-            infoMessage='Search through templates by title or content. Click to expand and view the full template. Copy templates with one click.'
             error={error}
           />
+
+          {isGuest && (
+            <GuestLoginAlert title='Sign in to use template actions' />
+          )}
 
           {/* Stats Bar */}
           <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
@@ -597,6 +593,7 @@ export default function PromptTemplatesPage() {
                                         e.stopPropagation();
                                         handleCopy(template);
                                       }}
+                                      disabled={isGuest}
                                       aria-label={
                                         isCopied
                                           ? 'Copied to clipboard'
@@ -656,6 +653,7 @@ export default function PromptTemplatesPage() {
                                           e.stopPropagation();
                                           handleOpenInputModal(template);
                                         }}
+                                        disabled={isGuest}
                                         className='gap-1.5'
                                       >
                                         <Settings2 className='h-3.5 w-3.5' />
@@ -791,7 +789,7 @@ export default function PromptTemplatesPage() {
             >
               Cancel
             </Button>
-            <Button onClick={handleGenerate} disabled={!canGenerate}>
+            <Button onClick={handleGenerate} disabled={isGuest || !canGenerate}>
               <Sparkles className='h-4 w-4 mr-2' />
               Generate Prompt
             </Button>
@@ -829,7 +827,11 @@ export default function PromptTemplatesPage() {
               <Button variant='outline' onClick={handleCloseModals}>
                 Close
               </Button>
-              <Button onClick={handleCopyGenerated} className='gap-2'>
+              <Button
+                onClick={handleCopyGenerated}
+                className='gap-2'
+                disabled={isGuest}
+              >
                 {resultCopied ? (
                   <>
                     <Check className='h-4 w-4' />

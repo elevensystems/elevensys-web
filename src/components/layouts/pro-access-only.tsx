@@ -1,4 +1,8 @@
+import Link from 'next/link';
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import type { AuthUser } from '@/types/auth';
 
 import MainLayout from './main-layout';
 import { ToolPageHeader } from './tool-page-header';
@@ -8,6 +12,7 @@ interface ProAccessOnlyProps {
   description: string;
   toolName?: string;
   message?: string;
+  user?: AuthUser | null;
 }
 
 export default function ProAccessOnly({
@@ -15,11 +20,16 @@ export default function ProAccessOnly({
   description,
   toolName,
   message,
+  user,
 }: ProAccessOnlyProps) {
+  const isGuest = !user;
   const resolvedToolName = toolName || title;
-  const resolvedMessage =
-    message ||
-    `This tool is available to Pro users only. Upgrade your plan to unlock ${resolvedToolName}.`;
+
+  const resolvedTitle = isGuest ? 'Sign in required' : 'Pro access required';
+  const resolvedMessage = isGuest
+    ? `Please sign in to use ${resolvedToolName}.`
+    : message ||
+      `This tool is available to Pro users only. Upgrade your plan to unlock ${resolvedToolName}.`;
 
   return (
     <MainLayout>
@@ -27,9 +37,14 @@ export default function ProAccessOnly({
         <div className='max-w-3xl mx-auto space-y-6'>
           <ToolPageHeader title={title} description={description} />
           <Alert className='border-dashed'>
-            <AlertTitle>Pro access required</AlertTitle>
+            <AlertTitle>{resolvedTitle}</AlertTitle>
             <AlertDescription>{resolvedMessage}</AlertDescription>
           </Alert>
+          {isGuest && (
+            <Button asChild>
+              <Link href='/login'>Sign in</Link>
+            </Button>
+          )}
         </div>
       </section>
     </MainLayout>

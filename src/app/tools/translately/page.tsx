@@ -13,8 +13,8 @@ import {
   X,
 } from 'lucide-react';
 
+import GuestLoginAlert from '@/components/layouts/guest-login-alert';
 import MainLayout from '@/components/layouts/main-layout';
-import ProAccessOnly from '@/components/layouts/pro-access-only';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +41,6 @@ import {
   TRANSLATION_TONES,
   type TranslationDirection,
 } from '@/lib/constants';
-import { hasRole } from '@/lib/utils';
 
 const PAGE_METADATA = {
   title: 'Translately',
@@ -57,6 +56,7 @@ interface Preferences {
 
 export default function TranslatelyPage() {
   const { user } = useAuth();
+  const isGuest = !user;
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [direction, setDirection] = useState<TranslationDirection>(
@@ -223,16 +223,6 @@ export default function TranslatelyPage() {
 
   const inputCount = inputText.length;
 
-  if (!hasRole(user, ['pro'])) {
-    return (
-      <ProAccessOnly
-        title={PAGE_METADATA.title}
-        description={PAGE_METADATA.description}
-        toolName={PAGE_METADATA.title}
-      />
-    );
-  }
-
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
@@ -247,6 +237,10 @@ export default function TranslatelyPage() {
               <AlertTitle>Translation failed</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
+          )}
+
+          {isGuest && (
+            <GuestLoginAlert className='mb-6' title='Sign in to translate' />
           )}
 
           <div className='grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-start'>
@@ -410,7 +404,7 @@ export default function TranslatelyPage() {
                   size='lg'
                   variant='outline'
                   onClick={handleTranslate}
-                  disabled={loading || !inputText.trim()}
+                  disabled={isGuest || loading || !inputText.trim()}
                 >
                   {loading ? (
                     <>
