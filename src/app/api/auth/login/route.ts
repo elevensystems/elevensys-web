@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 
 import { AUTH_COOKIES } from '@/lib/auth';
+import { authCookie } from '@/lib/auth-cookies';
 import { requireEnv } from '@/lib/utils';
 
 const base64UrlEncode = (buffer: Buffer): string => {
@@ -49,21 +50,12 @@ export const GET = async () => {
     `${cognitoDomain}/oauth2/authorize?${params.toString()}`
   );
 
-  response.cookies.set(AUTH_COOKIES.oauthState, state, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 10 * 60,
-  });
-
-  response.cookies.set(AUTH_COOKIES.pkceVerifier, codeVerifier, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 10 * 60,
-  });
+  response.cookies.set(AUTH_COOKIES.oauthState, state, authCookie(10 * 60));
+  response.cookies.set(
+    AUTH_COOKIES.pkceVerifier,
+    codeVerifier,
+    authCookie(10 * 60)
+  );
 
   return response;
 };

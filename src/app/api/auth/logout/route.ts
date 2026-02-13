@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { AUTH_COOKIES } from '@/lib/auth';
+import { deletedCookie } from '@/lib/auth-cookies';
 import { requireEnv } from '@/lib/utils';
 
 export const GET = async () => {
@@ -14,21 +15,8 @@ export const GET = async () => {
 
   const response = NextResponse.redirect(logoutUrl.toString());
 
-  response.cookies.set(AUTH_COOKIES.idToken, '', {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 0,
-  });
-
-  response.cookies.set(AUTH_COOKIES.refreshToken, '', {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 0,
-  });
+  response.cookies.set(AUTH_COOKIES.idToken, '', deletedCookie());
+  response.cookies.set(AUTH_COOKIES.refreshToken, '', deletedCookie());
 
   return response;
 };

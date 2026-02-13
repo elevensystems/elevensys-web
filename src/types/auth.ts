@@ -15,6 +15,7 @@ export type JwtPayload = {
 export type UserRole = 'admin' | 'free' | 'pro';
 
 export type AuthUser = {
+  sub: string;
   name: string;
   email: string;
   avatar?: string;

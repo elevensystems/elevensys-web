@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { AUTH_COOKIES } from '@/lib/auth';
+import { authCookie, deletedCookie } from '@/lib/auth-cookies';
 import { requireEnv } from '@/lib/utils';
 
 type TokenResponse = {
@@ -53,8 +54,9 @@ export const GET = async (request: NextRequest) => {
 
   if (!tokenResponse.ok) {
     const errorText = await tokenResponse.text();
+    console.error('Cognito token exchange failed:', errorText);
     return NextResponse.json(
-      { error: 'Token exchange failed', details: errorText },
+      { error: 'Authentication failed. Please try again.' },
       { status: 400 }
     );
   }
@@ -67,38 +69,21 @@ export const GET = async (request: NextRequest) => {
 
   const response = NextResponse.redirect(new URL('/', request.url));
 
-  response.cookies.set(AUTH_COOKIES.idToken, tokenJson.id_token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: tokenJson.expires_in,
-  });
+  response.cookies.set(
+    AUTH_COOKIES.idToken,
+    tokenJson.id_token,
+    authCookie(tokenJson.expires_in)
+  );
 
-  response.cookies.set(AUTH_COOKIES.refreshToken, tokenJson.refresh_token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30,
-  });
+  response.cookies.set(
+    AUTH_COOKIES.refreshToken,
+    tokenJson.refresh_token,
+    authCookie(60 * 60 * 24 * 30)
+  );
 
   // Clear transient OAuth cookies.
-  response.cookies.set(AUTH_COOKIES.oauthState, '', {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 0,
-  });
-
-  response.cookies.set(AUTH_COOKIES.pkceVerifier, '', {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 0,
-  });
+  response.cookies.set(AUTH_COOKIES.oauthState, '', deletedCookie());
+  response.cookies.set(AUTH_COOKIES.pkceVerifier, '', deletedCookie());
 
   return response;
 };

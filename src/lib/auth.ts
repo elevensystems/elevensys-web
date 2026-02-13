@@ -15,7 +15,8 @@ const base64UrlDecode = (input: string): string => {
     base64.length + ((4 - (base64.length % 4)) % 4),
     '='
   );
-  return Buffer.from(padded, 'base64').toString('utf-8');
+  const bytes = Uint8Array.from(atob(padded), c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
 };
 
 export const decodeJwt = (token: string): JwtPayload | null => {
@@ -27,6 +28,12 @@ export const decodeJwt = (token: string): JwtPayload | null => {
   } catch {
     return null;
   }
+};
+
+export const isTokenExpired = (payload: JwtPayload): boolean => {
+  if (typeof payload.exp !== 'number') return true;
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+  return nowInSeconds >= payload.exp - 30;
 };
 
 // Server-only helpers for reading the current session from HttpOnly cookies.
@@ -42,13 +49,15 @@ export const getSession = async () => {
   const idToken = await getIdToken();
   const refreshToken = await getRefreshToken();
   const payload = idToken ? decodeJwt(idToken) : null;
-  return { idToken, refreshToken, payload };
+  const expired = payload ? isTokenExpired(payload) : true;
+  return { idToken, refreshToken, payload, expired };
 };
 
 export const getUserFromSession = async (): Promise<AuthUser | null> => {
-  const { payload } = await getSession();
-  if (!payload) return null;
+  const { payload, expired } = await getSession();
+  if (!payload || expired) return null;
 
+  const sub = typeof payload.sub === 'string' ? payload.sub : '';
   const email = typeof payload.email === 'string' ? payload.email : '';
   const nameFromToken = typeof payload.name === 'string' ? payload.name : '';
   const givenName =
@@ -73,17 +82,18 @@ export const getUserFromSession = async (): Promise<AuthUser | null> => {
         (group): group is string => typeof group === 'string'
       )
     : [];
-  const role: UserRole = groups.includes('pro')
-    ? 'pro'
-    : groups.includes('admin')
-      ? 'admin'
+  const role: UserRole = groups.includes('admin')
+    ? 'admin'
+    : groups.includes('pro')
+      ? 'pro'
       : 'free';
-  const result = {
+
+  return {
+    sub,
     name: displayName,
     email: email || displayName,
     avatar: avatar || undefined,
     role,
     groups,
   };
-  return result;
 };
