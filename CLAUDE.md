@@ -26,6 +26,12 @@ pnpm lint
 
 # Format code
 pnpm prettier
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
 ```
 
 ## Tech Stack
@@ -417,11 +423,44 @@ Components are installed to `src/components/ui/`.
 
 ## Testing
 
-**Note**: No testing framework is currently configured. When adding tests:
+| Category | Technology |
+|----------|------------|
+| Test Runner | Jest 30 (via `next/jest`) |
+| Component Testing | React Testing Library (`@testing-library/react`) |
+| User Interactions | `@testing-library/user-event` |
+| Assertions | `@testing-library/jest-dom` |
+| Environment | jsdom (`jest-environment-jsdom`) |
 
-- Consider Jest or Vitest for unit/integration tests
-- Use React Testing Library for component tests
-- Follow the existing code patterns for testability
+### Commands
+
+```bash
+npm test                   # Run all tests
+npm run test:coverage      # Run tests with coverage report
+npx jest path/to/file      # Run a specific test file
+```
+
+### Configuration
+
+- **Jest config**: `jest.config.ts` - uses `next/jest.js` with jsdom environment
+- **Setup file**: `jest.setup.ts` - imports `@testing-library/jest-dom`
+- **Path alias**: `@/` mapped to `<rootDir>/src/` via `moduleNameMapper`
+
+### Test File Conventions
+
+- Place test files next to the source file: `page.tsx` → `page.test.tsx`
+- Test descriptions start with a verb: `renders`, `calls`, `displays`, `hides`, `passes`, `disables`, `checks`
+- Mock hooks to control component state, mock complex UI components (Radix, layouts) as simple HTML elements
+- Use `data-testid` on mocked components for reliable selection
+- Group related tests with comments: `// --- Loading state ---`, `// --- Search card ---`
+
+### Mocking Strategy
+
+- **Hooks** (`useTimesheetSettings`, `useWorklogs`): Mock at module level with `jest.fn()` to control all state
+- **Layout components** (`MainLayout`, `ToolPageHeader`): Mock as simple div wrappers rendering children/props
+- **Child components** (`WorklogRow`, `BulkDeleteAction`): Mock with simplified HTML exposing key props via `data-testid`
+- **UI components** (`Button`, `Card`, `Table`, `Checkbox`): Mock as native HTML equivalents
+- **next/link**: Mock as `<a>` tag
+- **lucide-react icons**: Mock as `<span>` with `data-testid`
 
 ## Performance Considerations
 
