@@ -1,25 +1,42 @@
+export type TenantKey = 'satio' | 'elevensys';
+
 export interface DomainConfig {
+  tenant: TenantKey;
   appName: string;
   description: string;
   showTools: boolean;
+  blockedRoutes: string[];
 }
 
-const DOMAIN_CONFIGS: Record<string, DomainConfig> = {
-  'satio.dev': {
+const TENANT_CONFIGS: Record<TenantKey, DomainConfig> = {
+  satio: {
+    tenant: 'satio',
     appName: 'Jirassic World',
     description: 'Your Jira Timesheet Companion',
     showTools: false,
+    blockedRoutes: ['/tools'],
   },
-  'elevensystems.dev': {
+  elevensys: {
+    tenant: 'elevensys',
     appName: 'Eleven Systems',
     description: 'Connecting Ideas, Building Solutions',
     showTools: true,
+    blockedRoutes: [],
   },
 };
 
-const DEFAULT_CONFIG: DomainConfig = DOMAIN_CONFIGS['elevensystems.dev'];
+const HOSTNAME_TO_TENANT: Record<string, TenantKey> = {
+  'satio.dev': 'satio',
+  'elevensystems.dev': 'elevensys',
+};
 
-export function getDomainConfig(hostname: string): DomainConfig {
+export const DEFAULT_TENANT: TenantKey = 'elevensys';
+
+export function getTenantConfig(tenant: TenantKey): DomainConfig {
+  return TENANT_CONFIGS[tenant];
+}
+
+export function resolveTenantFromHostname(hostname: string): TenantKey {
   const bare = hostname.split(':')[0];
-  return DOMAIN_CONFIGS[bare] ?? DEFAULT_CONFIG;
+  return HOSTNAME_TO_TENANT[bare] ?? DEFAULT_TENANT;
 }

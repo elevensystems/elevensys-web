@@ -7,7 +7,11 @@ import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/auth-context';
 import { DomainProvider } from '@/contexts/domain-context';
 import { getUserFromSession } from '@/lib/auth';
-import { getDomainConfig } from '@/lib/domain-config';
+import {
+  DEFAULT_TENANT,
+  getTenantConfig,
+  type TenantKey,
+} from '@/lib/domain-config';
 import '@/styles/globals.css';
 
 const ubuntu = Ubuntu({
@@ -16,10 +20,14 @@ const ubuntu = Ubuntu({
   variable: '--font-ubuntu',
 });
 
+function resolveDomainConfig(headersList: Headers) {
+  const tenant = (headersList.get('x-tenant') as TenantKey) ?? DEFAULT_TENANT;
+  return getTenantConfig(tenant);
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers();
-  const host = headersList.get('host') ?? '';
-  const config = getDomainConfig(host);
+  const config = resolveDomainConfig(headersList);
 
   return {
     title: config.appName,
@@ -33,8 +41,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const headersList = await headers();
-  const host = headersList.get('host') ?? '';
-  const domainConfig = getDomainConfig(host);
+  const domainConfig = resolveDomainConfig(headersList);
   const user = await getUserFromSession();
 
   return (

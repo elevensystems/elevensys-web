@@ -79,8 +79,9 @@ export default function Home() {
               Welcome to {appName}
             </h1>
             <p className='text-lg text-muted-foreground max-w-2xl'>
-              Log your Jira timesheets, track worklogs, and access a suite of
-              developer tools — all in one place.
+              {showTools
+                ? 'Log your Jira timesheets, track worklogs, and access a suite of developer tools — all in one place.'
+                : 'Log your Jira timesheets and track worklogs with ease.'}
             </p>
           </div>
 

@@ -1,8 +1,12 @@
+'use client';
+
 import { ReactNode } from 'react';
 
 import Link from 'next/link';
 
 import { GalleryVerticalEnd } from 'lucide-react';
+
+import { useDomain } from '@/contexts/domain-context';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -17,6 +21,8 @@ export default function AuthLayout({
   children,
   className = '',
 }: AuthLayoutProps) {
+  const { appName } = useDomain();
+
   return (
     <div className='bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10'>
       <div className='flex w-full max-w-sm flex-col gap-6'>
@@ -27,7 +33,7 @@ export default function AuthLayout({
           <div className='bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md'>
             <GalleryVerticalEnd className='size-4' />
           </div>
-          Eleven Systems Inc.
+          {appName}
         </Link>
         <div className={className}>{children}</div>
       </div>
