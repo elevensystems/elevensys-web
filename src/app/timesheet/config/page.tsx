@@ -227,53 +227,55 @@ export default function TimesheetConfigPage() {
                 </p>
               </div>
             </CardContent>
-            <CardFooter className='flex justify-end gap-3'>
-              <Button
-                variant='outline'
-                className='text-destructive hover:bg-destructive/10 hover:text-destructive'
-                onClick={handleClear}
-                disabled={!isConfigured}
-              >
-                <Trash2 className='h-4 w-4' />
-                Clear
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={isSaving || (!hasChanges && isConfigured)}
-              >
-                {isSaving ? (
-                  <Loader2 className='h-4 w-4 animate-spin' />
-                ) : isConfigured && !hasChanges ? (
-                  <Check className='h-4 w-4' />
-                ) : (
-                  <Save className='h-4 w-4' />
+            <CardFooter className='flex items-center justify-between gap-3'>
+              <div className='flex items-center gap-3'>
+                {isConfigured && (
+                  <>
+                    <Button variant='outline' asChild>
+                      <Link href='/timesheet/logwork'>
+                        <ArrowLeft className='h-4 w-4' />
+                        Go to Log Work
+                      </Link>
+                    </Button>
+                    <Button variant='outline' asChild>
+                      <Link href='/timesheet/worklogs'>
+                        <ArrowLeft className='h-4 w-4' />
+                        Go to My Worklogs
+                      </Link>
+                    </Button>
+                  </>
                 )}
-                {isSaving
-                  ? 'Verifying...'
-                  : isConfigured && !hasChanges
-                    ? 'Saved'
-                    : 'Save'}
-              </Button>
+              </div>
+              <div className='flex items-center gap-3'>
+                <Button
+                  variant='outline'
+                  className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+                  onClick={handleClear}
+                  disabled={!isConfigured}
+                >
+                  <Trash2 className='h-4 w-4' />
+                  Clear
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  disabled={isSaving || (!hasChanges && isConfigured)}
+                >
+                  {isSaving ? (
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                  ) : isConfigured && !hasChanges ? (
+                    <Check className='h-4 w-4' />
+                  ) : (
+                    <Save className='h-4 w-4' />
+                  )}
+                  {isSaving
+                    ? 'Verifying...'
+                    : isConfigured && !hasChanges
+                      ? 'Saved'
+                      : 'Save'}
+                </Button>
+              </div>
             </CardFooter>
           </Card>
-
-          {/* Quick Navigation */}
-          {isConfigured && (
-            <div className='flex items-center justify-center gap-4'>
-              <Button variant='outline' asChild>
-                <Link href='/timesheet/logwork'>
-                  <ArrowLeft className='h-4 w-4' />
-                  Go to Log Work
-                </Link>
-              </Button>
-              <Button variant='outline' asChild>
-                <Link href='/timesheet/worklogs'>
-                  <ArrowLeft className='h-4 w-4' />
-                  Go to My Worklogs
-                </Link>
-              </Button>
-            </div>
-          )}
         </div>
       </section>
     </MainLayout>
