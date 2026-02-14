@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import Link from 'next/link';
 
-import { Command } from 'lucide-react';
+import { Egg } from 'lucide-react';
 
 import { FeedbackModal } from '@/components/layouts/feedback-modal';
 import { NavMain } from '@/components/layouts/nav-main';
@@ -56,7 +56,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
               <SidebarMenuButton size='lg' asChild>
                 <Link href='/'>
                   <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
-                    <Command className='size-4' />
+                    <Egg className='size-4' />
                   </div>
                   <div className='grid flex-1 text-left text-sm leading-tight'>
                     <span className='truncate font-medium'>
