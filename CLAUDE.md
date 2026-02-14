@@ -56,11 +56,12 @@ npm run test:coverage
 src/
 ├── app/                    # Next.js App Router
 │   ├── api/                # API route handlers
+│   │   ├── admin/urlify/   # Admin URL management (list, delete)
 │   │   ├── auth/           # OAuth2 endpoints (login, callback, logout, session)
 │   │   ├── password-generator/
 │   │   ├── song-recommender/
 │   │   ├── translate/      # Pro-only feature
-│   │   ├── url-shortener/
+│   │   ├── urlify/         # URL shortener create endpoint
 │   │   ├── templates/
 │   │   └── feedback/
 │   ├── tools/              # Tool pages (11 tools)
@@ -74,6 +75,10 @@ src/
 │   │   ├── prompt-templates/
 │   │   ├── song-recommender/
 │   │   └── summary-smith/
+│   ├── admin/              # Admin pages (protected by admin role)
+│   │   ├── layout.tsx      # Server-side admin auth check
+│   │   ├── page.tsx        # Admin dashboard
+│   │   └── urlify/         # URL management (table, pagination, bulk actions)
 │   ├── (auth)/             # Auth pages (route group)
 │   ├── layout.tsx          # Root layout with providers
 │   └── page.tsx            # Homepage
@@ -96,7 +101,8 @@ src/
 │   └── auth-context.tsx    # Auth state via React Context
 ├── hooks/
 │   ├── use-mobile.ts       # Mobile breakpoint detection
-│   └── use-copy-to-clipboard.ts  # Clipboard copy with feedback
+│   ├── use-copy-to-clipboard.ts  # Clipboard copy with feedback
+│   └── use-urlify-admin.ts # Admin URL management (fetch, paginate, select, delete)
 ├── lib/
 │   ├── auth.ts             # JWT decoding, session helpers
 │   ├── constants.ts        # Shared constants, validateModel()
@@ -110,6 +116,7 @@ src/
 ├── types/
 │   ├── auth.ts             # AuthUser, UserRole, JwtPayload types
 │   ├── translate.ts        # TranslateRequestBody
+│   ├── urlify.ts           # ShortenedUrl, UrlStatus, getUrlStatus()
 │   └── song-recommender.ts # MoodRequest, ChatMessage, Song
 └── styles/
     └── globals.css         # Global styles, CSS variables
@@ -355,8 +362,7 @@ COGNITO_SCOPES=
 NEXT_PUBLIC_APP_URL=
 
 # External APIs
-OPENAI_URL=           # For song recommender
-URL_SHORTENER_API=    # For URL shortener
+API_BASE_URL=         # Base URL for backend API (e.g. https://api.elevensys.dev)
 ```
 
 Access pattern:
@@ -365,7 +371,7 @@ Access pattern:
 import { requireEnv } from '@/lib/utils';
 
 // Throws if missing
-const apiUrl = requireEnv('OPENAI_URL');
+const baseUrl = requireEnv('API_BASE_URL');
 ```
 
 ## Common Tasks
