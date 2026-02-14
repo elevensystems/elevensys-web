@@ -62,6 +62,17 @@ export const appSidebarData = {
       url: '/admin',
       icon: ShieldCheck,
       adminOnly: true,
+      isActive: true,
+      items: [
+        {
+          title: 'Dashboard',
+          url: '/admin',
+        },
+        {
+          title: 'Urlify',
+          url: '/admin/urlify',
+        },
+      ],
     },
   ],
   navSecondary: [

@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       'You are an expert bilingual translator specializing in high-quality Vietnamese-English and English-Vietnamese translations.';
     const userMessage = buildPrompt(input, directionLabel, tonesLabel);
 
-    const lambdaBase = requireEnv('OPENAI_URL');
+    const lambdaBase = `${requireEnv('API_BASE_URL')}/openai`;
 
     try {
       const response = await fetchWithTimeout(lambdaBase, {

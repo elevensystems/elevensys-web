@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const body: MoodRequest = await request.json();
     const { mood, language, genres, excludedSongs } = body;
 
-    const lambdaBase = requireEnv('OPENAI_URL');
+    const lambdaBase = `${requireEnv('API_BASE_URL')}/openai`;
     const model = validateModel(body.model);
 
     if (!mood) {
