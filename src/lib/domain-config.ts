@@ -36,7 +36,13 @@ export function getTenantConfig(tenant: TenantKey): DomainConfig {
   return TENANT_CONFIGS[tenant];
 }
 
+export function isAdminHostname(hostname: string): boolean {
+  const bare = hostname.split(':')[0];
+  return bare.startsWith('admin.');
+}
+
 export function resolveTenantFromHostname(hostname: string): TenantKey {
   const bare = hostname.split(':')[0];
-  return HOSTNAME_TO_TENANT[bare] ?? DEFAULT_TENANT;
+  const baseDomain = bare.replace(/^admin\./, '');
+  return HOSTNAME_TO_TENANT[baseDomain] ?? DEFAULT_TENANT;
 }

@@ -13,6 +13,7 @@ import {
   Package,
   ScrollText,
   Send,
+  ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 
@@ -55,6 +56,12 @@ export const appSidebarData = {
       url: '#',
       icon: BadgeCheck,
       isActive: false,
+    },
+    {
+      title: 'Admin',
+      url: '/admin',
+      icon: ShieldCheck,
+      adminOnly: true,
     },
   ],
   navSecondary: [

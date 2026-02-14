@@ -4,6 +4,7 @@ import { AUTH_COOKIES, decodeJwt, isTokenExpired } from '@/lib/auth';
 import { authCookie, deletedCookie } from '@/lib/auth-cookies';
 import {
   getTenantConfig,
+  isAdminHostname,
   resolveTenantFromHostname,
 } from '@/lib/domain-config';
 
@@ -70,13 +71,41 @@ export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-tenant', tenant);
 
-  // --- Auth: token refresh + auth route redirect ---
+  // --- Decode JWT once for all checks ---
   const idToken = request.cookies.get(AUTH_COOKIES.idToken)?.value;
   const refreshToken = request.cookies.get(AUTH_COOKIES.refreshToken)?.value;
 
   const payload = idToken ? decodeJwt(idToken) : null;
   const expired = payload ? isTokenExpired(payload) : true;
   const isAuthenticated = payload !== null && !expired;
+
+  // --- Admin subdomain: require admin role ---
+  const isAdminSubdomain = isAdminHostname(hostname);
+  if (isAdminSubdomain) {
+    requestHeaders.set('x-is-admin', 'true');
+
+    const groups =
+      payload && Array.isArray(payload['cognito:groups'])
+        ? payload['cognito:groups']
+        : [];
+    const hasAdminRole = groups.includes('admin');
+
+    if (!isAuthenticated || !hasAdminRole) {
+      const baseDomain = hostname.split(':')[0].replace(/^admin\./, '');
+      const protocol = request.nextUrl.protocol;
+      return NextResponse.redirect(`${protocol}//${baseDomain}/login`);
+    }
+  }
+
+  // --- Block /admin routes on non-admin subdomains (skip in dev for localhost) ---
+  const isLocalhost = hostname.split(':')[0] === 'localhost';
+  if (
+    !isAdminSubdomain &&
+    !isLocalhost &&
+    (pathname === '/admin' || pathname.startsWith('/admin/'))
+  ) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
 
   // Redirect authenticated users away from auth pages (sync, no refresh needed).
   if (isAuthenticated && isAuthRoute(pathname)) {

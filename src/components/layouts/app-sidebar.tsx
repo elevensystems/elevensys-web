@@ -71,7 +71,10 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         </SidebarHeader>
         <SidebarContent>
           {hasData(appSidebarData.navMain) && (
-            <NavMain items={appSidebarData.navMain} />
+            <NavMain
+              items={appSidebarData.navMain}
+              isAdmin={user?.role === 'admin'}
+            />
           )}
           {domainConfig.showTools && hasData(tools) && (
             <NavTools tools={tools} />
