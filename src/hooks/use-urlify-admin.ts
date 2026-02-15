@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 import type { ShortenedUrl } from '@/types/urlify';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 5;
 const REQUEST_DELAY_MS = 500;
 
 function delay(ms: number) {
@@ -88,7 +88,8 @@ export function useUrlifyAdmin() {
     const newStack = cursorStack.slice(0, -1);
     setCursorStack(newStack);
     setCurrentPageIndex(prev => prev - 1);
-    const prevCursor = newStack.length > 0 ? newStack[newStack.length - 1] : undefined;
+    const prevCursor =
+      newStack.length > 0 ? newStack[newStack.length - 1] : undefined;
     fetchPage(prevCursor);
   }, [currentPageIndex, cursorStack, fetchPage]);
 
@@ -122,36 +123,33 @@ export function useUrlifyAdmin() {
     setSelectedIds(new Set());
   }, []);
 
-  const handleDelete = useCallback(
-    async (shortCode: string) => {
-      setDeletingId(shortCode);
+  const handleDelete = useCallback(async (shortCode: string) => {
+    setDeletingId(shortCode);
 
-      try {
-        const response = await fetch(`/api/admin/urlify/${shortCode}`, {
-          method: 'DELETE',
-        });
+    try {
+      const response = await fetch(`/api/admin/urlify/${shortCode}`, {
+        method: 'DELETE',
+      });
 
-        if (!response.ok) {
-          throw new Error(`Failed to delete URL: HTTP ${response.status}`);
-        }
-
-        setUrls(prev => prev.filter(u => u.shortCode !== shortCode));
-        setSelectedIds(prev => {
-          const next = new Set(prev);
-          next.delete(shortCode);
-          return next;
-        });
-        toast.success('URL deleted successfully');
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Failed to delete URL';
-        toast.error(message);
-      } finally {
-        setDeletingId(null);
+      if (!response.ok) {
+        throw new Error(`Failed to delete URL: HTTP ${response.status}`);
       }
-    },
-    []
-  );
+
+      setUrls(prev => prev.filter(u => u.shortCode !== shortCode));
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        next.delete(shortCode);
+        return next;
+      });
+      toast.success('URL deleted successfully');
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to delete URL';
+      toast.error(message);
+    } finally {
+      setDeletingId(null);
+    }
+  }, []);
 
   const handleBulkDelete = useCallback(async () => {
     if (selectedIds.size === 0) return;

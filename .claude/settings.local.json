@@ -1,9 +1,19 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
-    "allow": ["Bash(npx next build:*)", "Bash(npx next lint:*)", "Bash(npx eslint:*)", "Bash(node -e:*)", "Bash(npx prettier:*)"]
+    "allow": [
+      "Bash(npx next build:*)",
+      "Bash(npx next lint:*)",
+      "Bash(npx eslint:*)",
+      "Bash(node -e:*)",
+      "Bash(npx prettier:*)",
+      "Bash(npx tsc:*)"
+    ]
   },
-  "enabledMcpjsonServers": ["next-devtools", "shadcn"],
+  "enabledMcpjsonServers": [
+    "next-devtools",
+    "shadcn"
+  ],
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh",
