@@ -23,11 +23,131 @@ interface SubmitParams {
   endDate: string;
 }
 
+interface RetryParams {
+  failedResults: LogWorkResult[];
+  dateMode: 'range' | 'specific';
+  startDate: string;
+  endDate: string;
+}
+
 export function useLogWorkSubmission(settings: TimesheetSettings) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressText, setProgressText] = useState('');
   const [results, setResults] = useState<LogWorkResult[]>([]);
+
+  const submitSingleEntry = useCallback(
+    async (
+      entry: WorkEntry,
+      dates: string[],
+      isPeriod: boolean,
+      headers: Record<string, string>,
+      time: string
+    ): Promise<LogWorkResult> => {
+      if (isPeriod) {
+        // Range mode: single request
+        try {
+          const response = await fetch('/api/timesheet/logwork', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              jiraInstance: settings.jiraInstance,
+              worklog: {
+                username: settings.username,
+                issueKey: entry.issueKey.trim(),
+                timeSpend: entry.hours * 3600,
+                startDate: dates[0],
+                endDate: dates[1],
+                typeOfWork: entry.typeOfWork,
+                description: entry.description,
+                time,
+                remainingTime: 0,
+                period: true,
+              },
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.error || `HTTP ${response.status}`);
+          }
+
+          return { entry, success: true };
+        } catch (err) {
+          return {
+            entry,
+            success: false,
+            error: err instanceof Error ? err.message : 'Unknown error',
+          };
+        }
+      }
+
+      // Specific dates mode: one request per date
+      const failedDates: string[] = [];
+      const entryErrors: string[] = [];
+      let successCount = 0;
+
+      for (let i = 0; i < dates.length; i++) {
+        const date = dates[i];
+        try {
+          const response = await fetch('/api/timesheet/logwork', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              jiraInstance: settings.jiraInstance,
+              worklog: {
+                username: settings.username,
+                issueKey: entry.issueKey.trim(),
+                timeSpend: entry.hours * 3600,
+                startDate: date,
+                endDate: date,
+                typeOfWork: entry.typeOfWork,
+                description: entry.description,
+                time,
+                remainingTime: 0,
+                period: false,
+              },
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.error || `HTTP ${response.status}`);
+          }
+
+          successCount++;
+        } catch (err) {
+          failedDates.push(date);
+          entryErrors.push(
+            `${date}: ${err instanceof Error ? err.message : 'Unknown error'}`
+          );
+        }
+
+        if (i < dates.length - 1) {
+          await delay(REQUEST_DELAY_MS);
+        }
+      }
+
+      if (entryErrors.length === 0) {
+        return { entry, success: true };
+      } else if (successCount > 0) {
+        return {
+          entry,
+          success: false,
+          error: `${successCount}/${dates.length} dates succeeded. Failures: ${entryErrors.join('; ')}`,
+          failedDates,
+        };
+      } else {
+        return {
+          entry,
+          success: false,
+          error: entryErrors.join('; '),
+          failedDates,
+        };
+      }
+    },
+    [settings.jiraInstance, settings.username]
+  );
 
   const submitEntries = useCallback(
     async ({
@@ -49,137 +169,37 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
         Authorization: `Bearer ${settings.token}`,
       };
 
-      if (dateMode === 'range') {
-        const apiStartDate = formatDateForApi(startDate);
-        const apiEndDate = formatDateForApi(endDate);
-        const total = validEntries.length;
+      const total = validEntries.length;
 
-        for (let i = 0; i < validEntries.length; i++) {
-          const entry = validEntries[i];
-          setProgressText(
-            `Logging ${entry.issueKey} (${i + 1}/${total})...`
-          );
-          setProgress(Math.round((i / total) * 100));
+      for (let i = 0; i < validEntries.length; i++) {
+        const entry = validEntries[i];
+        setProgressText(
+          `Logging ${entry.issueKey} (${i + 1}/${total})...`
+        );
+        setProgress(Math.round(((i + 1) / total) * 100));
 
-          try {
-            const response = await fetch('/api/timesheet/logwork', {
-              method: 'POST',
-              headers,
-              body: JSON.stringify({
-                jiraInstance: settings.jiraInstance,
-                worklog: {
-                  username: settings.username,
-                  issueKey: entry.issueKey.trim(),
-                  timeSpend: entry.hours * 3600,
-                  startDate: apiStartDate,
-                  endDate: apiEndDate,
-                  typeOfWork: entry.typeOfWork,
-                  description: entry.description,
-                  time,
-                  remainingTime: 0,
-                  period: true,
-                },
-              }),
-            });
+        let dates: string[];
+        let isPeriod: boolean;
 
-            if (!response.ok) {
-              const errorData = await response
-                .json()
-                .catch(() => null);
-              throw new Error(
-                errorData?.error || `HTTP ${response.status}`
-              );
-            }
-
-            logResults.push({ entry, success: true });
-          } catch (err) {
-            logResults.push({
-              entry,
-              success: false,
-              error:
-                err instanceof Error ? err.message : 'Unknown error',
-            });
-          }
-
-          if (i < validEntries.length - 1) {
-            await delay(REQUEST_DELAY_MS);
-          }
+        if (dateMode === 'range') {
+          dates = [formatDateForApi(startDate), formatDateForApi(endDate)];
+          isPeriod = true;
+        } else {
+          dates = parseSpecificDates(datesText);
+          isPeriod = false;
         }
-      } else {
-        const dates = parseSpecificDates(datesText);
-        const totalRequests = validEntries.length * dates.length;
-        let requestIndex = 0;
 
-        for (const entry of validEntries) {
-          const entryErrors: string[] = [];
-          let entrySuccessCount = 0;
+        const result = await submitSingleEntry(
+          entry,
+          dates,
+          isPeriod,
+          headers,
+          time
+        );
+        logResults.push(result);
 
-          for (const date of dates) {
-            requestIndex++;
-            setProgressText(
-              `Logging ${entry.issueKey} for ${date} (${requestIndex}/${totalRequests})...`
-            );
-            setProgress(
-              Math.round((requestIndex / totalRequests) * 100)
-            );
-
-            try {
-              const response = await fetch('/api/timesheet/logwork', {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({
-                  jiraInstance: settings.jiraInstance,
-                  worklog: {
-                    username: settings.username,
-                    issueKey: entry.issueKey.trim(),
-                    timeSpend: entry.hours * 3600,
-                    startDate: date,
-                    endDate: date,
-                    typeOfWork: entry.typeOfWork,
-                    description: entry.description,
-                    time,
-                    remainingTime: 0,
-                    period: false,
-                  },
-                }),
-              });
-
-              if (!response.ok) {
-                const errorData = await response
-                  .json()
-                  .catch(() => null);
-                throw new Error(
-                  errorData?.error || `HTTP ${response.status}`
-                );
-              }
-
-              entrySuccessCount++;
-            } catch (err) {
-              entryErrors.push(
-                `${date}: ${err instanceof Error ? err.message : 'Unknown error'}`
-              );
-            }
-
-            if (requestIndex < totalRequests) {
-              await delay(REQUEST_DELAY_MS);
-            }
-          }
-
-          if (entryErrors.length === 0) {
-            logResults.push({ entry, success: true });
-          } else if (entrySuccessCount > 0) {
-            logResults.push({
-              entry,
-              success: false,
-              error: `${entrySuccessCount}/${dates.length} dates succeeded. Failures: ${entryErrors.join('; ')}`,
-            });
-          } else {
-            logResults.push({
-              entry,
-              success: false,
-              error: entryErrors.join('; '),
-            });
-          }
+        if (i < validEntries.length - 1) {
+          await delay(REQUEST_DELAY_MS);
         }
       }
 
@@ -189,8 +209,87 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
 
       return logResults;
     },
-    [settings.token, settings.jiraInstance, settings.username]
+    [settings.token, submitSingleEntry]
   );
+
+  const retryFailed = useCallback(
+    async ({
+      failedResults,
+      dateMode,
+      startDate,
+      endDate,
+    }: RetryParams): Promise<LogWorkResult[]> => {
+      setIsSubmitting(true);
+      setProgress(0);
+      setResults([]);
+
+      const logResults: LogWorkResult[] = [];
+      const time = getCurrentTime();
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${settings.token}`,
+      };
+
+      const total = failedResults.length;
+
+      for (let i = 0; i < failedResults.length; i++) {
+        const { entry, failedDates } = failedResults[i];
+        setProgressText(
+          `Retrying ${entry.issueKey} (${i + 1}/${total})...`
+        );
+        setProgress(Math.round(((i + 1) / total) * 100));
+
+        let dates: string[];
+        let isPeriod: boolean;
+
+        if (dateMode === 'range') {
+          dates = [formatDateForApi(startDate), formatDateForApi(endDate)];
+          isPeriod = true;
+        } else {
+          // Only retry the dates that previously failed
+          dates = failedDates && failedDates.length > 0
+            ? failedDates
+            : [];
+          isPeriod = false;
+        }
+
+        if (dates.length === 0) {
+          logResults.push({
+            entry,
+            success: false,
+            error: 'No dates to retry',
+          });
+          continue;
+        }
+
+        const result = await submitSingleEntry(
+          entry,
+          dates,
+          isPeriod,
+          headers,
+          time
+        );
+        logResults.push(result);
+
+        if (i < failedResults.length - 1) {
+          await delay(REQUEST_DELAY_MS);
+        }
+      }
+
+      setProgress(100);
+      setResults(logResults);
+      setIsSubmitting(false);
+
+      return logResults;
+    },
+    [settings.token, submitSingleEntry]
+  );
+
+  const resetResults = useCallback(() => {
+    setResults([]);
+    setProgress(0);
+    setProgressText('');
+  }, []);
 
   return {
     isSubmitting,
@@ -198,5 +297,7 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
     progressText,
     results,
     submitEntries,
+    retryFailed,
+    resetResults,
   };
 }

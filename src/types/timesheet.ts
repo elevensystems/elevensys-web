@@ -73,6 +73,7 @@ export interface LogWorkResult {
   entry: WorkEntry;
   success: boolean;
   error?: string;
+  failedDates?: string[];
 }
 
 export interface JiraProject {

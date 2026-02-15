@@ -46,7 +46,7 @@ import {
   isValidIssueKey,
   parseSpecificDates,
 } from '@/lib/timesheet';
-import type { WorkEntry } from '@/types/timesheet';
+import type { LogWorkResult, WorkEntry } from '@/types/timesheet';
 
 import { LogWorkConfirmDialog } from './_components/confirm-dialog';
 import { MissingWorklogsCard } from './_components/missing-worklogs-card';
@@ -127,8 +127,15 @@ export default function LogWorkPage() {
     handleSearchWarnings,
   } = useMissingWorklogs({ settings, isConfigured });
 
-  const { isSubmitting, progress, progressText, results, submitEntries } =
-    useLogWorkSubmission(settings);
+  const {
+    isSubmitting,
+    progress,
+    progressText,
+    results,
+    submitEntries,
+    retryFailed,
+    resetResults,
+  } = useLogWorkSubmission(settings);
 
   // Work entries state
   const [entries, setEntries] = useState<WorkEntry[]>([
@@ -247,8 +254,41 @@ export default function LogWorkPage() {
     setShowConfirmDialog(true);
   }, [validateEntries]);
 
+  const processResults = useCallback(
+    (logResults: LogWorkResult[]) => {
+      const successCount = logResults.filter(r => r.success).length;
+      const errorCount = logResults.filter(r => !r.success).length;
+
+      if (errorCount === 0) {
+        toast.success(
+          `All ${successCount} entries logged successfully!`
+        );
+      } else if (successCount > 0) {
+        toast.warning(
+          `${successCount} succeeded, ${errorCount} failed`
+        );
+        // Keep only failed entries in the form so user can edit and resubmit
+        const failedIssueKeys = new Set(
+          logResults
+            .filter(r => !r.success)
+            .map(r => r.entry.issueKey)
+        );
+        setEntries(prev =>
+          prev.filter(e => failedIssueKeys.has(e.issueKey))
+        );
+      } else {
+        toast.error(`All ${errorCount} entries failed`);
+      }
+    },
+    []
+  );
+
   const handleLogWork = useCallback(async () => {
     setShowConfirmDialog(false);
+
+    // Save entries to localStorage before submission (preserves for next session)
+    const validEntries = entries.filter(e => e.issueKey.trim());
+    saveEntriesToStorage(validEntries, selectedProjectId);
 
     const logResults = await submitEntries({
       entries,
@@ -258,24 +298,7 @@ export default function LogWorkPage() {
       endDate,
     });
 
-    const successCount = logResults.filter(r => r.success).length;
-    const errorCount = logResults.filter(r => !r.success).length;
-
-    // Save entries to localStorage for next session
-    const validEntries = entries.filter(e => e.issueKey.trim());
-    saveEntriesToStorage(validEntries, selectedProjectId);
-
-    if (errorCount === 0) {
-      toast.success(
-        `All ${successCount} entries logged successfully!`
-      );
-    } else if (successCount > 0) {
-      toast.warning(
-        `${successCount} succeeded, ${errorCount} failed`
-      );
-    } else {
-      toast.error(`All ${errorCount} entries failed`);
-    }
+    processResults(logResults);
   }, [
     entries,
     dateMode,
@@ -284,6 +307,31 @@ export default function LogWorkPage() {
     endDate,
     selectedProjectId,
     submitEntries,
+    processResults,
+  ]);
+
+  const handleRetryFailed = useCallback(async () => {
+    const failedResults = results.filter(r => !r.success);
+    if (failedResults.length === 0) return;
+
+    resetResults();
+
+    const logResults = await retryFailed({
+      failedResults,
+      dateMode,
+      startDate,
+      endDate,
+    });
+
+    processResults(logResults);
+  }, [
+    results,
+    dateMode,
+    startDate,
+    endDate,
+    retryFailed,
+    resetResults,
+    processResults,
   ]);
 
   if (!isLoaded) {
@@ -413,6 +461,7 @@ export default function LogWorkPage() {
                 progress={progress}
                 progressText={progressText}
                 results={results}
+                onRetryFailed={handleRetryFailed}
               />
 
               {/* Action Buttons */}
