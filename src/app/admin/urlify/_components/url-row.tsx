@@ -2,7 +2,13 @@
 
 import { memo, useCallback } from 'react';
 
-import { ExternalLink, Loader2, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import {
+  ExternalLink,
+  Loader2,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 
 import {
   AlertDialog,
@@ -125,8 +131,8 @@ export const UrlRow = memo(function UrlRow({
                 Edit (Coming soon)
               </DropdownMenuItem>
               <AlertDialogTrigger asChild>
-                <DropdownMenuItem className='text-destructive focus:text-destructive'>
-                  <Trash2 className='h-4 w-4' />
+                <DropdownMenuItem className='text-destructive focus:text-destructive focus:bg-destructive/10'>
+                  <Trash2 className='h-4 w-4 text-destructive' />
                   Delete
                 </DropdownMenuItem>
               </AlertDialogTrigger>
@@ -137,18 +143,13 @@ export const UrlRow = memo(function UrlRow({
               <AlertDialogTitle>Delete URL</AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to delete the shortened URL{' '}
-                <span className='font-semibold font-mono'>
-                  {url.shortCode}
-                </span>
+                <span className='font-semibold font-mono'>{url.shortCode}</span>
                 ? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                variant='destructive'
-                onClick={handleDelete}
-              >
+              <AlertDialogAction variant='destructive' onClick={handleDelete}>
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>

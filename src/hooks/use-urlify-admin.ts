@@ -6,17 +6,22 @@ import { toast } from 'sonner';
 
 import type { ShortenedUrl } from '@/types/urlify';
 
-const PAGE_SIZE = 5;
+const DEFAULT_PAGE_SIZE = 5;
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50] as const;
 const REQUEST_DELAY_MS = 500;
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+export type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
+
 export function useUrlifyAdmin() {
   const [urls, setUrls] = useState<ShortenedUrl[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [pageSize, setPageSizeState] =
+    useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
 
   // Cursor-based pagination
   const [cursorStack, setCursorStack] = useState<string[]>([]);
@@ -37,44 +42,62 @@ export function useUrlifyAdmin() {
   const hasNextPage = nextCursor !== null;
   const hasPrevPage = currentPageIndex > 0;
 
-  const fetchPage = useCallback(async (cursor?: string) => {
-    setIsLoading(true);
-    setError('');
+  const fetchPage = useCallback(
+    async (cursor?: string, size: number = pageSize) => {
+      setIsLoading(true);
+      setError('');
 
-    try {
-      const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
-      if (cursor) params.set('lastKey', cursor);
+      try {
+        const params = new URLSearchParams({ limit: String(size) });
+        if (cursor) params.set('lastKey', cursor);
 
-      const response = await fetch(`/api/admin/urlify?${params.toString()}`);
+        const response = await fetch(`/api/admin/urlify?${params.toString()}`);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch URLs: HTTP ${response.status}`);
-      }
+        if (!response.ok) {
+          throw new Error(`Failed to fetch URLs: HTTP ${response.status}`);
+        }
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (result.data) {
-        setUrls(result.data.urls ?? []);
-        setNextCursor(
-          result.data.lastEvaluatedKey
-            ? JSON.stringify(result.data.lastEvaluatedKey)
-            : null
-        );
-        setSelectedIds(new Set());
-      } else {
+        if (result.data) {
+          const fetchedUrls: ShortenedUrl[] = result.data.urls ?? [];
+
+          // If the page is empty and we're not on the first page,
+          // go back to the previous page instead of showing an empty state.
+          if (fetchedUrls.length === 0 && cursor) {
+            setNextCursor(null);
+            setCurrentPageIndex(prev => {
+              const newIndex = Math.max(0, prev - 1);
+              setCursorStack(stack => stack.slice(0, newIndex));
+              return newIndex;
+            });
+            toast.info('No more data — returned to the last page.');
+            return;
+          }
+
+          setUrls(fetchedUrls);
+          setNextCursor(
+            result.data.lastEvaluatedKey
+              ? JSON.stringify(result.data.lastEvaluatedKey)
+              : null
+          );
+          setSelectedIds(new Set());
+        } else {
+          setUrls([]);
+          setNextCursor(null);
+        }
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Failed to fetch URLs';
+        setError(message);
+        toast.error(message);
         setUrls([]);
-        setNextCursor(null);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Failed to fetch URLs';
-      setError(message);
-      toast.error(message);
-      setUrls([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [pageSize]
+  );
 
   const goToNextPage = useCallback(() => {
     if (!nextCursor) return;
@@ -92,6 +115,53 @@ export function useUrlifyAdmin() {
       newStack.length > 0 ? newStack[newStack.length - 1] : undefined;
     fetchPage(prevCursor);
   }, [currentPageIndex, cursorStack, fetchPage]);
+
+  const goToPage = useCallback(
+    (targetIndex: number) => {
+      if (targetIndex === currentPageIndex) return;
+      if (targetIndex < 0) return;
+
+      // Navigate to first page
+      if (targetIndex === 0) {
+        setCursorStack([]);
+        setCurrentPageIndex(0);
+        fetchPage(undefined);
+        return;
+      }
+
+      // Navigate to a previously-visited page
+      if (targetIndex <= cursorStack.length) {
+        const cursor = cursorStack[targetIndex - 1];
+        setCursorStack(prev => prev.slice(0, targetIndex));
+        setCurrentPageIndex(targetIndex);
+        fetchPage(cursor);
+        return;
+      }
+
+      // Navigate to the next undiscovered page (one beyond cursor stack)
+      if (targetIndex === cursorStack.length + 1 && nextCursor) {
+        goToNextPage();
+      }
+    },
+    [currentPageIndex, cursorStack, fetchPage, nextCursor, goToNextPage]
+  );
+
+  // Total number of pages we know about
+  // cursorStack.length = pages visited beyond page 0
+  // +1 for page 0 itself
+  // +1 if there's a next cursor (unseen next page)
+  const totalPages = cursorStack.length + 1 + (hasNextPage ? 1 : 0);
+
+  const setPageSize = useCallback(
+    (newSize: PageSizeOption) => {
+      setPageSizeState(newSize);
+      setCursorStack([]);
+      setCurrentPageIndex(0);
+      setNextCursor(null);
+      fetchPage(undefined, newSize);
+    },
+    [fetchPage]
+  );
 
   const refresh = useCallback(() => {
     const currentCursor =
@@ -214,7 +284,9 @@ export function useUrlifyAdmin() {
     hasPrevPage,
     goToNextPage,
     goToPrevPage,
+    goToPage,
     pageIndex: currentPageIndex,
+    totalPages,
     selectedIds,
     allSelected,
     someSelected,
@@ -227,5 +299,8 @@ export function useUrlifyAdmin() {
     handleDelete,
     handleBulkDelete,
     refresh,
+    pageSize,
+    setPageSize,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
   };
 }
