@@ -14,6 +14,7 @@ import {
   Settings,
   Sparkles,
   Sun,
+  SunMoon,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
@@ -23,7 +24,6 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuSub,
@@ -39,9 +39,39 @@ import {
 } from '@/components/ui/sidebar';
 import { AuthUser } from '@/types/auth';
 
+function ThemeSubmenu() {
+  const { theme, setTheme } = useTheme();
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>
+        <SunMoon />
+        Theme
+      </DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuSubContent>
+          <DropdownMenuItem onClick={() => setTheme('light')}>
+            <Sun />
+            <span>Light</span>
+            {theme === 'light' && <Check className='ml-auto' />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme('dark')}>
+            <Moon />
+            <span>Dark</span>
+            {theme === 'dark' && <Check className='ml-auto' />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme('system')}>
+            <Settings />
+            <span>System</span>
+            {theme === 'system' && <Check className='ml-auto' />}
+          </DropdownMenuItem>
+        </DropdownMenuSubContent>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
+  );
+}
+
 export function NavUser({ user }: { user?: AuthUser | null }) {
   const { isMobile } = useSidebar();
-  const { theme, setTheme } = useTheme();
 
   const getUserInitials = (name: string) => {
     return name
@@ -80,18 +110,6 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
               align='end'
               sideOffset={4}
             >
-              <DropdownMenuLabel className='p-0 font-normal'>
-                <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
-                  <Avatar className='h-8 w-8 rounded-lg'>
-                    <AvatarFallback className='rounded-lg'>G</AvatarFallback>
-                  </Avatar>
-                  <div className='grid flex-1 text-left text-sm leading-tight'>
-                    <span className='truncate font-medium'>Guest</span>
-                    <span className='truncate text-xs'>Not signed in</span>
-                  </div>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
                   <Link href='/login' className='cursor-pointer'>
@@ -108,31 +126,7 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <Settings />
-                    Settings
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuItem onClick={() => setTheme('light')}>
-                        <Sun />
-                        <span>Light</span>
-                        {theme === 'light' && <Check className='ml-auto' />}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setTheme('dark')}>
-                        <Moon />
-                        <span>Dark</span>
-                        {theme === 'dark' && <Check className='ml-auto' />}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setTheme('system')}>
-                        <Settings />
-                        <span>System</span>
-                        {theme === 'system' && <Check className='ml-auto' />}
-                      </DropdownMenuItem>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
+                <ThemeSubmenu />
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -169,21 +163,6 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
             align='end'
             sideOffset={4}
           >
-            <DropdownMenuLabel className='p-0 font-normal'>
-              <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
-                <Avatar className='h-8 w-8 rounded-lg'>
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className='rounded-lg'>
-                    {getUserInitials(user.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className='grid flex-1 text-left text-sm leading-tight'>
-                  <span className='truncate font-medium'>{user.name}</span>
-                  <span className='truncate text-xs'>{user.email}</span>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
@@ -199,31 +178,7 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <Settings />
-                  Settings
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuItem onClick={() => setTheme('light')}>
-                      <Sun />
-                      <span>Light</span>
-                      {theme === 'light' && <Check className='ml-auto' />}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme('dark')}>
-                      <Moon />
-                      <span>Dark</span>
-                      {theme === 'dark' && <Check className='ml-auto' />}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme('system')}>
-                      <Settings />
-                      <span>System</span>
-                      {theme === 'system' && <Check className='ml-auto' />}
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
+              <ThemeSubmenu />
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
