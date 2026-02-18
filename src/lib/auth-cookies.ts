@@ -5,6 +5,7 @@ const BASE_OPTIONS = {
   secure: isSecure,
   sameSite: 'lax' as const,
   path: '/',
+  domain: process.env.COOKIE_DOMAIN,
 };
 
 export const authCookie = (maxAge: number) => ({

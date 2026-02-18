@@ -2,11 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { AUTH_COOKIES, decodeJwt, isTokenExpired } from '@/lib/auth';
 import { authCookie, deletedCookie } from '@/lib/auth-cookies';
-import {
-  getTenantConfig,
-  isAdminHostname,
-  resolveTenantFromHostname,
-} from '@/lib/domain-config';
+import { getTenantConfig, resolveTenantFromHostname } from '@/lib/domain-config';
 
 const AUTH_ROUTES = ['/login', '/signup', '/forgot-password'];
 
@@ -79,29 +75,11 @@ export async function proxy(request: NextRequest) {
   const expired = payload ? isTokenExpired(payload) : true;
   const isAuthenticated = payload !== null && !expired;
 
-  // --- Admin subdomain: require admin role ---
-  const isAdminSubdomain = isAdminHostname(hostname);
-  if (isAdminSubdomain) {
-    requestHeaders.set('x-is-admin', 'true');
-
-    const groups =
-      payload && Array.isArray(payload['cognito:groups'])
-        ? payload['cognito:groups']
-        : [];
-    const hasAdminRole = groups.includes('admin');
-
-    if (!isAuthenticated || !hasAdminRole) {
-      const baseDomain = hostname.split(':')[0].replace(/^admin\./, '');
-      const protocol = request.nextUrl.protocol;
-      return NextResponse.redirect(`${protocol}//${baseDomain}/login`);
-    }
-  }
-
-  // --- Block /admin routes on non-admin subdomains (skip in dev for localhost) ---
+  // --- Block /admin routes on non-elevensys tenants (skip in dev for localhost) ---
   const isLocalhost = hostname.split(':')[0] === 'localhost';
   if (
-    !isAdminSubdomain &&
     !isLocalhost &&
+    tenant !== 'elevensys' &&
     (pathname === '/admin' || pathname.startsWith('/admin/'))
   ) {
     return NextResponse.redirect(new URL('/', request.url));
@@ -122,6 +100,19 @@ export async function proxy(request: NextRequest) {
   // Token expired with refresh token available - attempt async refresh.
   return handleTokenRefresh(request, requestHeaders, refreshToken, pathname);
 }
+
+export const config = {
+  matcher: [
+    /*
+     * Match all routes except:
+     * - _next/static (static files)
+     * - _next/image (image optimization)
+     * - favicon.ico, assets (public files)
+     * - api routes (no tenant scoping needed)
+     */
+    '/((?!_next/static|_next/image|favicon\\.ico|assets|api).*)',
+  ],
+};
 
 async function handleTokenRefresh(
   request: NextRequest,
@@ -164,16 +155,3 @@ async function handleTokenRefresh(
   response.cookies.set(AUTH_COOKIES.refreshToken, '', deletedCookie());
   return response;
 }
-
-export const config = {
-  matcher: [
-    /*
-     * Match all routes except:
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico, assets (public files)
-     * - api routes (no tenant scoping needed)
-     */
-    '/((?!_next/static|_next/image|favicon\\.ico|assets|api).*)',
-  ],
-};

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Egg } from 'lucide-react';
 
 import { FeedbackModal } from '@/components/layouts/feedback-modal';
+import { NavAdmin } from '@/components/layouts/nav-admin';
 import { NavMain } from '@/components/layouts/nav-main';
 import { NavSecondary } from '@/components/layouts/nav-secondary';
 import { NavTools } from '@/components/layouts/nav-tools';
@@ -70,6 +71,9 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
+          {user?.role === 'admin' && hasData(appSidebarData.navAdmin) && (
+            <NavAdmin items={appSidebarData.navAdmin} />
+          )}
           {hasData(appSidebarData.navMain) && (
             <NavMain
               items={appSidebarData.navMain}

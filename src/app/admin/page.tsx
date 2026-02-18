@@ -1,66 +1,24 @@
-'use client';
-
-import { Settings, Shield, Users } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 import MainLayout from '@/components/layouts/main-layout';
-import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { useAuth } from '@/contexts/auth-context';
+import { getUserFromSession } from '@/lib/auth';
 
-const PLACEHOLDER_CARDS = [
-  {
-    title: 'User Management',
-    description: 'View and manage users, assign roles, and control access.',
-    icon: Users,
-  },
-  {
-    title: 'Security',
-    description: 'Monitor authentication events and manage security settings.',
-    icon: Shield,
-  },
-  {
-    title: 'Settings',
-    description: 'Configure application settings and system preferences.',
-    icon: Settings,
-  },
-];
-
-export default function AdminPage() {
-  const { user } = useAuth();
+export default async function AdminWelcomePage() {
+  const user = await getUserFromSession();
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-full mx-auto'>
-          <ToolPageHeader
-            title='Admin Dashboard'
-            description={`Welcome back, ${user?.name ?? 'Admin'}.`}
-          />
-
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-            {PLACEHOLDER_CARDS.map(card => (
-              <Card
-                key={card.title}
-                className='opacity-60 cursor-not-allowed'
-              >
-                <CardHeader>
-                  <div className='flex items-center gap-3'>
-                    <card.icon className='h-5 w-5 text-muted-foreground' />
-                    <CardTitle className='text-lg'>{card.title}</CardTitle>
-                  </div>
-                  <CardDescription>{card.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
+      <section className='container mx-auto px-4 py-24'>
+        <div className='max-w-xl mx-auto text-center space-y-4'>
+          <div className='flex justify-center'>
+            <ShieldCheck className='h-12 w-12 text-primary' />
           </div>
-
-          <p className='text-sm text-muted-foreground mt-8 text-center'>
-            More admin features coming soon.
+          <h1 className='text-3xl font-bold'>
+            Welcome back, {user?.name ?? 'Admin'}
+          </h1>
+          <p className='text-muted-foreground'>
+            You are signed in as an administrator. Use the sidebar to navigate
+            the admin panel.
           </p>
         </div>
       </section>
