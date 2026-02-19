@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom';
-
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { toast } from 'sonner';
@@ -32,7 +31,7 @@ beforeAll(() => {
 jest.mock('@/components/layouts/main-layout', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="main-layout">{children}</div>
+    <div data-testid='main-layout'>{children}</div>
   ),
 }));
 
@@ -46,10 +45,10 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
     description: string;
     infoMessage?: string;
   }) => (
-    <div data-testid="tool-page-header">
+    <div data-testid='tool-page-header'>
       <h1>{title}</h1>
       <p>{description}</p>
-      {infoMessage && <p data-testid="info-message">{infoMessage}</p>}
+      {infoMessage && <p data-testid='info-message'>{infoMessage}</p>}
     </div>
   ),
 }));
@@ -70,21 +69,21 @@ jest.mock('next/link', () => ({
 // --- Mock icons ---
 
 jest.mock('lucide-react', () => ({
-  ArrowLeft: () => <span data-testid="icon-arrow-left" />,
-  Check: () => <span data-testid="icon-check" />,
-  Eye: () => <span data-testid="icon-eye" />,
-  EyeOff: () => <span data-testid="icon-eye-off" />,
-  Loader2: () => <span data-testid="icon-loader" />,
-  Save: () => <span data-testid="icon-save" />,
-  Settings: () => <span data-testid="icon-settings" />,
-  Trash2: () => <span data-testid="icon-trash" />,
+  ArrowLeft: () => <span data-testid='icon-arrow-left' />,
+  Check: () => <span data-testid='icon-check' />,
+  Eye: () => <span data-testid='icon-eye' />,
+  EyeOff: () => <span data-testid='icon-eye-off' />,
+  Loader2: () => <span data-testid='icon-loader' />,
+  Save: () => <span data-testid='icon-save' />,
+  Settings: () => <span data-testid='icon-settings' />,
+  Trash2: () => <span data-testid='icon-trash' />,
 }));
 
 // --- Mock UI components ---
 
 jest.mock('@/components/ui/alert', () => ({
   Alert: ({ children }: { children: React.ReactNode }) => (
-    <div role="alert">{children}</div>
+    <div role='alert'>{children}</div>
   ),
   AlertDescription: ({ children }: { children: React.ReactNode }) => (
     <span>{children}</span>
@@ -118,11 +117,9 @@ jest.mock('@/components/ui/button', () => ({
 }));
 
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardAction: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="card-action">{children}</div>
+    <div data-testid='card-action'>{children}</div>
   ),
   CardContent: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
@@ -131,7 +128,7 @@ jest.mock('@/components/ui/card', () => ({
     <p>{children}</p>
   ),
   CardFooter: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="card-footer">{children}</div>
+    <div data-testid='card-footer'>{children}</div>
   ),
   CardHeader: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
@@ -265,10 +262,7 @@ describe('TimesheetConfigPage', () => {
 
   it('renders Token input as password type by default', () => {
     render(<TimesheetConfigPage />);
-    expect(screen.getByLabelText('Token')).toHaveAttribute(
-      'type',
-      'password'
-    );
+    expect(screen.getByLabelText('Token')).toHaveAttribute('type', 'password');
   });
 
   it('renders help link with correct jiraInstance URL', () => {
@@ -294,10 +288,7 @@ describe('TimesheetConfigPage', () => {
     const toggle = screen.getByRole('button', { name: 'Show token' });
     await userEvent.click(toggle);
     await userEvent.click(screen.getByRole('button', { name: 'Hide token' }));
-    expect(screen.getByLabelText('Token')).toHaveAttribute(
-      'type',
-      'password'
-    );
+    expect(screen.getByLabelText('Token')).toHaveAttribute('type', 'password');
   });
 
   // --- Navigation links ---
@@ -308,9 +299,10 @@ describe('TimesheetConfigPage', () => {
       'href',
       '/timesheet/logwork'
     );
-    expect(
-      screen.getByText('Go to My Worklogs').closest('a')
-    ).toHaveAttribute('href', '/timesheet/worklogs');
+    expect(screen.getByText('Go to My Worklogs').closest('a')).toHaveAttribute(
+      'href',
+      '/timesheet/worklogs'
+    );
   });
 
   it('hides navigation links when not configured', () => {
@@ -330,9 +322,7 @@ describe('TimesheetConfigPage', () => {
 
   it('enables Clear button when configured', () => {
     render(<TimesheetConfigPage />);
-    expect(
-      screen.getByRole('button', { name: /Clear/i })
-    ).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: /Clear/i })).not.toBeDisabled();
   });
 
   it('clears form and saves empty settings on Clear click', async () => {
@@ -368,9 +358,7 @@ describe('TimesheetConfigPage', () => {
     render(<TimesheetConfigPage />);
     await userEvent.clear(screen.getByLabelText('Username'));
     await userEvent.type(screen.getByLabelText('Username'), 'newuser');
-    expect(
-      screen.getByRole('button', { name: /Save$/i })
-    ).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: /Save$/i })).not.toBeDisabled();
   });
 
   // --- Save validation ---
@@ -436,9 +424,7 @@ describe('TimesheetConfigPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /Save$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith(
-        'Settings saved successfully'
-      );
+      expect(toast.success).toHaveBeenCalledWith('Settings saved successfully');
     });
   });
 
@@ -476,7 +462,10 @@ describe('TimesheetConfigPage', () => {
 
   it('updates help link URL when jira instance changes', async () => {
     render(<TimesheetConfigPage />);
-    await userEvent.selectOptions(screen.getByLabelText('Jira Instance'), 'jira3');
+    await userEvent.selectOptions(
+      screen.getByLabelText('Jira Instance'),
+      'jira3'
+    );
     expect(screen.getByText('here')).toHaveAttribute(
       'href',
       'https://insight.fsoft.com.vn/jira3/secure/ViewProfile.jspa'

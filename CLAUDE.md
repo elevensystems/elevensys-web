@@ -1,10 +1,13 @@
 # CLAUDE.md - AI Assistant Guide for Elevensys Web
 
-This document provides comprehensive guidance for AI assistants working with the Elevensys Web codebase.
+This document provides comprehensive guidance for AI assistants working with the Elevensys Web
+codebase.
 
 ## Project Overview
 
-**Elevensys Web** is a full-stack web application providing AI-powered productivity tools. It's built with Next.js 16 (App Router), React 19, and TypeScript 5, featuring AWS Cognito authentication with role-based access control.
+**Elevensys Web** is a full-stack web application providing AI-powered productivity tools. It's
+built with Next.js 16 (App Router), React 19, and TypeScript 5, featuring AWS Cognito authentication
+with role-based access control.
 
 ### Quick Start
 
@@ -36,19 +39,19 @@ npm run test:coverage
 
 ## Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| Framework | Next.js 16.0.10 (App Router, Turbopack) |
-| UI Library | React 19.2.0 |
-| Language | TypeScript 5 (strict mode) |
-| Styling | Tailwind CSS v4 |
-| Components | shadcn/ui + Radix UI primitives |
-| Icons | lucide-react |
-| Editor | Monaco Editor |
-| Auth | AWS Cognito OAuth2 (PKCE) |
-| Theming | next-themes |
-| Notifications | sonner |
-| Package Manager | pnpm |
+| Category        | Technology                              |
+| --------------- | --------------------------------------- |
+| Framework       | Next.js 16.0.10 (App Router, Turbopack) |
+| UI Library      | React 19.2.0                            |
+| Language        | TypeScript 5 (strict mode)              |
+| Styling         | Tailwind CSS v4                         |
+| Components      | shadcn/ui + Radix UI primitives         |
+| Icons           | lucide-react                            |
+| Editor          | Monaco Editor                           |
+| Auth            | AWS Cognito OAuth2 (PKCE)               |
+| Theming         | next-themes                             |
+| Notifications   | sonner                                  |
+| Package Manager | pnpm                                    |
 
 ## Directory Structure
 
@@ -130,13 +133,13 @@ public/
 
 ### Naming
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Components | PascalCase | `MainLayout`, `ProAccessOnly` |
-| Files/Folders | kebab-case | `password-generator`, `auth-context.tsx` |
-| Variables/Functions | camelCase | `getUserFromSession`, `handleCopy` |
-| Constants | UPPER_SNAKE_CASE | `AUTH_COOKIES`, `COPY_FEEDBACK_DURATION` |
-| Types/Interfaces | PascalCase | `AuthUser`, `CharacterOptions` |
+| Type                | Convention       | Example                                  |
+| ------------------- | ---------------- | ---------------------------------------- |
+| Components          | PascalCase       | `MainLayout`, `ProAccessOnly`            |
+| Files/Folders       | kebab-case       | `password-generator`, `auth-context.tsx` |
+| Variables/Functions | camelCase        | `getUserFromSession`, `handleCopy`       |
+| Constants           | UPPER_SNAKE_CASE | `AUTH_COOKIES`, `COPY_FEEDBACK_DURATION` |
+| Types/Interfaces    | PascalCase       | `AuthUser`, `CharacterOptions`           |
 
 ### File Organization
 
@@ -157,7 +160,6 @@ public/
 // 3. Third-party libraries
 // 4. @/ aliased imports
 // 5. Relative imports
-
 import { useCallback, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
@@ -167,6 +169,8 @@ import { toast } from 'sonner';
 import MainLayout from '@/components/layouts/main-layout';
 import { Button } from '@/components/ui/button';
 import type { AuthUser } from '@/types/auth';
+
+// Always use 'use client' directive for client components
 
 // Define interfaces above component
 interface MyComponentProps {
@@ -182,11 +186,7 @@ export default function MyComponent({ title, user }: MyComponentProps) {
     // Implementation
   }, []);
 
-  return (
-    <MainLayout>
-      {/* Component JSX */}
-    </MainLayout>
-  );
+  return <MainLayout>{/* Component JSX */}</MainLayout>;
 }
 ```
 
@@ -241,10 +241,7 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!body.field) {
-      return NextResponse.json(
-        { error: 'Field is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Field is required' }, { status: 400 });
     }
 
     // Process request
@@ -256,10 +253,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 ```
@@ -306,11 +300,7 @@ function MyComponent() {
 import { ProAccessOnly } from '@/components/layouts/pro-access-only';
 
 function ProFeaturePage() {
-  return (
-    <ProAccessOnly>
-      {/* Pro-only content */}
-    </ProAccessOnly>
-  );
+  return <ProAccessOnly>{/* Pro-only content */}</ProAccessOnly>;
 }
 ```
 
@@ -324,11 +314,13 @@ function ProFeaturePage() {
 ```tsx
 import { cn } from '@/lib/utils';
 
-<div className={cn(
-  'base-classes',
-  condition && 'conditional-class',
-  variant === 'primary' && 'primary-styles'
-)} />
+<div
+  className={cn(
+    'base-classes',
+    condition && 'conditional-class',
+    variant === 'primary' && 'primary-styles'
+  )}
+/>;
 ```
 
 ### CSS Variables (Theme)
@@ -429,13 +421,13 @@ Components are installed to `src/components/ui/`.
 
 ## Testing
 
-| Category | Technology |
-|----------|------------|
-| Test Runner | Jest 30 (via `next/jest`) |
+| Category          | Technology                                       |
+| ----------------- | ------------------------------------------------ |
+| Test Runner       | Jest 30 (via `next/jest`)                        |
 | Component Testing | React Testing Library (`@testing-library/react`) |
-| User Interactions | `@testing-library/user-event` |
-| Assertions | `@testing-library/jest-dom` |
-| Environment | jsdom (`jest-environment-jsdom`) |
+| User Interactions | `@testing-library/user-event`                    |
+| Assertions        | `@testing-library/jest-dom`                      |
+| Environment       | jsdom (`jest-environment-jsdom`)                 |
 
 ### Commands
 
@@ -454,16 +446,21 @@ npx jest path/to/file      # Run a specific test file
 ### Test File Conventions
 
 - Place test files next to the source file: `page.tsx` → `page.test.tsx`
-- Test descriptions start with a verb: `renders`, `calls`, `displays`, `hides`, `passes`, `disables`, `checks`
-- Mock hooks to control component state, mock complex UI components (Radix, layouts) as simple HTML elements
+- Test descriptions start with a verb: `renders`, `calls`, `displays`, `hides`, `passes`,
+  `disables`, `checks`
+- Mock hooks to control component state, mock complex UI components (Radix, layouts) as simple HTML
+  elements
 - Use `data-testid` on mocked components for reliable selection
 - Group related tests with comments: `// --- Loading state ---`, `// --- Search card ---`
 
 ### Mocking Strategy
 
-- **Hooks** (`useTimesheetSettings`, `useWorklogs`): Mock at module level with `jest.fn()` to control all state
-- **Layout components** (`MainLayout`, `ToolPageHeader`): Mock as simple div wrappers rendering children/props
-- **Child components** (`WorklogRow`, `BulkDeleteAction`): Mock with simplified HTML exposing key props via `data-testid`
+- **Hooks** (`useTimesheetSettings`, `useWorklogs`): Mock at module level with `jest.fn()` to
+  control all state
+- **Layout components** (`MainLayout`, `ToolPageHeader`): Mock as simple div wrappers rendering
+  children/props
+- **Child components** (`WorklogRow`, `BulkDeleteAction`): Mock with simplified HTML exposing key
+  props via `data-testid`
 - **UI components** (`Button`, `Card`, `Table`, `Checkbox`): Mock as native HTML equivalents
 - **next/link**: Mock as `<a>` tag
 - **lucide-react icons**: Mock as `<span>` with `data-testid`

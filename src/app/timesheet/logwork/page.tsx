@@ -88,10 +88,7 @@ function loadSavedEntries(projectId?: string): WorkEntry[] {
   return [createDefaultEntry()];
 }
 
-function saveEntriesToStorage(
-  entries: WorkEntry[],
-  projectId?: string
-): void {
+function saveEntriesToStorage(entries: WorkEntry[], projectId?: string): void {
   try {
     const toSave = entries
       .filter(e => e.issueKey.trim())
@@ -138,9 +135,7 @@ export default function LogWorkPage() {
   } = useLogWorkSubmission(settings);
 
   // Work entries state
-  const [entries, setEntries] = useState<WorkEntry[]>([
-    createDefaultEntry(),
-  ]);
+  const [entries, setEntries] = useState<WorkEntry[]>([createDefaultEntry()]);
   const [dateMode] = useState<'range' | 'specific'>('specific');
   const [startDate] = useState(getTodayISO());
   const [endDate] = useState(getTodayISO());
@@ -148,16 +143,11 @@ export default function LogWorkPage() {
   const [error, setError] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  const parsedDates = useMemo(
-    () => parseSpecificDates(datesText),
-    [datesText]
-  );
+  const parsedDates = useMemo(() => parseSpecificDates(datesText), [datesText]);
 
   const removeDate = useCallback(
     (dateToRemove: string) => {
-      const updated = parsedDates
-        .filter(d => d !== dateToRemove)
-        .join(', ');
+      const updated = parsedDates.filter(d => d !== dateToRemove).join(', ');
       setDatesText(updated);
     },
     [parsedDates]
@@ -255,34 +245,23 @@ export default function LogWorkPage() {
     setShowConfirmDialog(true);
   }, [validateEntries]);
 
-  const processResults = useCallback(
-    (logResults: LogWorkResult[]) => {
-      const successCount = logResults.filter(r => r.success).length;
-      const errorCount = logResults.filter(r => !r.success).length;
+  const processResults = useCallback((logResults: LogWorkResult[]) => {
+    const successCount = logResults.filter(r => r.success).length;
+    const errorCount = logResults.filter(r => !r.success).length;
 
-      if (errorCount === 0) {
-        toast.success(
-          `All ${successCount} entries logged successfully!`
-        );
-      } else if (successCount > 0) {
-        toast.warning(
-          `${successCount} succeeded, ${errorCount} failed`
-        );
-        // Keep only failed entries in the form so user can edit and resubmit
-        const failedIssueKeys = new Set(
-          logResults
-            .filter(r => !r.success)
-            .map(r => r.entry.issueKey)
-        );
-        setEntries(prev =>
-          prev.filter(e => failedIssueKeys.has(e.issueKey))
-        );
-      } else {
-        toast.error(`All ${errorCount} entries failed`);
-      }
-    },
-    []
-  );
+    if (errorCount === 0) {
+      toast.success(`All ${successCount} entries logged successfully!`);
+    } else if (successCount > 0) {
+      toast.warning(`${successCount} succeeded, ${errorCount} failed`);
+      // Keep only failed entries in the form so user can edit and resubmit
+      const failedIssueKeys = new Set(
+        logResults.filter(r => !r.success).map(r => r.entry.issueKey)
+      );
+      setEntries(prev => prev.filter(e => failedIssueKeys.has(e.issueKey)));
+    } else {
+      toast.error(`All ${errorCount} entries failed`);
+    }
+  }, []);
 
   const handleLogWork = useCallback(async () => {
     setShowConfirmDialog(false);
@@ -414,8 +393,7 @@ export default function LogWorkPage() {
                           : 'text-foreground'
                     }`}
                   >
-                    {formatHours(totalHours)}h /{' '}
-                    {formatHours(STANDARD_HOURS)}h
+                    {formatHours(totalHours)}h / {formatHours(STANDARD_HOURS)}h
                   </span>
                 </div>
               </CardAction>
@@ -489,9 +467,7 @@ export default function LogWorkPage() {
                       ) : (
                         <Send className='h-4 w-4' />
                       )}
-                      {isSubmitting
-                        ? 'Submitting...'
-                        : 'Submit Work Logs'}
+                      {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
                     </Button>
                     <Button
                       variant='outline'

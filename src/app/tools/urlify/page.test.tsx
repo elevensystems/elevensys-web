@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom';
-
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { toast } from 'sonner';
@@ -32,7 +31,7 @@ jest.mock('@/hooks/use-copy-to-clipboard', () => ({
 jest.mock('@/components/layouts/main-layout', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="main-layout">{children}</div>
+    <div data-testid='main-layout'>{children}</div>
   ),
 }));
 
@@ -48,11 +47,11 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
     infoMessage?: string;
     error?: string;
   }) => (
-    <div data-testid="tool-page-header">
+    <div data-testid='tool-page-header'>
       <h1>{title}</h1>
       <p>{description}</p>
-      {infoMessage && <p data-testid="info-message">{infoMessage}</p>}
-      {error && <p data-testid="error-message">{error}</p>}
+      {infoMessage && <p data-testid='info-message'>{infoMessage}</p>}
+      {error && <p data-testid='error-message'>{error}</p>}
     </div>
   ),
 }));
@@ -60,11 +59,11 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
 // --- Mock icons ---
 
 jest.mock('lucide-react', () => ({
-  CalendarClock: () => <span data-testid="icon-calendar-clock" />,
-  Check: () => <span data-testid="icon-check" />,
-  Copy: () => <span data-testid="icon-copy" />,
-  Link2: () => <span data-testid="icon-link2" />,
-  Settings: () => <span data-testid="icon-settings" />,
+  CalendarClock: () => <span data-testid='icon-calendar-clock' />,
+  Check: () => <span data-testid='icon-check' />,
+  Copy: () => <span data-testid='icon-copy' />,
+  Link2: () => <span data-testid='icon-link2' />,
+  Settings: () => <span data-testid='icon-settings' />,
 }));
 
 // --- Mock UI components ---
@@ -81,9 +80,7 @@ jest.mock('@/components/ui/button', () => ({
 }));
 
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardContent: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),
@@ -106,7 +103,7 @@ jest.mock('@/components/ui/checkbox', () => ({
     onCheckedChange?: (checked: boolean) => void;
   }) => (
     <input
-      type="checkbox"
+      type='checkbox'
       id={id}
       checked={checked}
       onChange={e => onCheckedChange?.(e.target.checked)}
@@ -230,9 +227,7 @@ describe('UrlifyPage', () => {
 
   it('displays error when submitting empty URL', async () => {
     render(<UrlifyPage />);
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
     expect(screen.getByTestId('error-message')).toHaveTextContent(
       'Please enter a URL'
     );
@@ -240,13 +235,8 @@ describe('UrlifyPage', () => {
 
   it('displays error for invalid URL', async () => {
     render(<UrlifyPage />);
-    await userEvent.type(
-      screen.getByLabelText('Enter Long URL'),
-      'not-a-url'
-    );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.type(screen.getByLabelText('Enter Long URL'), 'not-a-url');
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
     expect(screen.getByTestId('error-message')).toHaveTextContent(
       /must start with http:\/\/ or https:\/\//
     );
@@ -255,17 +245,12 @@ describe('UrlifyPage', () => {
   it('displays error for invalid TTL value', async () => {
     render(<UrlifyPage />);
     await userEvent.click(screen.getByLabelText('Auto-delete link'));
-    await userEvent.type(
-      screen.getByLabelText('Expires After (days)'),
-      '-5'
-    );
+    await userEvent.type(screen.getByLabelText('Expires After (days)'), '-5');
     await userEvent.type(
       screen.getByLabelText('Enter Long URL'),
       'https://example.com'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
     expect(screen.getByTestId('error-message')).toHaveTextContent(
       'TTL must be a positive number of days'
     );
@@ -279,9 +264,7 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/urlify', {
@@ -303,13 +286,8 @@ describe('UrlifyPage', () => {
       'https://example.com/long'
     );
     await userEvent.click(screen.getByLabelText('Auto-delete link'));
-    await userEvent.type(
-      screen.getByLabelText('Expires After (days)'),
-      '7'
-    );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.type(screen.getByLabelText('Expires After (days)'), '7');
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/urlify', {
@@ -330,14 +308,10 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText('https://short.url/abc123')
-      ).toBeInTheDocument();
+      expect(screen.getByText('https://short.url/abc123')).toBeInTheDocument();
     });
   });
 
@@ -347,9 +321,7 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
       expect(screen.getByText('abc123')).toBeInTheDocument();
@@ -365,14 +337,14 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith(
         'URL shortened successfully',
-        expect.objectContaining({ description: 'Your short URL is ready to use.' })
+        expect.objectContaining({
+          description: 'Your short URL is ready to use.',
+        })
       );
     });
   });
@@ -386,9 +358,7 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
       expect(screen.getByTestId('error-message')).toHaveTextContent(
@@ -404,9 +374,7 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
@@ -426,9 +394,7 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
       expect(screen.getByTestId('error-message')).toHaveTextContent(
@@ -446,9 +412,7 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     expect(screen.getByText('Shortening...')).toBeInTheDocument();
   });
@@ -460,9 +424,7 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     expect(screen.getByText('Shortening...').closest('button')).toBeDisabled();
   });
@@ -475,14 +437,10 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText('https://short.url/abc123')
-      ).toBeInTheDocument();
+      expect(screen.getByText('https://short.url/abc123')).toBeInTheDocument();
     });
 
     await userEvent.click(
@@ -509,9 +467,7 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com/long'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
       expect(
@@ -538,16 +494,11 @@ describe('UrlifyPage', () => {
     render(<UrlifyPage />);
 
     // Trigger an error first
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
     expect(screen.getByTestId('error-message')).toBeInTheDocument();
 
     // Type in URL input to clear
-    await userEvent.type(
-      screen.getByLabelText('Enter Long URL'),
-      'h'
-    );
+    await userEvent.type(screen.getByLabelText('Enter Long URL'), 'h');
     expect(screen.queryByTestId('error-message')).not.toBeInTheDocument();
   });
 
@@ -568,9 +519,7 @@ describe('UrlifyPage', () => {
       screen.getByLabelText('Enter Long URL'),
       'https://example.com'
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: /Shorten URL/i })
-    );
+    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
 
     await waitFor(() => {
       expect(screen.getByText('Never')).toBeInTheDocument();

@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom';
-
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -34,7 +33,7 @@ jest.mock('@/hooks/use-worklogs', () => ({
 jest.mock('@/components/layouts/main-layout', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="main-layout">{children}</div>
+    <div data-testid='main-layout'>{children}</div>
   ),
 }));
 
@@ -48,10 +47,10 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
     description: string;
     error?: string;
   }) => (
-    <div data-testid="tool-page-header">
+    <div data-testid='tool-page-header'>
       <h1>{title}</h1>
       <p>{description}</p>
-      {error && <div data-testid="header-error">{error}</div>}
+      {error && <div data-testid='header-error'>{error}</div>}
     </div>
   ),
 }));
@@ -76,7 +75,7 @@ jest.mock('./_components/bulk-delete-action', () => ({
     onBulkDelete: () => void;
     onClearSelection: () => void;
   }) => (
-    <div data-testid="bulk-delete-action">
+    <div data-testid='bulk-delete-action'>
       <span>{selectedCount} selected</span>
       <button onClick={onBulkDelete}>Bulk Delete</button>
       <button onClick={onClearSelection}>Clear Selection</button>
@@ -103,10 +102,10 @@ jest.mock('next/link', () => ({
 }));
 
 jest.mock('lucide-react', () => ({
-  AlertCircle: () => <span data-testid="icon-alert-circle" />,
-  ClipboardList: () => <span data-testid="icon-clipboard-list" />,
-  Loader2: () => <span data-testid="icon-loader" />,
-  Search: () => <span data-testid="icon-search" />,
+  AlertCircle: () => <span data-testid='icon-alert-circle' />,
+  ClipboardList: () => <span data-testid='icon-clipboard-list' />,
+  Loader2: () => <span data-testid='icon-loader' />,
+  Search: () => <span data-testid='icon-search' />,
 }));
 
 jest.mock('@/components/ui/alert', () => ({
@@ -117,7 +116,7 @@ jest.mock('@/components/ui/alert', () => ({
     children: React.ReactNode;
     className?: string;
   }) => (
-    <div role="alert" {...props}>
+    <div role='alert' {...props}>
       {children}
     </div>
   ),
@@ -136,14 +135,12 @@ jest.mock('@/components/ui/button', () => ({
 }));
 
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardContent: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),
   CardDescription: ({ children }: { children: React.ReactNode }) => (
-    <p data-testid="card-description">{children}</p>
+    <p data-testid='card-description'>{children}</p>
   ),
   CardHeader: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
@@ -164,7 +161,7 @@ jest.mock('@/components/ui/checkbox', () => ({
     'aria-label'?: string;
   }) => (
     <input
-      type="checkbox"
+      type='checkbox'
       checked={checked === true}
       onChange={() => onCheckedChange?.(!checked)}
       {...props}
@@ -178,9 +175,9 @@ jest.mock('@/components/ui/date-range-picker', () => ({
   }: {
     onRangeChange?: (from: string, to: string) => void;
   }) => (
-    <div data-testid="date-range-picker">
+    <div data-testid='date-range-picker'>
       <button
-        data-testid="change-date-range"
+        data-testid='change-date-range'
         onClick={() => onRangeChange?.('2025-02-01', '2025-02-28')}
       />
     </div>
@@ -197,7 +194,9 @@ jest.mock('@/components/ui/table', () => ({
   TableHead: ({
     children,
     ...props
-  }: { children?: React.ReactNode } & React.HTMLAttributes<HTMLTableCellElement>) => (
+  }: {
+    children?: React.ReactNode;
+  } & React.HTMLAttributes<HTMLTableCellElement>) => (
     <th {...props}>{children}</th>
   ),
   TableHeader: ({
@@ -368,9 +367,7 @@ describe('MyWorklogsPage', () => {
 
   it('renders search button', () => {
     render(<MyWorklogsPage />);
-    expect(
-      screen.getByRole('button', { name: /Search/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Search/i })).toBeInTheDocument();
   });
 
   it('disables search button when not configured', () => {
@@ -388,9 +385,7 @@ describe('MyWorklogsPage', () => {
       isLoading: true,
     });
     render(<MyWorklogsPage />);
-    expect(
-      screen.getByRole('button', { name: /Searching/i })
-    ).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Searching/i })).toBeDisabled();
   });
 
   it('renders "Searching..." text while loading', () => {
@@ -457,9 +452,7 @@ describe('MyWorklogsPage', () => {
 
   it('hides BulkDeleteAction when worklogs are empty', () => {
     render(<MyWorklogsPage />);
-    expect(
-      screen.queryByTestId('bulk-delete-action')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('bulk-delete-action')).not.toBeInTheDocument();
   });
 
   // --- Worklogs table ---
@@ -537,9 +530,7 @@ describe('MyWorklogsPage', () => {
       allSelected: true,
     });
     render(<MyWorklogsPage />);
-    expect(
-      screen.getByRole('checkbox', { name: 'Select all' })
-    ).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Select all' })).toBeChecked();
   });
 
   it('unchecks select-all checkbox when none are selected', () => {
@@ -563,9 +554,7 @@ describe('MyWorklogsPage', () => {
       totalHours: 6.5,
     });
     render(<MyWorklogsPage />);
-    await userEvent.click(
-      screen.getByRole('checkbox', { name: 'Select all' })
-    );
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Select all' }));
     expect(mockToggleSelectAll).toHaveBeenCalledTimes(1);
   });
 

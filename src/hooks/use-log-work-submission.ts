@@ -173,9 +173,7 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
 
       for (let i = 0; i < validEntries.length; i++) {
         const entry = validEntries[i];
-        setProgressText(
-          `Logging ${entry.issueKey} (${i + 1}/${total})...`
-        );
+        setProgressText(`Logging ${entry.issueKey} (${i + 1}/${total})...`);
         setProgress(Math.round(((i + 1) / total) * 100));
 
         let dates: string[];
@@ -234,9 +232,7 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
 
       for (let i = 0; i < failedResults.length; i++) {
         const { entry, failedDates } = failedResults[i];
-        setProgressText(
-          `Retrying ${entry.issueKey} (${i + 1}/${total})...`
-        );
+        setProgressText(`Retrying ${entry.issueKey} (${i + 1}/${total})...`);
         setProgress(Math.round(((i + 1) / total) * 100));
 
         let dates: string[];
@@ -247,9 +243,7 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
           isPeriod = true;
         } else {
           // Only retry the dates that previously failed
-          dates = failedDates && failedDates.length > 0
-            ? failedDates
-            : [];
+          dates = failedDates && failedDates.length > 0 ? failedDates : [];
           isPeriod = false;
         }
 

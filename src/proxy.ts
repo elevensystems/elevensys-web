@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { AUTH_COOKIES, decodeJwt, isTokenExpired } from '@/lib/auth';
 import { authCookie, deletedCookie } from '@/lib/auth-cookies';
-import { getTenantConfig, resolveTenantFromHostname } from '@/lib/domain-config';
+import {
+  getTenantConfig,
+  resolveTenantFromHostname,
+} from '@/lib/domain-config';
 
 const AUTH_ROUTES = ['/login', '/signup', '/forgot-password'];
 

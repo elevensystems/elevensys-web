@@ -18,7 +18,6 @@ import {
 
 import MainLayout from '@/components/layouts/main-layout';
 import { Badge } from '@/components/ui/badge';
-import { useDomain } from '@/contexts/domain-context';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -30,6 +29,7 @@ import {
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ShineBorder } from '@/components/ui/shine-border';
+import { useDomain } from '@/contexts/domain-context';
 import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 
 const timesheetActions = [

@@ -4,18 +4,18 @@ A collection of productivity tools built with Next.js, React, and Tailwind CSS.
 
 ## Tools
 
-| Tool | Description |
-| --- | --- |
-| **Urlify** | Shorten long URLs to make them easier to share and manage |
-| **JSON Diffinity** | Compare two JSON payloads with editor-style highlighting |
-| **JSON Objectify** | Transform JSON into clean JavaScript object notation |
-| **Translately** | Translate between Vietnamese and English with tone control |
-| **Passly** | Generate secure, random passwords with customizable options |
-| **NPM Converter** | Convert Lerna publish output to npm install commands |
-| **PR Link Shrinker** | Shorten GitHub PR URLs to a compact, readable format |
-| **Summary Smith** | Generate formatted status summaries for Rally stories |
+| Tool                 | Description                                                  |
+| -------------------- | ------------------------------------------------------------ |
+| **Urlify**           | Shorten long URLs to make them easier to share and manage    |
+| **JSON Diffinity**   | Compare two JSON payloads with editor-style highlighting     |
+| **JSON Objectify**   | Transform JSON into clean JavaScript object notation         |
+| **Translately**      | Translate between Vietnamese and English with tone control   |
+| **Passly**           | Generate secure, random passwords with customizable options  |
+| **NPM Converter**    | Convert Lerna publish output to npm install commands         |
+| **PR Link Shrinker** | Shorten GitHub PR URLs to a compact, readable format         |
+| **Summary Smith**    | Generate formatted status summaries for Rally stories        |
 | **Prompt Templates** | Browse and copy prompt templates for AI agents and workflows |
-| **Beatly** | Get song recommendations based on your favorite artists |
+| **Beatly**           | Get song recommendations based on your favorite artists      |
 
 ## Prerequisites
 
@@ -61,13 +61,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Scripts
 
-| Script | Description |
-| --- | --- |
-| `npm run dev` | Start the development server (Turbopack) |
-| `npm run build` | Create a production build |
-| `npm start` | Start the production server |
-| `npm run lint` | Run ESLint |
-| `npm run prettier` | Format code with Prettier |
+| Script             | Description                              |
+| ------------------ | ---------------------------------------- |
+| `npm run dev`      | Start the development server (Turbopack) |
+| `npm run build`    | Create a production build                |
+| `npm start`        | Start the production server              |
+| `npm run lint`     | Run ESLint                               |
+| `npm run prettier` | Format code with Prettier                |
 
 ## Tech Stack
 

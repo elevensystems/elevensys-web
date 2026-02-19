@@ -192,8 +192,8 @@ export default function NpmConverterPage() {
                 {!result ? (
                   <div className='flex items-center justify-center h-64 text-muted-foreground'>
                     <p className='text-center'>
-                      Paste Lerna output and click &quot;Convert to NPM Install&quot; to
-                      generate the npm install command
+                      Paste Lerna output and click &quot;Convert to NPM
+                      Install&quot; to generate the npm install command
                     </p>
                   </div>
                 ) : (

@@ -15,8 +15,7 @@ export async function POST(
     if (!authHeader || !jiraInstance) {
       return NextResponse.json(
         {
-          error:
-            'Missing required fields: Authorization header, jiraInstance',
+          error: 'Missing required fields: Authorization header, jiraInstance',
         },
         { status: 400 }
       );

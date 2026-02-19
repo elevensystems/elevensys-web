@@ -145,8 +145,8 @@ export default function PRLinkShrinkerPage() {
                 {!result ? (
                   <div className='flex items-center justify-center h-64 text-muted-foreground'>
                     <p className='text-center'>
-                      Paste GitHub PR URLs and click &quot;Shorten Links&quot; to generate
-                      the shortened format
+                      Paste GitHub PR URLs and click &quot;Shorten Links&quot;
+                      to generate the shortened format
                     </p>
                   </div>
                 ) : (

@@ -2,12 +2,7 @@
 
 import Link from 'next/link';
 
-import {
-  AlertCircle,
-  ClipboardList,
-  Loader2,
-  Search,
-} from 'lucide-react';
+import { AlertCircle, ClipboardList, Loader2, Search } from 'lucide-react';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
@@ -148,8 +143,8 @@ export default function MyWorklogsPage() {
               {worklogs.length > 0 && (
                 <>
                   <CardDescription>
-                    {worklogs.length} entries &middot;{' '}
-                    {totalHours.toFixed(1)} total hours
+                    {worklogs.length} entries &middot; {totalHours.toFixed(1)}{' '}
+                    total hours
                   </CardDescription>
                   <BulkDeleteAction
                     selectedCount={selectedIds.size}
@@ -165,13 +160,11 @@ export default function MyWorklogsPage() {
               {worklogs.length === 0 ? (
                 <div className='flex flex-col items-center justify-center h-40 text-muted-foreground'>
                   {hasSearched ? (
-                    <p>
-                      No worklogs found for the selected date range.
-                    </p>
+                    <p>No worklogs found for the selected date range.</p>
                   ) : (
                     <p>
-                      Select a date range and click &quot;Search&quot;
-                      to view your worklogs.
+                      Select a date range and click &quot;Search&quot; to view
+                      your worklogs.
                     </p>
                   )}
                 </div>
@@ -195,9 +188,7 @@ export default function MyWorklogsPage() {
                         </TableHead>
                         <TableHead>Ticket ID</TableHead>
                         <TableHead>Description</TableHead>
-                        <TableHead className='text-right'>
-                          Hours
-                        </TableHead>
+                        <TableHead className='text-right'>Hours</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Status</TableHead>

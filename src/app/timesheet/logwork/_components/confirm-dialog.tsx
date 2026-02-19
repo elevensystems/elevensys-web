@@ -77,14 +77,11 @@ export function LogWorkConfirmDialog({
         <div className='space-y-3 py-2'>
           {/* Dates */}
           <div className='space-y-1'>
-            <p className='text-sm font-medium text-muted-foreground'>
-              Dates
-            </p>
+            <p className='text-sm font-medium text-muted-foreground'>Dates</p>
             <div className='flex flex-wrap gap-1.5'>
               {dateMode === 'range' ? (
                 <Badge variant='outline' className='font-mono text-xs'>
-                  {formatDateForApi(startDate)} →{' '}
-                  {formatDateForApi(endDate)}
+                  {formatDateForApi(startDate)} → {formatDateForApi(endDate)}
                 </Badge>
               ) : (
                 parsedDates.map(date => (
@@ -102,9 +99,7 @@ export function LogWorkConfirmDialog({
 
           {/* Tickets */}
           <div className='space-y-1'>
-            <p className='text-sm font-medium text-muted-foreground'>
-              Tickets
-            </p>
+            <p className='text-sm font-medium text-muted-foreground'>Tickets</p>
             <div className='rounded-md border'>
               <Table>
                 <TableHeader className='bg-muted'>
@@ -129,9 +124,7 @@ export function LogWorkConfirmDialog({
                       <TableCell className='text-sm py-1.5'>
                         <Badge
                           variant='outline'
-                          className={getWorkTypeBadgeClass(
-                            entry.typeOfWork
-                          )}
+                          className={getWorkTypeBadgeClass(entry.typeOfWork)}
                         >
                           {entry.typeOfWork}
                         </Badge>
@@ -151,10 +144,7 @@ export function LogWorkConfirmDialog({
         </div>
 
         <DialogFooter className='gap-2'>
-          <Button
-            variant='outline'
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant='outline' onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={onConfirm}>

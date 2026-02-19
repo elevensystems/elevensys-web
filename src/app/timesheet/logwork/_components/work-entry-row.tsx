@@ -16,10 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
 import { TableCell, TableRow } from '@/components/ui/table';
-import {
-  HOUR_STEP,
-  MIN_HOURS,
-} from '@/lib/timesheet';
+import { HOUR_STEP, MIN_HOURS } from '@/lib/timesheet';
 import {
   type JiraIssue,
   WORK_TYPES,
@@ -32,7 +29,11 @@ interface WorkEntryRowProps {
   issues: JiraIssue[];
   issuesByKey: Map<string, JiraIssue>;
   isLoadingIssues: boolean;
-  onUpdate: (id: string, field: keyof WorkEntry, value: string | number) => void;
+  onUpdate: (
+    id: string,
+    field: keyof WorkEntry,
+    value: string | number
+  ) => void;
   onRemove: (id: string) => void;
 }
 
@@ -94,9 +95,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           itemToStringLabel={(issue: JiraIssue) => issue.key}
         >
           <ComboboxInput
-            placeholder={
-              isLoadingIssues ? 'Loading...' : 'Select ticket'
-            }
+            placeholder={isLoadingIssues ? 'Loading...' : 'Select ticket'}
             className='h-8 font-mono'
             disabled={isLoadingIssues}
             showClear
@@ -105,9 +104,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
             <ComboboxList>
               {(issue: JiraIssue) => (
                 <ComboboxItem key={issue.id} value={issue}>
-                  <span className='font-mono shrink-0'>
-                    {issue.key}
-                  </span>
+                  <span className='font-mono shrink-0'>{issue.key}</span>
                 </ComboboxItem>
               )}
             </ComboboxList>
@@ -125,10 +122,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
         />
       </TableCell>
       <TableCell>
-        <NativeSelect
-          value={entry.typeOfWork}
-          onChange={handleTypeChange}
-        >
+        <NativeSelect value={entry.typeOfWork} onChange={handleTypeChange}>
           {WORK_TYPES.map(type => (
             <option key={type} value={type}>
               {type}

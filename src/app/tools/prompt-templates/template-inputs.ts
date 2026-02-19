@@ -88,8 +88,7 @@ export const areRequiredInputsFilled = (
 ): boolean => {
   return config.inputs
     .filter(
-      input =>
-        input.required && input.type !== 'image' && input.type !== 'file'
+      input => input.required && input.type !== 'image' && input.type !== 'file'
     )
     .every(input => {
       const value = inputValues[input.id]?.trim();
@@ -111,8 +110,7 @@ export const TEMPLATE_INPUT_CONFIGS: TemplateInputConfig[] = [
         placeholder: 'https://ghe.coxautoinc.com/org/repo/pull/12345',
         type: 'url',
         required: true,
-        pattern:
-          'https://ghe.coxautoinc.com/Autotrader/find-car/pull/15050',
+        pattern: 'https://ghe.coxautoinc.com/Autotrader/find-car/pull/15050',
         helpText: 'The full URL of the Pull Request to review',
       },
     ],
@@ -126,8 +124,7 @@ export const TEMPLATE_INPUT_CONFIGS: TemplateInputConfig[] = [
         placeholder: 'https://ghe.coxautoinc.com/org/repo/pull/12345',
         type: 'url',
         required: true,
-        pattern:
-          'https://ghe.coxautoinc.com/Autotrader/find-car/pull/15050',
+        pattern: 'https://ghe.coxautoinc.com/Autotrader/find-car/pull/15050',
         helpText: 'The full URL of the Pull Request to review locally',
       },
     ],
@@ -190,7 +187,8 @@ export const TEMPLATE_INPUT_CONFIGS: TemplateInputConfig[] = [
         required: true,
         pattern: '{{TARGET_BRANCH}}',
         defaultValue: 'origin/master',
-        helpText: 'The remote branch to compare against (default: origin/master)',
+        helpText:
+          'The remote branch to compare against (default: origin/master)',
       },
       {
         id: 'test_file_path',
@@ -213,7 +211,7 @@ export const TEMPLATE_INPUT_CONFIGS: TemplateInputConfig[] = [
         type: 'text',
         required: true,
         pattern: '{{BRANCH}}',
-        helpText: "Your current feature/develop branch name",
+        helpText: 'Your current feature/develop branch name',
       },
     ],
   },
@@ -244,8 +242,7 @@ export const TEMPLATE_INPUT_CONFIGS: TemplateInputConfig[] = [
         type: 'list',
         required: true,
         pattern: '[LIST_YOUR_IDS_HERE]',
-        helpText:
-          'Comma-separated list of Rally User Story or Defect IDs',
+        helpText: 'Comma-separated list of Rally User Story or Defect IDs',
       },
     ],
   },

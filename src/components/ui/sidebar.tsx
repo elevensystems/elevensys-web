@@ -2,9 +2,9 @@
 
 import * as React from 'react';
 
-import { Slot as SlotPrimitive } from 'radix-ui';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { PanelLeftIcon } from 'lucide-react';
+import { Slot as SlotPrimitive } from 'radix-ui';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -608,7 +608,9 @@ function SidebarMenuSkeleton({
   showIcon?: boolean;
 }) {
   // Random width between 50 to 90%, stable per instance via lazy state init.
-  const [width] = React.useState(() => `${Math.floor(Math.random() * 40) + 50}%`);
+  const [width] = React.useState(
+    () => `${Math.floor(Math.random() * 40) + 50}%`
+  );
 
   return (
     <div

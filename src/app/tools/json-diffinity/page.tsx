@@ -157,7 +157,9 @@ export default function JsonDiffinityPage() {
 
     const jsonDefaults = (
       monaco.languages as unknown as {
-        json?: { jsonDefaults?: { setDiagnosticsOptions: (o: object) => void } };
+        json?: {
+          jsonDefaults?: { setDiagnosticsOptions: (o: object) => void };
+        };
       }
     ).json?.jsonDefaults;
 

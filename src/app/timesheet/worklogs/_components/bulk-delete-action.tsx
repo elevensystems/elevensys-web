@@ -41,19 +41,13 @@ export function BulkDeleteAction({
         </span>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button
-              variant='destructive'
-              size='sm'
-              disabled={isBulkDeleting}
-            >
+            <Button variant='destructive' size='sm' disabled={isBulkDeleting}>
               {isBulkDeleting ? (
                 <Loader2 className='h-4 w-4 animate-spin' />
               ) : (
                 <Trash2 className='h-4 w-4' />
               )}
-              {isBulkDeleting
-                ? `Deleting... ${bulkDeleteProgress}%`
-                : 'Delete'}
+              {isBulkDeleting ? `Deleting... ${bulkDeleteProgress}%` : 'Delete'}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -64,31 +58,21 @@ export function BulkDeleteAction({
               </AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to delete{' '}
-                <span className='font-semibold'>
-                  {selectedCount}
-                </span>{' '}
-                selected worklog
-                {selectedCount !== 1 ? 's' : ''}? This action cannot
-                be undone.
+                <span className='font-semibold'>{selectedCount}</span> selected
+                worklog
+                {selectedCount !== 1 ? 's' : ''}? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                variant='destructive'
-                onClick={onBulkDelete}
-              >
+              <AlertDialogAction variant='destructive' onClick={onBulkDelete}>
                 Delete {selectedCount} Worklog
                 {selectedCount !== 1 ? 's' : ''}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <Button
-          variant='ghost'
-          size='sm'
-          onClick={onClearSelection}
-        >
+        <Button variant='ghost' size='sm' onClick={onClearSelection}>
           Clear
         </Button>
       </div>

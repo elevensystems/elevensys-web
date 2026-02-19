@@ -70,11 +70,7 @@ function FailedResultItem({ result }: { result: LogWorkResult }) {
   );
 }
 
-function SuccessResultsList({
-  results,
-}: {
-  results: LogWorkResult[];
-}) {
+function SuccessResultsList({ results }: { results: LogWorkResult[] }) {
   const [isOpen, setIsOpen] = useState(false);
 
   if (results.length === 0) return null;
@@ -88,8 +84,8 @@ function SuccessResultsList({
         >
           <CheckCircle2 className='h-4 w-4 shrink-0' />
           <span className='font-medium'>
-            {results.length} {results.length === 1 ? 'entry' : 'entries'}{' '}
-            logged successfully
+            {results.length} {results.length === 1 ? 'entry' : 'entries'} logged
+            successfully
           </span>
           <ChevronDown
             className={`ml-auto h-4 w-4 transition-transform duration-200 ${

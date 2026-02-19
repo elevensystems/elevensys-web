@@ -355,8 +355,8 @@ export default function SummarySmithPage() {
                 {!result ? (
                   <div className='flex items-center justify-center h-64 text-muted-foreground'>
                     <p className='text-center'>
-                      Fill in the required fields and click &quot;Generate Summary&quot;
-                      to create your formatted status update
+                      Fill in the required fields and click &quot;Generate
+                      Summary&quot; to create your formatted status update
                     </p>
                   </div>
                 ) : (

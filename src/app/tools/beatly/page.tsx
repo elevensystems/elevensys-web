@@ -158,7 +158,6 @@ export default function BeatlyPage() {
     }
   }, [mood, selectedGenres, displayedSongs]);
 
-
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>

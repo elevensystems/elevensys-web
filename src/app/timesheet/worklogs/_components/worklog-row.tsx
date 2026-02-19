@@ -43,8 +43,7 @@ export const WorklogRow = memo(function WorklogRow({
   onDelete,
 }: WorklogRowProps) {
   const key = getWorklogKey(worklog);
-  const isApproved =
-    worklog.statusWorklog?.toLowerCase() === 'approved';
+  const isApproved = worklog.statusWorklog?.toLowerCase() === 'approved';
   const displayDate = worklog.startDateEdit
     ? formatDisplayDate(worklog.startDateEdit)
     : worklog.startDate;
@@ -119,19 +118,14 @@ export const WorklogRow = memo(function WorklogRow({
               <AlertDialogTitle>Delete Worklog</AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to delete this worklog for{' '}
-                <span className='font-semibold'>
-                  {worklog.issueKey}
-                </span>{' '}
-                ({parseFloat(String(worklog.worked))}h on {displayDate}
+                <span className='font-semibold'>{worklog.issueKey}</span> (
+                {parseFloat(String(worklog.worked))}h on {displayDate}
                 )? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                variant='destructive'
-                onClick={handleDelete}
-              >
+              <AlertDialogAction variant='destructive' onClick={handleDelete}>
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>

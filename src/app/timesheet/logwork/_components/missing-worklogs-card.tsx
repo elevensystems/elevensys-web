@@ -57,9 +57,7 @@ export function MissingWorklogsCard({
     const result = await onSearchWarnings();
     if (result) {
       onDatesTextChange(result.dates);
-      toast.success(
-        `Found missing dates for ${result.count} user(s)`
-      );
+      toast.success(`Found missing dates for ${result.count} user(s)`);
     }
   };
 
@@ -81,8 +79,8 @@ export function MissingWorklogsCard({
             )}
           </CardTitle>
           <CardDescription>
-            Search for dates with missing worklogs in a project and
-            auto-fill the dates below
+            Search for dates with missing worklogs in a project and auto-fill
+            the dates below
           </CardDescription>
         </div>
       </CardHeader>
@@ -105,9 +103,7 @@ export function MissingWorklogsCard({
               disabled={isLoadingProjects}
             >
               <option value=''>
-                {isLoadingProjects
-                  ? 'Loading projects...'
-                  : 'Select a project'}
+                {isLoadingProjects ? 'Loading projects...' : 'Select a project'}
               </option>
               {projects.map(project => (
                 <option key={project.id} value={project.id}>
@@ -202,8 +198,8 @@ export function MissingWorklogsCard({
           )}
 
           <p className='text-xs text-muted-foreground'>
-            Comma-separated dates in DD/Mon/YY format. Each work entry
-            will be logged for every date listed above.
+            Comma-separated dates in DD/Mon/YY format. Each work entry will be
+            logged for every date listed above.
           </p>
         </div>
       </CardContent>

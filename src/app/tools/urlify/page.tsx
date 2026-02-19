@@ -237,7 +237,10 @@ export default function UrlifyPage() {
               <CardContent className='space-y-4'>
                 {!result?.shortUrl ? (
                   <div className='flex items-center justify-center h-40 text-muted-foreground'>
-                    <p>Enter a URL and click &quot;Shorten URL&quot; to get started</p>
+                    <p>
+                      Enter a URL and click &quot;Shorten URL&quot; to get
+                      started
+                    </p>
                   </div>
                 ) : (
                   <div className='space-y-4'>

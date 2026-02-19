@@ -44,10 +44,7 @@ export default function AdminDashboardPage() {
 
           <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
             {PLACEHOLDER_CARDS.map(card => (
-              <Card
-                key={card.title}
-                className='opacity-60 cursor-not-allowed'
-              >
+              <Card key={card.title} className='opacity-60 cursor-not-allowed'>
                 <CardHeader>
                   <div className='flex items-center gap-3'>
                     <card.icon className='h-5 w-5 text-muted-foreground' />

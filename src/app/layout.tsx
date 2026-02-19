@@ -9,8 +9,8 @@ import { DomainProvider } from '@/contexts/domain-context';
 import { getUserFromSession } from '@/lib/auth';
 import {
   DEFAULT_TENANT,
-  getTenantConfig,
   type TenantKey,
+  getTenantConfig,
 } from '@/lib/domain-config';
 import '@/styles/globals.css';
 

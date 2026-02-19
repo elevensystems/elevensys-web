@@ -4,11 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { toast } from 'sonner';
 
-import {
-  formatDateForApi,
-  getMonthEnd,
-  getMonthStart,
-} from '@/lib/timesheet';
+import { formatDateForApi, getMonthEnd, getMonthStart } from '@/lib/timesheet';
 import type {
   JiraIssue,
   JiraProject,
@@ -42,13 +38,10 @@ export function useMissingWorklogs({
     const controller = new AbortController();
     setIsLoadingProjects(true);
 
-    fetch(
-      `/api/timesheet/projects?jiraInstance=${settings.jiraInstance}`,
-      {
-        headers: { Authorization: `Bearer ${settings.token}` },
-        signal: controller.signal,
-      }
-    )
+    fetch(`/api/timesheet/projects?jiraInstance=${settings.jiraInstance}`, {
+      headers: { Authorization: `Bearer ${settings.token}` },
+      signal: controller.signal,
+    })
       .then(res => res.json())
       .then(result => {
         if (result.success && Array.isArray(result.data)) {
