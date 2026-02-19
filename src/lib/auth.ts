@@ -68,8 +68,13 @@ export const getUserFromSession = async (): Promise<AuthUser | null> => {
     typeof payload.preferred_username === 'string'
       ? payload.preferred_username
       : '';
+  const username =
+    typeof payload['cognito:username'] === 'string'
+      ? payload['cognito:username']
+      : '';
 
   const displayName =
+    username ||
     nameFromToken ||
     [givenName, familyName].filter(Boolean).join(' ') ||
     preferredUsername ||

@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 
 import Link from 'next/link';
 
-import { GalleryVerticalEnd } from 'lucide-react';
+import { Egg } from 'lucide-react';
 
 import { useDomain } from '@/contexts/domain-context';
 
@@ -31,7 +31,7 @@ export default function AuthLayout({
           className='flex items-center gap-2 self-center font-medium'
         >
           <div className='bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md'>
-            <GalleryVerticalEnd className='size-4' />
+            <Egg className='size-4' />
           </div>
           {appName}
         </Link>

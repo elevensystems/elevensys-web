@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import Link from 'next/link';
 
+import clsx from 'clsx';
 import {
   BadgeCheck,
   Check,
@@ -15,6 +16,7 @@ import {
   Sparkles,
   Sun,
   SunMoon,
+  UserPlus,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
@@ -117,12 +119,12 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
                     Sign in
                   </Link>
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild>
                   <Link href='/signup' className='cursor-pointer'>
                     <UserPlus />
                     Sign up
                   </Link>
-                </DropdownMenuItem> */}
+                </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
@@ -146,7 +148,11 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
             >
               <Avatar className='h-8 w-8 rounded-lg'>
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className='rounded-lg'>
+                <AvatarFallback
+                  className={clsx('rounded-lg', {
+                    'bg-yellow-500 text-white': user.role === 'admin',
+                  })}
+                >
                   {getUserInitials(user.name)}
                 </AvatarFallback>
               </Avatar>
@@ -163,13 +169,17 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
             align='end'
             sideOffset={4}
           >
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            {user.role === 'free' && (
+              <>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    <Sparkles />
+                    Upgrade to Pro
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />

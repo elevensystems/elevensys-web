@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -6,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Field, FieldGroup } from '@/components/ui/field';
+import { Field, FieldDescription, FieldGroup } from '@/components/ui/field';
 import { cn } from '@/lib/utils';
 
 export function LoginForm({
@@ -27,10 +29,10 @@ export function LoginForm({
             <FieldGroup>
               <Field>
                 <Button type='submit'>Continue to sign in</Button>
-                {/* <FieldDescription className='text-center'>
+                <FieldDescription className='text-center'>
                   Don&apos;t have an account?{' '}
                   <Link href='/signup'>Sign up</Link>
-                </FieldDescription> */}
+                </FieldDescription>
               </Field>
             </FieldGroup>
           </form>
