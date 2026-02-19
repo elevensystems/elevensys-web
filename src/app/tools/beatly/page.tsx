@@ -70,7 +70,6 @@ export default function BeatlyPage() {
   const handleReset = useCallback(() => {
     setMood('');
     setSelectedGenres(new Set());
-    setSongs([]);
     setDisplayedSongs([]);
     toast.info('Reset complete');
   }, []);
@@ -82,7 +81,6 @@ export default function BeatlyPage() {
     }
 
     setIsLoading(true);
-    setSongs([]);
     setDisplayedSongs([]);
 
     try {
