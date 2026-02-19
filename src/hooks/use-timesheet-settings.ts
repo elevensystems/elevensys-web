@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { SETTINGS_STORAGE_KEY } from '@/lib/timesheet';
 import type { TimesheetSettings } from '@/types/timesheet';
@@ -11,21 +11,20 @@ const DEFAULT_SETTINGS: TimesheetSettings = {
   jiraInstance: 'jiradc',
 };
 
-export function useTimesheetSettings() {
-  const [settings, setSettings] = useState<TimesheetSettings>(DEFAULT_SETTINGS);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
-      if (stored) {
-        setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
-      }
-    } catch {
-      // Ignore parse errors, use defaults
+function loadSettings(): TimesheetSettings {
+  try {
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (stored) {
+      return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
     }
-    setIsLoaded(true);
-  }, []);
+  } catch {
+    // Ignore parse errors, use defaults
+  }
+  return DEFAULT_SETTINGS;
+}
+
+export function useTimesheetSettings() {
+  const [settings, setSettings] = useState<TimesheetSettings>(loadSettings);
 
   const saveSettings = useCallback((newSettings: TimesheetSettings) => {
     setSettings(newSettings);
@@ -36,5 +35,5 @@ export function useTimesheetSettings() {
     settings.username && settings.token && settings.jiraInstance
   );
 
-  return { settings, saveSettings, isConfigured, isLoaded };
+  return { settings, saveSettings, isConfigured, isLoaded: true };
 }

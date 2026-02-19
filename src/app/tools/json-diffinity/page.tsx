@@ -155,7 +155,11 @@ export default function JsonDiffinityPage() {
       return;
     }
 
-    const jsonDefaults = (monaco.languages as any).json?.jsonDefaults;
+    const jsonDefaults = (
+      monaco.languages as unknown as {
+        json?: { jsonDefaults?: { setDiagnosticsOptions: (o: object) => void } };
+      }
+    ).json?.jsonDefaults;
 
     jsonDefaults?.setDiagnosticsOptions({
       validate: true,
@@ -349,7 +353,7 @@ export default function JsonDiffinityPage() {
 
         onChange(formatted);
         toast.success(`${label} formatted.`);
-      } catch (error) {
+      } catch {
         toast.error('Invalid JSON. Unable to format.');
       }
     },

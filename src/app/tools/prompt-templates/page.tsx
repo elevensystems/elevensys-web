@@ -520,7 +520,7 @@ export default function PromptTemplatesPage() {
                       </p>
                       <p className='text-sm text-center max-w-md'>
                         Try adjusting your search or category filter to find
-                        what you're looking for
+                        what you&apos;re looking for
                       </p>
                       {searchQuery && (
                         <Button

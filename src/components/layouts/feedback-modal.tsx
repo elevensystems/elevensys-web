@@ -87,7 +87,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
         <DialogHeader>
           <DialogTitle>Send Feedback</DialogTitle>
           <DialogDescription>
-            We'd love to hear your thoughts, suggestions, or issues
+            We&apos;d love to hear your thoughts, suggestions, or issues
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className='space-y-4 py-4'>

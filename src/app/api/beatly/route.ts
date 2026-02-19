@@ -86,7 +86,7 @@ Return only pure JSON, no markdown or explanations.${excludeStr}`;
       }
 
       const data = await response.json();
-      let content =
+      const content =
         data?.output_text?.trim() || data?.data?.output_text?.trim() || '';
 
       if (!content) {

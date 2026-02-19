@@ -216,7 +216,7 @@ export default function JsonObjectifyPage() {
 
       setJsonText(formatted);
       toast.success('JSON formatted.');
-    } catch (error) {
+    } catch {
       toast.error('Invalid JSON. Unable to format.');
     }
   }, [jsonText]);
@@ -235,7 +235,7 @@ export default function JsonObjectifyPage() {
     try {
       await navigator.clipboard.writeText(jsOutput);
       toast.success('JavaScript code copied to clipboard.');
-    } catch (error) {
+    } catch {
       toast.error('Failed to copy to clipboard.');
     }
   }, [jsOutput]);

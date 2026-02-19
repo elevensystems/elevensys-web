@@ -33,7 +33,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { RainbowButton } from '@/components/ui/rainbow-button';
 import { Separator } from '@/components/ui/separator';
-import { ShineBorder } from '@/components/ui/shine-border';
 import { Textarea } from '@/components/ui/textarea';
 import { GENRES, RANDOM_MOODS } from '@/lib/beatly-data';
 import type { Song } from '@/types/beatly';
@@ -41,7 +40,6 @@ import type { Song } from '@/types/beatly';
 export default function BeatlyPage() {
   const [mood, setMood] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<Set<string>>(new Set());
-  const [songs, setSongs] = useState<Song[]>([]);
   const [displayedSongs, setDisplayedSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenreModalOpen, setIsGenreModalOpen] = useState(false);
@@ -109,7 +107,6 @@ export default function BeatlyPage() {
 
       console.log('Recommended Songs:', recommendedSongs);
 
-      setSongs(recommendedSongs);
       setDisplayedSongs(recommendedSongs);
       toast.success(`Found ${recommendedSongs.length} songs for your mood!`);
     } catch (error) {
@@ -153,7 +150,6 @@ export default function BeatlyPage() {
       const data = await songsResponse.json();
       const newSongs = data.songs || [];
 
-      setSongs(prev => [...prev, ...newSongs]);
       setDisplayedSongs(prev => [...prev, ...newSongs]);
       toast.success(`Added ${newSongs.length} more songs!`);
     } catch (error) {
@@ -164,8 +160,6 @@ export default function BeatlyPage() {
     }
   }, [mood, selectedGenres, displayedSongs]);
 
-  const selectedGenresText =
-    selectedGenres.size > 0 ? Array.from(selectedGenres).join(', ') : 'Random';
 
   return (
     <MainLayout>

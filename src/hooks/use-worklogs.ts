@@ -75,9 +75,7 @@ export function useWorklogs({
 
   const handleSearch = useCallback(async () => {
     if (!isConfigured) {
-      setError(
-        'Please configure your Jira settings on the Log Work page.'
-      );
+      setError('Please configure your Jira settings on the Log Work page.');
       return;
     }
 
@@ -159,7 +157,7 @@ export function useWorklogs({
     if (isLoaded && isConfigured) {
       handleSearch();
     }
-  }, [isLoaded, isConfigured]);
+  }, [isLoaded, isConfigured, handleSearch]);
 
   const handleDelete = useCallback(
     async (worklogId: number, issueId: number) => {
@@ -202,16 +200,12 @@ export function useWorklogs({
         }
 
         setWorklogs(prev =>
-          prev.filter(
-            w => !(w.id === worklogId && w.issueId === issueId)
-          )
+          prev.filter(w => !(w.id === worklogId && w.issueId === issueId))
         );
         toast.success('Worklog deleted successfully');
       } catch (err) {
         const message =
-          err instanceof Error
-            ? err.message
-            : 'Failed to delete worklog';
+          err instanceof Error ? err.message : 'Failed to delete worklog';
         toast.error(message);
       } finally {
         setDeletingId(null);
@@ -281,8 +275,7 @@ export function useWorklogs({
 
         setWorklogs(prev =>
           prev.filter(
-            w =>
-              !(w.id === worklog.id && w.issueId === worklog.issueId)
+            w => !(w.id === worklog.id && w.issueId === worklog.issueId)
           )
         );
         successCount++;
@@ -301,9 +294,7 @@ export function useWorklogs({
     setBulkDeleteProgress(0);
 
     if (failCount === 0) {
-      toast.success(
-        `Deleted ${successCount} worklog(s) successfully`
-      );
+      toast.success(`Deleted ${successCount} worklog(s) successfully`);
     } else if (successCount > 0) {
       toast.warning(`${successCount} deleted, ${failCount} failed`);
     } else {

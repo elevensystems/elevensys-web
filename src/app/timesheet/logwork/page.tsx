@@ -170,6 +170,7 @@ export default function LogWorkPage() {
     if (!selectedProjectId) return;
     const saved = loadSavedEntries(selectedProjectId);
     if (saved.length > 0 && saved[0].issueKey) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEntries(saved);
     } else {
       setEntries([createDefaultEntry()]);

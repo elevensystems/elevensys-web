@@ -93,7 +93,7 @@ export default function NpmConverterPage() {
     }
 
     setResult({ command, count });
-  }, [input]);
+  }, [input, resetCopied]);
 
   const handleCopy = useCallback(async () => {
     if (!result?.command) return;
@@ -192,7 +192,7 @@ export default function NpmConverterPage() {
                 {!result ? (
                   <div className='flex items-center justify-center h-64 text-muted-foreground'>
                     <p className='text-center'>
-                      Paste Lerna output and click "Convert to NPM Install" to
+                      Paste Lerna output and click &quot;Convert to NPM Install&quot; to
                       generate the npm install command
                     </p>
                   </div>

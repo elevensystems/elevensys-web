@@ -8,7 +8,8 @@
       "Bash(node -e:*)",
       "Bash(npx prettier:*)",
       "Bash(npx tsc:*)",
-      "mcp__next-devtools__nextjs_docs"
+      "mcp__next-devtools__nextjs_docs",
+      "Bash(pnpm exec eslint:*)"
     ]
   },
   "enabledMcpjsonServers": [

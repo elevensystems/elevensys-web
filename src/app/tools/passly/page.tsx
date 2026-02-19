@@ -113,7 +113,7 @@ export default function PasslyPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [createPasswordEntries, length, options]);
+  }, [createPasswordEntries, length, options, resetCopied]);
 
   const handleCopy = useCallback(
     async (password: string, id: string) => {
@@ -256,7 +256,7 @@ export default function PasslyPage() {
               <CardContent className='space-y-4'>
                 {passwords.length === 0 ? (
                   <div className='flex items-center justify-center h-40 text-muted-foreground'>
-                    <p>Click "Generate Passwords" to create 5 passwords</p>
+                    <p>Click &quot;Generate Passwords&quot; to create 5 passwords</p>
                   </div>
                 ) : (
                   passwords.map((password, index) => {
