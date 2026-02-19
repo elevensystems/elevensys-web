@@ -13,6 +13,7 @@ import { NavSecondary } from '@/components/layouts/nav-secondary';
 import { NavTools } from '@/components/layouts/nav-tools';
 import { NavUser } from '@/components/layouts/nav-user';
 import { SupportModal } from '@/components/layouts/support-modal';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sidebar,
   SidebarContent,
@@ -71,25 +72,27 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          {user?.role === 'admin' && hasData(appSidebarData.navAdmin) && (
-            <NavAdmin items={appSidebarData.navAdmin} />
-          )}
-          {hasData(appSidebarData.navMain) && (
-            <NavMain
-              items={appSidebarData.navMain}
-              isAdmin={user?.role === 'admin'}
-            />
-          )}
-          {domainConfig.showTools && hasData(tools) && (
-            <NavTools tools={tools} />
-          )}
-          {hasData(appSidebarData.navSecondary) && (
-            <NavSecondary
-              items={appSidebarData.navSecondary}
-              className='mt-auto'
-              onItemClick={handleNavAction}
-            />
-          )}
+          <ScrollArea className='flex-1'>
+            {user?.role === 'admin' && hasData(appSidebarData.navAdmin) && (
+              <NavAdmin items={appSidebarData.navAdmin} />
+            )}
+            {hasData(appSidebarData.navMain) && (
+              <NavMain
+                items={appSidebarData.navMain}
+                isAdmin={user?.role === 'admin'}
+              />
+            )}
+            {domainConfig.showTools && hasData(tools) && (
+              <NavTools tools={tools} />
+            )}
+            {hasData(appSidebarData.navSecondary) && (
+              <NavSecondary
+                items={appSidebarData.navSecondary}
+                className='mt-auto'
+                onItemClick={handleNavAction}
+              />
+            )}
+          </ScrollArea>
         </SidebarContent>
         <SidebarFooter>
           <NavUser user={user} />
