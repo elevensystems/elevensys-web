@@ -12,26 +12,26 @@ with role-based access control.
 ### Quick Start
 
 ```bash
-# Install dependencies (uses pnpm)
-pnpm install
+# Install dependencies (uses npm)
+npm install
 
 # Start development server with Turbopack
-pnpm dev
+npm run dev
 
 # Build for production
-pnpm build
+npm run build
 
 # Start production server
-pnpm start
+npm run start
 
 # Run linting
-pnpm lint
+npm run lint
 
 # Format code
-pnpm prettier
+npm run prettier
 
 # Run tests
-npm test
+npm run test
 
 # Run tests with coverage
 npm run test:coverage
@@ -51,7 +51,7 @@ npm run test:coverage
 | Auth            | AWS Cognito OAuth2 (PKCE)               |
 | Theming         | next-themes                             |
 | Notifications   | sonner                                  |
-| Package Manager | pnpm                                    |
+| Package Manager | npm                                    |
 
 ## Directory Structure
 
