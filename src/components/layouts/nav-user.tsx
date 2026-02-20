@@ -1,7 +1,5 @@
 'use client';
 
-import * as React from 'react';
-
 import Link from 'next/link';
 
 import clsx from 'clsx';
@@ -181,9 +179,11 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
               </>
             )}
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href='/profile' className='cursor-pointer'>
+                  <BadgeCheck />
+                  Account
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
