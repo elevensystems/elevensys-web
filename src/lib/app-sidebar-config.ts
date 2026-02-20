@@ -11,6 +11,7 @@ import {
   Link as LinkIcon,
   Music4,
   Package,
+  ScanSearch,
   ScrollText,
   Send,
   ShieldCheck,
@@ -99,6 +100,11 @@ export const appSidebarData = {
       name: 'JSON Objectify',
       url: '/tools/json-objectify',
       icon: Sparkles,
+    },
+    {
+      name: 'JSON Lens',
+      url: '/tools/json-lens',
+      icon: ScanSearch,
     },
     {
       name: 'Translately',
