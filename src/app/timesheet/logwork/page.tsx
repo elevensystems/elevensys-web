@@ -400,9 +400,9 @@ export default function LogWorkPage() {
             </CardHeader>
             <CardContent className='space-y-6'>
               {/* Entries Table */}
-              <div className='rounded-md border'>
+              <div className='overflow-hidden rounded-lg border'>
                 <Table>
-                  <TableHeader className='bg-muted'>
+                  <TableHeader className='bg-muted/50 top-0 z-10'>
                     <TableRow>
                       <TableHead className='w-[230px] font-semibold'>
                         Ticket ID

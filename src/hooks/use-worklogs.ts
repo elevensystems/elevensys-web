@@ -152,12 +152,13 @@ export function useWorklogs({
     }
   }, [isConfigured, fromDate, toDate, settings]);
 
-  // Auto-search on mount when configured
-  useEffect(() => {
-    if (isLoaded && isConfigured) {
-      handleSearch();
-    }
-  }, [isLoaded, isConfigured, handleSearch]);
+  // Temporarily disable auto-search on mount to avoid unexpected API calls
+  // // Auto-search on mount when configured
+  // useEffect(() => {
+  //   if (isLoaded && isConfigured) {
+  //     handleSearch();
+  //   }
+  // }, [isLoaded, isConfigured, handleSearch]);
 
   const handleDelete = useCallback(
     async (worklogId: number, issueId: number) => {
