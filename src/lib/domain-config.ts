@@ -1,4 +1,4 @@
-export type TenantKey = 'satio' | 'elevensys';
+export type TenantKey = 'fhmhub' | 'elevensys';
 
 export interface DomainConfig {
   tenant: TenantKey;
@@ -9,8 +9,8 @@ export interface DomainConfig {
 }
 
 const TENANT_CONFIGS: Record<TenantKey, DomainConfig> = {
-  satio: {
-    tenant: 'satio',
+  fhmhub: {
+    tenant: 'fhmhub',
     appName: 'Jirassic World',
     description: 'Your Jira Timesheet Companion',
     showTools: false,
@@ -26,7 +26,7 @@ const TENANT_CONFIGS: Record<TenantKey, DomainConfig> = {
 };
 
 const HOSTNAME_TO_TENANT: Record<string, TenantKey> = {
-  'satio.dev': 'satio',
+  'logwork.fhmhub.com': 'fhmhub',
   'elevensystems.dev': 'elevensys',
 };
 
