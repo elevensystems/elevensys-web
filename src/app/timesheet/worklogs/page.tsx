@@ -76,7 +76,12 @@ export default function MyWorklogsPage() {
           <ToolPageHeader
             title='My Worklogs'
             description='View your logged timesheets from Jira. Search by date range to see all your work entries.'
-            error={error}
+            error={error || undefined}
+            infoMessage={
+              !error
+                ? 'Your Jira settings are configured. You can start logging work entries.'
+                : undefined
+            }
           />
 
           {!isConfigured && (
