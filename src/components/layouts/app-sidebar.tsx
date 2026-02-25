@@ -13,7 +13,6 @@ import { NavSecondary } from '@/components/layouts/nav-secondary';
 import { NavTools } from '@/components/layouts/nav-tools';
 import { NavUser } from '@/components/layouts/nav-user';
 import { SupportModal } from '@/components/layouts/support-modal';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sidebar,
   SidebarContent,
@@ -72,20 +71,18 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <ScrollArea className='flex-1'>
-            {user?.role === 'admin' && hasData(appSidebarData.navAdmin) && (
-              <NavAdmin items={appSidebarData.navAdmin} />
-            )}
-            {hasData(appSidebarData.navMain) && (
-              <NavMain
-                items={appSidebarData.navMain}
-                isAdmin={user?.role === 'admin'}
-              />
-            )}
-            {domainConfig.showTools && hasData(tools) && (
-              <NavTools tools={tools} />
-            )}
-          </ScrollArea>
+          {user?.role === 'admin' && hasData(appSidebarData.navAdmin) && (
+            <NavAdmin items={appSidebarData.navAdmin} />
+          )}
+          {hasData(appSidebarData.navMain) && (
+            <NavMain
+              items={appSidebarData.navMain}
+              isAdmin={user?.role === 'admin'}
+            />
+          )}
+          {domainConfig.showTools && hasData(tools) && (
+            <NavTools tools={tools} />
+          )}
         </SidebarContent>
         <SidebarFooter className='relative before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-sidebar before:to-transparent'>
           {hasData(appSidebarData.navSecondary) && (

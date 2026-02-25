@@ -55,7 +55,7 @@ export default function MyWorklogsPage() {
     handleSearch,
     handleDelete,
     handleBulkDelete,
-  } = useWorklogs({ settings, isConfigured, isLoaded });
+  } = useWorklogs({ settings, isConfigured });
 
   if (!isLoaded) {
     return (

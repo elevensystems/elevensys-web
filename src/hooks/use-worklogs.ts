@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { toast } from 'sonner';
 
@@ -20,14 +20,9 @@ export function getWorklogKey(worklog: WorklogEntry): string {
 interface UseWorklogsParams {
   settings: TimesheetSettings;
   isConfigured: boolean;
-  isLoaded: boolean;
 }
 
-export function useWorklogs({
-  settings,
-  isConfigured,
-  isLoaded,
-}: UseWorklogsParams) {
+export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
   const [fromDate, setFromDate] = useState(getMonthStart());
   const [toDate, setToDate] = useState(getMonthEnd());
   const [worklogs, setWorklogs] = useState<WorklogEntry[]>([]);
@@ -151,14 +146,6 @@ export function useWorklogs({
       setIsLoading(false);
     }
   }, [isConfigured, fromDate, toDate, settings]);
-
-  // Temporarily disable auto-search on mount to avoid unexpected API calls
-  // // Auto-search on mount when configured
-  // useEffect(() => {
-  //   if (isLoaded && isConfigured) {
-  //     handleSearch();
-  //   }
-  // }, [isLoaded, isConfigured, handleSearch]);
 
   const handleDelete = useCallback(
     async (worklogId: number, issueId: number) => {
