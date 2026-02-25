@@ -46,7 +46,10 @@ export const WorkEntryRow = memo(function WorkEntryRow({
   onRemove,
 }: WorkEntryRowProps) {
   const handleIssueInputChange = useCallback(
-    (value: string) => onUpdate(entry.id, 'issueKey', value),
+    (value: string, eventDetails: { reason: string }) => {
+      if (eventDetails.reason === 'input-clear') return;
+      onUpdate(entry.id, 'issueKey', value);
+    },
     [entry.id, onUpdate]
   );
 

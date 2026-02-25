@@ -333,7 +333,12 @@ export default function LogWorkPage() {
           <ToolPageHeader
             title='Log Work'
             description='Log your work entries to Jira timesheet. Add work entries and submit them in bulk.'
-            error={error}
+            error={error || undefined}
+            infoMessage={
+              !error
+                ? 'Your Jira settings are configured. You can start logging work entries.'
+                : undefined
+            }
           />
 
           {!isConfigured && (
