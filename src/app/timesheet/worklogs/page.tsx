@@ -169,9 +169,9 @@ export default function MyWorklogsPage() {
                   )}
                 </div>
               ) : (
-                <div className='rounded-md border'>
+                <div className='overflow-hidden rounded-lg border'>
                   <Table>
-                    <TableHeader className='bg-muted/50'>
+                    <TableHeader className='bg-muted/50 top-0 z-10'>
                       <TableRow>
                         <TableHead className='w-[40px]'>
                           <Checkbox
