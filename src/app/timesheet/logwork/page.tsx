@@ -335,7 +335,7 @@ export default function LogWorkPage() {
             description='Log your work entries to Jira timesheet. Add work entries and submit them in bulk.'
             error={error || undefined}
             infoMessage={
-              !error
+              !error && isConfigured
                 ? 'Your Jira settings are configured. You can start logging work entries.'
                 : undefined
             }

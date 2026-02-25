@@ -78,7 +78,7 @@ export default function MyWorklogsPage() {
             description='View your logged timesheets from Jira. Search by date range to see all your work entries.'
             error={error || undefined}
             infoMessage={
-              !error
+              !error && isConfigured
                 ? 'Your Jira settings are configured. You can start logging work entries.'
                 : undefined
             }
