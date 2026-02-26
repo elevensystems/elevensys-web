@@ -1,4 +1,4 @@
-import { AlertCircle, Lock } from 'lucide-react';
+import { AlertCircle, Info } from 'lucide-react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -24,7 +24,7 @@ export function ToolPageHeader({
 
       {infoMessage && (
         <Alert className='mb-4 border-blue-200 bg-blue-50 text-blue-800 [&>svg]:text-blue-800 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-200 dark:[&>svg]:text-blue-200'>
-          <Lock />
+          <Info />
           <AlertDescription className='text-blue-800 dark:text-blue-200'>
             {infoMessage}
           </AlertDescription>

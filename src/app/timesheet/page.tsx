@@ -40,13 +40,13 @@ const features = [
   {
     title: 'My Worklogs',
     description:
-      'View all your logged timesheets from Jira. Search by date range, see approval status, and export to CSV.',
+      'View all your logged timesheets from Jira. Search by date range to see your work entries, track approval status and delete entries if needed.',
     href: '/timesheet/worklogs',
     icon: ClipboardList,
     highlights: [
       'Search by date range',
       'Approval status tracking',
-      'Export worklogs to CSV',
+      'Delete worklogs if needed',
     ],
   },
   {
@@ -72,7 +72,7 @@ export default function TimesheetPage() {
         <div className='max-w-4xl mx-auto'>
           <ToolPageHeader
             title='Timesheet'
-            description='Manage your Jira  timesheets. Log work entries and view your logged hours — all in one place.'
+            description='Manage your Jira timesheets. Log work entries and view your logged hours — all in one place.'
           />
 
           {isLoaded && !isConfigured && (

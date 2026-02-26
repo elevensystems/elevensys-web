@@ -43,7 +43,8 @@ const timesheetActions = [
   },
   {
     title: 'My Worklogs',
-    description: 'View logged hours, check approval status, and export to CSV.',
+    description:
+      'View logged hours, check approval status, and delete entries if needed.',
     href: '/timesheet/worklogs',
     icon: ClipboardList,
     primary: false,

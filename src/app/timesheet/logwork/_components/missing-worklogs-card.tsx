@@ -189,7 +189,7 @@ export function MissingWorklogsCard({
               <Button
                 variant='ghost'
                 onClick={onClearAllDates}
-                className='h-7 text-xs text-muted-foreground hover:text-destructive'
+                className='h-7 text-xs text-destructive hover:text-destructive/80'
               >
                 <Trash2 className='h-3 w-3' />
                 Clear all
