@@ -32,6 +32,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: config.appName,
     description: config.description,
+    icons: {
+      icon: '/diaspora-brands.svg',
+    },
   };
 }
 
