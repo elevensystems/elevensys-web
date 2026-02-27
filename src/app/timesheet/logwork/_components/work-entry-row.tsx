@@ -125,7 +125,11 @@ export const WorkEntryRow = memo(function WorkEntryRow({
         />
       </TableCell>
       <TableCell>
-        <NativeSelect value={entry.typeOfWork} onChange={handleTypeChange}>
+        <NativeSelect
+          className='h-8'
+          value={entry.typeOfWork}
+          onChange={handleTypeChange}
+        >
           {WORK_TYPES.map(type => (
             <option key={type} value={type}>
               {type}
@@ -145,9 +149,10 @@ export const WorkEntryRow = memo(function WorkEntryRow({
       </TableCell>
       <TableCell>
         <Button
+          aria-label='Delete'
           variant='ghost'
           size='icon'
-          className='h-8 w-8 text-muted-foreground hover:text-destructive'
+          className='h-8 w-8 text-destructive hover:bg-destructive hover:text-white'
           onClick={handleRemove}
         >
           <Trash2 className='h-4 w-4' />

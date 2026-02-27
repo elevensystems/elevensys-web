@@ -95,9 +95,10 @@ export const WorklogRow = memo(function WorklogRow({
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
+              aria-label='Delete'
               variant='ghost'
               size='icon'
-              className='h-8 w-8 text-muted-foreground hover:text-destructive'
+              className='h-8 w-8 text-destructive hover:bg-destructive hover:text-white'
               disabled={isApproved || isDeleting}
               title={
                 isApproved
