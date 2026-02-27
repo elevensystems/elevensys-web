@@ -4,9 +4,9 @@ import { ReactNode } from 'react';
 
 import Link from 'next/link';
 
-import { Egg } from 'lucide-react';
-
 import { useDomain } from '@/contexts/domain-context';
+
+import DiasporaIcon from '../ui/diaspora-icon';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -30,8 +30,8 @@ export default function AuthLayout({
           href='/'
           className='flex items-center gap-2 self-center font-medium'
         >
-          <div className='bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md'>
-            <Egg className='size-4' />
+          <div className='bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-lg'>
+            <DiasporaIcon className='size-4 fill-current' />
           </div>
           {appName}
         </Link>

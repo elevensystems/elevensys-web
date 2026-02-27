@@ -94,8 +94,10 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
                 size='lg'
                 className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
               >
-                <Avatar className='h-8 w-8 rounded-lg'>
-                  <AvatarFallback className='rounded-lg'>G</AvatarFallback>
+                <Avatar className='h-8 w-8 rounded-sm'>
+                  <AvatarFallback className='rounded-sm bg-gray-500 text-white'>
+                    G
+                  </AvatarFallback>
                 </Avatar>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
                   <span className='truncate font-medium'>Guest</span>

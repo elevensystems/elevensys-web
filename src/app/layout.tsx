@@ -32,9 +32,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: config.appName,
     description: config.description,
-    icons: {
-      icon: '/diaspora-brands.svg',
-    },
+    icons: [
+      {
+        media: '(prefers-color-scheme: light)',
+        url: '/diaspora-brands-dark.svg',
+        href: '/diaspora-brands-dark.svg',
+      },
+      {
+        media: '(prefers-color-scheme: dark)',
+        url: '/diaspora-brands-light.svg',
+        href: '/diaspora-brands-light.svg',
+      },
+    ],
   };
 }
 

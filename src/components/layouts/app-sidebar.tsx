@@ -4,8 +4,6 @@ import * as React from 'react';
 
 import Link from 'next/link';
 
-import { Egg } from 'lucide-react';
-
 import { FeedbackModal } from '@/components/layouts/feedback-modal';
 import { NavAdmin } from '@/components/layouts/nav-admin';
 import { NavMain } from '@/components/layouts/nav-main';
@@ -26,6 +24,9 @@ import { useDomain } from '@/contexts/domain-context';
 import { appSidebarData } from '@/lib/app-sidebar-config';
 import type { AuthUser } from '@/types/auth';
 
+import DiasporaIcon from '../ui/diaspora-icon';
+import SolidDinosaurIcon from '../ui/solid-dinosaur-icon';
+
 const hasData = <T,>(data: T[] | undefined | null): boolean => {
   return Boolean(data && data.length > 0);
 };
@@ -38,6 +39,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
   const domainConfig = useDomain();
+  const tenant = domainConfig.tenant;
   const tools = appSidebarData.tools;
 
   const handleNavAction = (action?: string) => {
@@ -56,8 +58,12 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
             <SidebarMenuItem>
               <SidebarMenuButton size='lg' asChild>
                 <Link href='/'>
-                  <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
-                    <Egg className='size-4' />
+                  <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-sm'>
+                    {tenant === 'fhmhub' ? (
+                      <SolidDinosaurIcon className='size-4 fill-current' />
+                    ) : (
+                      <DiasporaIcon className='size-4 fill-current' />
+                    )}
                   </div>
                   <div className='grid flex-1 text-left text-sm leading-tight'>
                     <span className='truncate font-medium'>
