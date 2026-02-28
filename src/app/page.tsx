@@ -8,10 +8,10 @@ import {
   ClipboardList,
   Clock,
   FileText,
+  FolderKanban,
   Key,
   Link2,
   PenLine,
-  Settings,
   Sparkles,
   Wrench,
 } from 'lucide-react';
@@ -50,10 +50,11 @@ const timesheetActions = [
     primary: false,
   },
   {
-    title: 'Settings',
-    description: 'Configure your Jira credentials and instance connection.',
-    href: '/timesheet/config',
-    icon: Settings,
+    title: 'Project Worklogs',
+    description:
+      'Browse worklogs across projects and see team activity at a glance.',
+    href: '/timesheet/project-worklogs',
+    icon: FolderKanban,
     primary: false,
   },
 ] as const;
