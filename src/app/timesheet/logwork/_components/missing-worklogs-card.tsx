@@ -68,15 +68,6 @@ export function MissingWorklogsCard({
           <CardTitle className='flex items-center gap-2'>
             <CalendarDays className='h-5 w-5 text-primary' />
             Find Missing Worklogs
-            {parsedDates.length > 0 && (
-              <Badge
-                variant='secondary'
-                className='ml-1 bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-300 border-green-200 dark:border-green-800'
-              >
-                {parsedDates.length} date
-                {parsedDates.length !== 1 ? 's' : ''}
-              </Badge>
-            )}
           </CardTitle>
           <CardDescription>
             Search for dates with missing worklogs in a project and auto-fill
@@ -154,6 +145,15 @@ export function MissingWorklogsCard({
                 2
               </span>
               Review & edit dates
+              {parsedDates.length > 0 && (
+                <Badge
+                  variant='secondary'
+                  className='ml-1 bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-300 border-green-200 dark:border-green-800'
+                >
+                  {parsedDates.length} date
+                  {parsedDates.length !== 1 ? 's' : ''}
+                </Badge>
+              )}
             </div>
           </div>
 
@@ -189,7 +189,7 @@ export function MissingWorklogsCard({
               <Button
                 variant='ghost'
                 onClick={onClearAllDates}
-                className='h-7 text-xs text-destructive hover:text-destructive/80'
+                className='h-7 text-xs text-destructive hover:bg-destructive hover:text-white'
               >
                 <Trash2 className='h-3 w-3' />
                 Clear all
