@@ -31,10 +31,10 @@ import {
   getStatusVariant,
   getWorkTypeBadgeClass,
 } from '@/lib/timesheet';
-import type { WorklogEntry } from '@/types/timesheet';
+import type { MyWorklogsRow } from '@/types/timesheet';
 
 interface WorklogRowProps {
-  worklog: WorklogEntry;
+  worklog: MyWorklogsRow;
   isSelected: boolean;
   isDeleting: boolean;
   onToggleSelect: (key: string) => void;

@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { WorklogEntry } from '@/types/timesheet';
+import type { MyWorklogsRow } from '@/types/timesheet';
 
 import MyWorklogsPage from './page';
 
@@ -14,6 +14,7 @@ jest.mock('@/hooks/use-timesheet-settings', () => ({
 }));
 
 const mockHandleSearch = jest.fn();
+const mockGoToPage = jest.fn();
 const mockToggleSelectAll = jest.fn();
 const mockToggleSelect = jest.fn();
 const mockClearSelection = jest.fn();
@@ -21,11 +22,13 @@ const mockHandleDelete = jest.fn();
 const mockHandleBulkDelete = jest.fn();
 const mockSetFromDate = jest.fn();
 const mockSetToDate = jest.fn();
+const mockSetSelectedProject = jest.fn();
+const mockSetStatusWorklog = jest.fn();
 
 const mockUseWorklogs = jest.fn();
 jest.mock('@/hooks/use-worklogs', () => ({
   useWorklogs: () => mockUseWorklogs(),
-  getWorklogKey: (w: WorklogEntry) => `${w.id}_${w.issueId}`,
+  getWorklogKey: (w: MyWorklogsRow) => `${w.id}_${w.issueId}`,
 }));
 
 // --- Mock layouts ---
@@ -58,7 +61,7 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
 // --- Mock child components ---
 
 jest.mock('./_components/worklog-row', () => ({
-  WorklogRow: ({ worklog }: { worklog: WorklogEntry }) => (
+  WorklogRow: ({ worklog }: { worklog: MyWorklogsRow }) => (
     <tr data-testid={`worklog-row-${worklog.id}`}>
       <td>{worklog.issueKey}</td>
     </tr>
@@ -184,6 +187,86 @@ jest.mock('@/components/ui/date-range-picker', () => ({
   ),
 }));
 
+jest.mock('@/components/ui/label', () => ({
+  Label: ({
+    children,
+    ...props
+  }: {
+    children: React.ReactNode;
+    htmlFor?: string;
+  }) => <label {...props}>{children}</label>,
+}));
+
+jest.mock('@/components/ui/native-select', () => ({
+  NativeSelect: ({
+    children,
+    onChange,
+    ...props
+  }: React.SelectHTMLAttributes<HTMLSelectElement> & {
+    children: React.ReactNode;
+  }) => (
+    <select onChange={onChange} {...props}>
+      {children}
+    </select>
+  ),
+}));
+
+jest.mock('@/components/ui/pagination', () => ({
+  Pagination: ({ children }: { children: React.ReactNode }) => (
+    <nav data-testid='pagination'>{children}</nav>
+  ),
+  PaginationContent: ({ children }: { children: React.ReactNode }) => (
+    <ul>{children}</ul>
+  ),
+  PaginationEllipsis: () => <span>...</span>,
+  PaginationItem: ({ children }: { children: React.ReactNode }) => (
+    <li>{children}</li>
+  ),
+  PaginationLink: ({
+    children,
+    isActive,
+    onClick,
+  }: {
+    children: React.ReactNode;
+    isActive?: boolean;
+    onClick?: () => void;
+  }) => (
+    <button data-active={isActive} onClick={onClick}>
+      {children}
+    </button>
+  ),
+  PaginationNext: ({
+    onClick,
+    ...props
+  }: {
+    onClick?: () => void;
+    'aria-disabled'?: boolean;
+    className?: string;
+  }) => (
+    <button data-testid='pagination-next' onClick={onClick} {...props}>
+      Next
+    </button>
+  ),
+  PaginationPrevious: ({
+    onClick,
+    ...props
+  }: {
+    onClick?: () => void;
+    'aria-disabled'?: boolean;
+    className?: string;
+  }) => (
+    <button data-testid='pagination-prev' onClick={onClick} {...props}>
+      Previous
+    </button>
+  ),
+}));
+
+jest.mock('@/components/ui/skeleton', () => ({
+  Skeleton: ({ className }: { className?: string }) => (
+    <div data-testid='skeleton' className={className} />
+  ),
+}));
+
 jest.mock('@/components/ui/table', () => ({
   Table: ({ children }: { children: React.ReactNode }) => (
     <table>{children}</table>
@@ -223,16 +306,30 @@ const configuredSettings = {
 };
 
 const defaultWorklogsReturn = {
+  projects: [
+    { id: '1', key: 'PROJ', name: 'Project One' },
+    { id: '2', key: 'PROJ2', name: 'Project Two' },
+  ],
+  projectsLoading: false,
+  selectedProject: { id: '1', key: 'PROJ', name: 'Project One' },
+  setSelectedProject: mockSetSelectedProject,
+  statusWorklog: 'All',
+  setStatusWorklog: mockSetStatusWorklog,
   fromDate: '2025-01-01',
   setFromDate: mockSetFromDate,
   toDate: '2025-01-31',
   setToDate: mockSetToDate,
-  worklogs: [] as WorklogEntry[],
+  worklogs: [] as MyWorklogsRow[],
   isLoading: false,
   deletingId: null,
   error: '',
   hasSearched: false,
   totalHours: 0,
+  currentPage: 1,
+  totalPages: 0,
+  totalRecords: 0,
+  pageStart: 0,
+  pageEnd: 0,
   selectedIds: new Set<string>(),
   allSelected: false,
   someSelected: false,
@@ -242,38 +339,53 @@ const defaultWorklogsReturn = {
   toggleSelect: mockToggleSelect,
   clearSelection: mockClearSelection,
   handleSearch: mockHandleSearch,
+  goToPage: mockGoToPage,
   handleDelete: mockHandleDelete,
   handleBulkDelete: mockHandleBulkDelete,
 };
 
-const sampleWorklogs: WorklogEntry[] = [
+const sampleWorklogs: MyWorklogsRow[] = [
   {
     id: 1,
+    typeIssueName: 'Sub-task',
     issueKey: 'PROJ-101',
     issueId: 100,
-    worked: 2.5,
-    remaining: 5,
-    estimated: 8,
-    startDate: '2025-01-15',
-    startDateEdit: '2025-01-15',
+    summary: 'Fix bug',
+    statusName: 'To Do',
+    statusIssue: '/',
+    startDate: 'Wed 15/Jan/25',
+    startDateEdit: '15/Jan/25',
     description: 'Fixed a bug',
     author: 'testuser',
     typeOfWork: 'Create',
-    statusWorklog: 'Open',
+    estimated: '8.00',
+    remain: '5.00',
+    worked: '2.50',
+    statusWorklog: 'Pending',
+    isDayOff: false,
+    isEdit: true,
+    avatarId: '10316',
   },
   {
     id: 2,
+    typeIssueName: 'Sub-task',
     issueKey: 'PROJ-102',
     issueId: 200,
-    worked: 4.0,
-    remaining: 3,
-    estimated: 8,
-    startDate: '2025-01-16',
-    startDateEdit: '2025-01-16',
+    summary: 'Add feature',
+    statusName: 'To Do',
+    statusIssue: '/',
+    startDate: 'Thu 16/Jan/25',
+    startDateEdit: '16/Jan/25',
     description: 'Added feature',
     author: 'testuser',
     typeOfWork: 'Review',
+    estimated: '8.00',
+    remain: '3.00',
+    worked: '4.00',
     statusWorklog: 'Approved',
+    isDayOff: false,
+    isEdit: true,
+    avatarId: '10316',
   },
 ];
 
@@ -365,6 +477,33 @@ describe('MyWorklogsPage', () => {
     expect(screen.getByTestId('date-range-picker')).toBeInTheDocument();
   });
 
+  it('renders project select with options', () => {
+    render(<MyWorklogsPage />);
+    const projectSelect = screen.getByLabelText(/Project/);
+    expect(projectSelect).toBeInTheDocument();
+    expect(screen.getByText('Project One (PROJ)')).toBeInTheDocument();
+    expect(screen.getByText('Project Two (PROJ2)')).toBeInTheDocument();
+  });
+
+  it('renders status select with options', () => {
+    render(<MyWorklogsPage />);
+    const statusSelect = screen.getByLabelText('Status');
+    expect(statusSelect).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'All' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: 'Pending' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: 'Approved' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: 'Rejected' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: 'Reopened' })
+    ).toBeInTheDocument();
+  });
+
   it('renders search button', () => {
     render(<MyWorklogsPage />);
     expect(screen.getByRole('button', { name: /Search/i })).toBeInTheDocument();
@@ -379,13 +518,24 @@ describe('MyWorklogsPage', () => {
     expect(screen.getByRole('button', { name: /Search/i })).toBeDisabled();
   });
 
+  it('disables search button when no project selected', () => {
+    mockUseWorklogs.mockReturnValue({
+      ...defaultWorklogsReturn,
+      selectedProject: null,
+    });
+    render(<MyWorklogsPage />);
+    expect(screen.getByRole('button', { name: /Search/i })).toBeDisabled();
+  });
+
   it('disables search button while loading', () => {
     mockUseWorklogs.mockReturnValue({
       ...defaultWorklogsReturn,
       isLoading: true,
     });
     render(<MyWorklogsPage />);
-    expect(screen.getByRole('button', { name: /Searching/i })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /Searching/i })
+    ).toBeDisabled();
   });
 
   it('renders "Searching..." text while loading', () => {
@@ -394,17 +544,9 @@ describe('MyWorklogsPage', () => {
       isLoading: true,
     });
     render(<MyWorklogsPage />);
-    expect(screen.getByText('Searching...')).toBeInTheDocument();
-  });
-
-  it('renders loader icon instead of search icon while loading', () => {
-    mockUseWorklogs.mockReturnValue({
-      ...defaultWorklogsReturn,
-      isLoading: true,
-    });
-    render(<MyWorklogsPage />);
-    const button = screen.getByRole('button', { name: /Searching/i });
-    expect(button.querySelector('[data-testid="icon-loader"]')).toBeTruthy();
+    expect(
+      screen.getByText((content) => content.includes('Searching'))
+    ).toBeInTheDocument();
   });
 
   it('calls handleSearch when search button is clicked', async () => {
@@ -425,7 +567,7 @@ describe('MyWorklogsPage', () => {
   it('renders initial prompt before search', () => {
     render(<MyWorklogsPage />);
     expect(
-      screen.getByText(/Select a date range and click/)
+      screen.getByText(/Select a project and date range/)
     ).toBeInTheDocument();
   });
 
@@ -436,7 +578,7 @@ describe('MyWorklogsPage', () => {
     });
     render(<MyWorklogsPage />);
     expect(
-      screen.getByText(/No worklogs found for the selected date range/)
+      screen.getByText(/No worklogs found for the selected filters/)
     ).toBeInTheDocument();
   });
 
@@ -445,14 +587,29 @@ describe('MyWorklogsPage', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
-  it('hides entry count when worklogs are empty', () => {
+  it('hides results description when worklogs are empty', () => {
     render(<MyWorklogsPage />);
-    expect(screen.queryByTestId('card-description')).not.toBeInTheDocument();
+    const descriptions = screen.getAllByTestId('card-description');
+    const resultsDescription = descriptions.find(el =>
+      el.textContent?.includes('records')
+    );
+    expect(resultsDescription).toBeUndefined();
   });
 
   it('hides BulkDeleteAction when worklogs are empty', () => {
     render(<MyWorklogsPage />);
     expect(screen.queryByTestId('bulk-delete-action')).not.toBeInTheDocument();
+  });
+
+  // --- Loading skeleton ---
+
+  it('renders skeleton loading rows while loading', () => {
+    mockUseWorklogs.mockReturnValue({
+      ...defaultWorklogsReturn,
+      isLoading: true,
+    });
+    render(<MyWorklogsPage />);
+    expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
   });
 
   // --- Worklogs table ---
@@ -462,24 +619,36 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       worklogs: sampleWorklogs,
       totalHours: 6.5,
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     expect(screen.getByRole('table')).toBeInTheDocument();
   });
 
-  it('displays entry count and total hours', () => {
+  it('displays record count and total hours', () => {
     mockUseWorklogs.mockReturnValue({
       ...defaultWorklogsReturn,
       worklogs: sampleWorklogs,
       totalHours: 6.5,
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
-    expect(screen.getByTestId('card-description')).toHaveTextContent(
-      '2 entries'
+    const descriptions = screen.getAllByTestId('card-description');
+    const resultsDescription = descriptions.find(el =>
+      el.textContent?.includes('records')
     );
-    expect(screen.getByTestId('card-description')).toHaveTextContent(
-      '6.5 total hours'
-    );
+    expect(resultsDescription).toHaveTextContent('2 records');
+    expect(resultsDescription).toHaveTextContent('6.5 total hours');
   });
 
   it('renders a WorklogRow for each worklog entry', () => {
@@ -487,6 +656,12 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       worklogs: sampleWorklogs,
       totalHours: 6.5,
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     expect(screen.getByTestId('worklog-row-1')).toBeInTheDocument();
@@ -498,6 +673,12 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       worklogs: sampleWorklogs,
       totalHours: 6.5,
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     expect(screen.getByText('Key')).toBeInTheDocument();
@@ -505,7 +686,6 @@ describe('MyWorklogsPage', () => {
     expect(screen.getByText('Hours')).toBeInTheDocument();
     expect(screen.getByText('Type')).toBeInTheDocument();
     expect(screen.getByText('Date')).toBeInTheDocument();
-    expect(screen.getByText('Status')).toBeInTheDocument();
   });
 
   // --- Select all checkbox ---
@@ -515,6 +695,12 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       worklogs: sampleWorklogs,
       totalHours: 6.5,
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     expect(
@@ -528,6 +714,12 @@ describe('MyWorklogsPage', () => {
       worklogs: sampleWorklogs,
       totalHours: 6.5,
       allSelected: true,
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     expect(screen.getByRole('checkbox', { name: 'Select all' })).toBeChecked();
@@ -540,6 +732,12 @@ describe('MyWorklogsPage', () => {
       totalHours: 6.5,
       allSelected: false,
       someSelected: false,
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     expect(
@@ -552,6 +750,12 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       worklogs: sampleWorklogs,
       totalHours: 6.5,
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     await userEvent.click(screen.getByRole('checkbox', { name: 'Select all' }));
@@ -565,6 +769,12 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       worklogs: sampleWorklogs,
       totalHours: 6.5,
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     expect(screen.getByTestId('bulk-delete-action')).toBeInTheDocument();
@@ -576,6 +786,12 @@ describe('MyWorklogsPage', () => {
       worklogs: sampleWorklogs,
       totalHours: 6.5,
       selectedIds: new Set(['1_100', '2_200']),
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     expect(screen.getByText('2 selected')).toBeInTheDocument();
@@ -587,6 +803,12 @@ describe('MyWorklogsPage', () => {
       worklogs: sampleWorklogs,
       totalHours: 6.5,
       selectedIds: new Set(['1_100']),
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     await userEvent.click(screen.getByText('Bulk Delete'));
@@ -599,9 +821,66 @@ describe('MyWorklogsPage', () => {
       worklogs: sampleWorklogs,
       totalHours: 6.5,
       selectedIds: new Set(['1_100']),
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
     });
     render(<MyWorklogsPage />);
     await userEvent.click(screen.getByText('Clear Selection'));
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
+  });
+
+  // --- Pagination ---
+
+  it('renders pagination when multiple pages exist', () => {
+    mockUseWorklogs.mockReturnValue({
+      ...defaultWorklogsReturn,
+      worklogs: sampleWorklogs,
+      totalHours: 6.5,
+      hasSearched: true,
+      totalRecords: 40,
+      currentPage: 1,
+      totalPages: 2,
+      pageStart: 1,
+      pageEnd: 20,
+    });
+    render(<MyWorklogsPage />);
+    expect(screen.getByTestId('pagination')).toBeInTheDocument();
+  });
+
+  it('hides pagination when only one page', () => {
+    mockUseWorklogs.mockReturnValue({
+      ...defaultWorklogsReturn,
+      worklogs: sampleWorklogs,
+      totalHours: 6.5,
+      hasSearched: true,
+      totalRecords: 2,
+      currentPage: 1,
+      totalPages: 1,
+      pageStart: 1,
+      pageEnd: 2,
+    });
+    render(<MyWorklogsPage />);
+    expect(screen.queryByTestId('pagination')).not.toBeInTheDocument();
+  });
+
+  it('calls goToPage when next button is clicked', async () => {
+    mockUseWorklogs.mockReturnValue({
+      ...defaultWorklogsReturn,
+      worklogs: sampleWorklogs,
+      totalHours: 6.5,
+      hasSearched: true,
+      totalRecords: 40,
+      currentPage: 1,
+      totalPages: 2,
+      pageStart: 1,
+      pageEnd: 20,
+    });
+    render(<MyWorklogsPage />);
+    await userEvent.click(screen.getByTestId('pagination-next'));
+    expect(mockGoToPage).toHaveBeenCalledWith(2);
   });
 });

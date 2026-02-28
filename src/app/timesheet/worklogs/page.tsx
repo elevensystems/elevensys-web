@@ -17,6 +17,18 @@ import {
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -30,10 +42,18 @@ import { getWorklogKey, useWorklogs } from '@/hooks/use-worklogs';
 import { BulkDeleteAction } from './_components/bulk-delete-action';
 import { WorklogRow } from './_components/worklog-row';
 
+const STATUS_OPTIONS = ['All', 'Pending', 'Reopened', 'Approved', 'Rejected'];
+
 export default function MyWorklogsPage() {
   const { settings, isConfigured, isLoaded } = useTimesheetSettings();
 
   const {
+    projects,
+    projectsLoading,
+    selectedProject,
+    setSelectedProject,
+    statusWorklog,
+    setStatusWorklog,
     fromDate,
     setFromDate,
     toDate,
@@ -44,6 +64,11 @@ export default function MyWorklogsPage() {
     error,
     hasSearched,
     totalHours,
+    currentPage,
+    totalPages,
+    totalRecords,
+    pageStart,
+    pageEnd,
     selectedIds,
     allSelected,
     someSelected,
@@ -53,6 +78,7 @@ export default function MyWorklogsPage() {
     toggleSelect,
     clearSelection,
     handleSearch,
+    goToPage,
     handleDelete,
     handleBulkDelete,
   } = useWorklogs({ settings, isConfigured });
@@ -69,13 +95,16 @@ export default function MyWorklogsPage() {
     );
   }
 
+  const hasPrevPage = currentPage > 1;
+  const hasNextPage = currentPage < totalPages;
+
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-full mx-auto space-y-8'>
           <ToolPageHeader
             title='My Worklogs'
-            description='View your logged timesheets from Jira. Search by date range to see all your work entries.'
+            description='View your logged timesheets from Jira. Search by project, date range, and status to see your work entries.'
             error={error || undefined}
           />
 
@@ -105,34 +134,83 @@ export default function MyWorklogsPage() {
                 Search My Worklogs
               </CardTitle>
               <CardDescription>
-                Select a date range and click &quot;Search&quot; to view your
-                worklogs.
+                Select a project, date range, and status, then click
+                &quot;Search&quot; to view your worklogs.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className='flex flex-col sm:flex-row items-end gap-4'>
-                <DateRangePicker
-                  id='date-range'
-                  from={fromDate}
-                  to={toDate}
-                  onRangeChange={(from, to) => {
-                    setFromDate(from);
-                    setToDate(to);
-                  }}
-                  className='flex-1 w-full sm:w-auto'
-                />
-                <Button
-                  onClick={handleSearch}
-                  disabled={isLoading || !isConfigured}
-                  className='w-full sm:w-auto'
-                >
-                  {isLoading ? (
-                    <Loader2 className='h-4 w-4 animate-spin' />
-                  ) : (
-                    <Search className='h-4 w-4' />
-                  )}
-                  {isLoading ? 'Searching...' : 'Search'}
-                </Button>
+            <CardContent className='space-y-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr_1fr] gap-4 items-end'>
+                <div className='space-y-1.5'>
+                  <Label htmlFor='project-select'>
+                    Project <span className='text-destructive'>*</span>
+                  </Label>
+                  <NativeSelect
+                    id='project-select'
+                    value={selectedProject?.id ?? ''}
+                    onChange={e => {
+                      const project =
+                        projects.find(p => p.id === e.target.value) ?? null;
+                      setSelectedProject(project);
+                    }}
+                    disabled={!isConfigured || projectsLoading}
+                  >
+                    <option value=''>
+                      {projectsLoading
+                        ? 'Loading projects…'
+                        : 'Select a project'}
+                    </option>
+                    {projects.map(project => (
+                      <option key={project.id} value={project.id}>
+                        {project.name} ({project.key})
+                      </option>
+                    ))}
+                  </NativeSelect>
+                </div>
+
+                <div className='space-y-1.5'>
+                  <Label htmlFor='date-range'>Date Range</Label>
+                  <DateRangePicker
+                    id='date-range'
+                    from={fromDate}
+                    to={toDate}
+                    onRangeChange={(from, to) => {
+                      setFromDate(from);
+                      setToDate(to);
+                    }}
+                    className='w-full'
+                  />
+                </div>
+
+                <div className='space-y-1.5'>
+                  <Label htmlFor='status-select'>Status</Label>
+                  <NativeSelect
+                    id='status-select'
+                    value={statusWorklog}
+                    onChange={e => setStatusWorklog(e.target.value)}
+                    disabled={!isConfigured}
+                  >
+                    {STATUS_OPTIONS.map(status => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                </div>
+
+                <div className='flex items-end'>
+                  <Button
+                    onClick={handleSearch}
+                    disabled={isLoading || !isConfigured || !selectedProject}
+                    className='w-full'
+                  >
+                    {isLoading ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : (
+                      <Search className='h-4 w-4' />
+                    )}
+                    {isLoading ? 'Searching…' : 'Search'}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -144,11 +222,13 @@ export default function MyWorklogsPage() {
                 <ClipboardList className='h-5 w-5' />
                 Worklogs
               </CardTitle>
-              {worklogs.length > 0 && (
+              {hasSearched && totalRecords > 0 && (
                 <>
                   <CardDescription>
-                    {worklogs.length} entries &middot; {totalHours.toFixed(1)}{' '}
-                    total hours
+                    {totalRecords} record{totalRecords !== 1 ? 's' : ''}{' '}
+                    &middot; {totalHours.toFixed(1)} total hours &middot; page{' '}
+                    {currentPage} of {totalPages} (entries {pageStart}–
+                    {pageEnd})
                   </CardDescription>
                   <BulkDeleteAction
                     selectedCount={selectedIds.size}
@@ -161,35 +241,12 @@ export default function MyWorklogsPage() {
               )}
             </CardHeader>
             <CardContent>
-              {worklogs.length === 0 ? (
-                <div className='flex flex-col items-center justify-center h-40 text-muted-foreground'>
-                  {hasSearched ? (
-                    <p>No worklogs found for the selected date range.</p>
-                  ) : (
-                    <p>
-                      Select a date range and click &quot;Search&quot; to view
-                      your worklogs.
-                    </p>
-                  )}
-                </div>
-              ) : (
+              {isLoading ? (
                 <div className='overflow-hidden rounded-lg border'>
                   <Table>
                     <TableHeader className='bg-muted/50 top-0 z-10'>
                       <TableRow>
-                        <TableHead className='w-[40px]'>
-                          <Checkbox
-                            checked={
-                              allSelected
-                                ? true
-                                : someSelected
-                                  ? 'indeterminate'
-                                  : false
-                            }
-                            onCheckedChange={toggleSelectAll}
-                            aria-label='Select all'
-                          />
-                        </TableHead>
+                        <TableHead className='w-[40px]' />
                         <TableHead>Key</TableHead>
                         <TableHead>Description</TableHead>
                         <TableHead className='text-right'>Hours</TableHead>
@@ -200,22 +257,169 @@ export default function MyWorklogsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {worklogs.map(worklog => {
-                        const key = getWorklogKey(worklog);
-                        return (
-                          <WorklogRow
-                            key={key}
-                            worklog={worklog}
-                            isSelected={selectedIds.has(key)}
-                            isDeleting={deletingId === key}
-                            onToggleSelect={toggleSelect}
-                            onDelete={handleDelete}
-                          />
-                        );
-                      })}
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <td className='p-2 pl-4'>
+                            <Skeleton className='h-4 w-4' />
+                          </td>
+                          <td className='p-2'>
+                            <Skeleton className='h-4 w-28' />
+                          </td>
+                          <td className='p-2'>
+                            <Skeleton className='h-4 w-40' />
+                          </td>
+                          <td className='p-2 text-right'>
+                            <Skeleton className='h-4 w-10 ml-auto' />
+                          </td>
+                          <td className='p-2'>
+                            <Skeleton className='h-5 w-16 rounded-full' />
+                          </td>
+                          <td className='p-2'>
+                            <Skeleton className='h-4 w-24' />
+                          </td>
+                          <td className='p-2'>
+                            <Skeleton className='h-5 w-16 rounded-full' />
+                          </td>
+                          <td className='p-2'>
+                            <Skeleton className='h-4 w-8' />
+                          </td>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
+              ) : worklogs.length === 0 ? (
+                <div className='flex flex-col items-center justify-center h-40 text-muted-foreground'>
+                  {hasSearched ? (
+                    <p>No worklogs found for the selected filters.</p>
+                  ) : (
+                    <p>
+                      Select a project and date range, then click
+                      &quot;Search&quot; to view your worklogs.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className='overflow-hidden rounded-lg border'>
+                    <Table>
+                      <TableHeader className='bg-muted/50 top-0 z-10'>
+                        <TableRow>
+                          <TableHead className='w-[40px]'>
+                            <Checkbox
+                              checked={
+                                allSelected
+                                  ? true
+                                  : someSelected
+                                    ? 'indeterminate'
+                                    : false
+                              }
+                              onCheckedChange={toggleSelectAll}
+                              aria-label='Select all'
+                            />
+                          </TableHead>
+                          <TableHead>Key</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead className='text-right'>Hours</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className='w-[60px]' />
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {worklogs.map(worklog => {
+                          const key = getWorklogKey(worklog);
+                          return (
+                            <WorklogRow
+                              key={key}
+                              worklog={worklog}
+                              isSelected={selectedIds.has(key)}
+                              isDeleting={deletingId === key}
+                              onToggleSelect={toggleSelect}
+                              onDelete={handleDelete}
+                            />
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className='flex justify-end mt-4'>
+                      <Pagination className='mx-0 w-auto'>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious
+                              onClick={
+                                hasPrevPage && !isLoading
+                                  ? () => goToPage(currentPage - 1)
+                                  : undefined
+                              }
+                              aria-disabled={!hasPrevPage || isLoading}
+                              className={
+                                !hasPrevPage || isLoading
+                                  ? 'pointer-events-none opacity-50'
+                                  : 'cursor-pointer'
+                              }
+                            />
+                          </PaginationItem>
+                          {Array.from({ length: totalPages }).map((_, i) => {
+                            const pageNum = i + 1;
+                            const isFirst = i === 0;
+                            const isLast = i === totalPages - 1;
+                            const isNearCurrent =
+                              Math.abs(pageNum - currentPage) <= 1;
+
+                            if (!isFirst && !isLast && !isNearCurrent) {
+                              const prevShown =
+                                i === 1
+                                  ? true
+                                  : i - 1 === 0 ||
+                                    i - 1 === totalPages - 1 ||
+                                    Math.abs(i - currentPage) <= 1;
+                              if (prevShown) {
+                                return (
+                                  <PaginationItem key={i}>
+                                    <PaginationEllipsis />
+                                  </PaginationItem>
+                                );
+                              }
+                              return null;
+                            }
+
+                            return (
+                              <PaginationItem key={i}>
+                                <PaginationLink
+                                  isActive={pageNum === currentPage}
+                                  onClick={() => goToPage(pageNum)}
+                                  className='cursor-pointer'
+                                >
+                                  {pageNum}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+                          <PaginationItem>
+                            <PaginationNext
+                              onClick={
+                                hasNextPage && !isLoading
+                                  ? () => goToPage(currentPage + 1)
+                                  : undefined
+                              }
+                              aria-disabled={!hasNextPage || isLoading}
+                              className={
+                                !hasNextPage || isLoading
+                                  ? 'pointer-events-none opacity-50'
+                                  : 'cursor-pointer'
+                              }
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>

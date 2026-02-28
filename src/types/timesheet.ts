@@ -129,3 +129,33 @@ export interface ProjectWorklogsData {
   end: number;
   rows: ProjectWorklogRow[];
 }
+
+export interface MyWorklogsRow {
+  id: number;
+  typeIssueName: string;
+  issueKey: string;
+  issueId: number;
+  summary: string;
+  statusName: string;
+  statusIssue: string;
+  startDate: string;
+  startDateEdit: string;
+  description: string;
+  author: string;
+  typeOfWork: string;
+  estimated: string;
+  remain: string;
+  worked: string;
+  statusWorklog: string;
+  isDayOff: boolean;
+  isEdit: boolean;
+  avatarId: string;
+}
+
+export interface MyWorklogsData {
+  rows: MyWorklogsRow[];
+  records: number;
+  start: number;
+  pageSize: number;
+  end: number;
+}

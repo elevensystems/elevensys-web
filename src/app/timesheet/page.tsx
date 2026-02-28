@@ -6,6 +6,7 @@ import {
   ArrowRight,
   ClipboardList,
   Clock,
+  FolderSearch,
   PenLine,
   Settings,
 } from 'lucide-react';
@@ -50,6 +51,18 @@ const features = [
     ],
   },
   {
+    title: 'Project Worklogs',
+    description:
+      'View logged timesheets for a project. Filter by project, username, type of work, status, and date range.',
+    href: '/timesheet/project-worklogs',
+    icon: FolderSearch,
+    highlights: [
+      'Filter by project & username',
+      'Type of work & status filters',
+      'Paginated results',
+    ],
+  },
+  {
     title: 'Settings',
     description:
       'Configure your Jira credentials and connection. Your settings are stored securely in your browser.',
@@ -69,7 +82,7 @@ export default function TimesheetPage() {
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-4xl mx-auto'>
+        <div className='max-w-5xl mx-auto space-y-12'>
           <ToolPageHeader
             title='Timesheet'
             description='Manage your Jira timesheets. Log work entries and view your logged hours — all in one place.'
