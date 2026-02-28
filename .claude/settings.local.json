@@ -10,10 +10,15 @@
       "Bash(npx tsc:*)",
       "mcp__next-devtools__nextjs_docs",
       "Bash(pnpm exec eslint:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "mcp__shadcn__search_items_in_registries",
+      "mcp__shadcn__view_items_in_registries"
     ]
   },
-  "enabledMcpjsonServers": ["next-devtools", "shadcn"],
+  "enabledMcpjsonServers": [
+    "next-devtools",
+    "shadcn"
+  ],
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh",

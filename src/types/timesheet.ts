@@ -100,3 +100,32 @@ export interface JiraIssue {
   summary: string;
   type: JiraIssueType;
 }
+
+export interface ProjectWorklogRow {
+  no: number;
+  id: number;
+  key: string;
+  component: string;
+  summary: string;
+  user: string;
+  projectId: number;
+  date: string;
+  description: string;
+  worked: string;
+  attribute: string;
+  attributeValue: string;
+  status: string;
+  issuetype: string;
+  projectname: string;
+  productName: string;
+  warningAbsence: boolean;
+}
+
+export interface ProjectWorklogsData {
+  page: number;
+  total: number;
+  records: number;
+  start: number;
+  end: number;
+  rows: ProjectWorklogRow[];
+}
