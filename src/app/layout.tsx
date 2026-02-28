@@ -74,7 +74,7 @@ export default async function RootLayout({
           <DomainProvider config={domainConfig}>
             <AuthProvider user={user}>
               {children}
-              <Toaster />
+              <Toaster position='top-right' />
             </AuthProvider>
           </DomainProvider>
         </ThemeProvider>
