@@ -12,7 +12,9 @@
       "Bash(pnpm exec eslint:*)",
       "Bash(grep:*)",
       "mcp__shadcn__search_items_in_registries",
-      "mcp__shadcn__view_items_in_registries"
+      "mcp__shadcn__view_items_in_registries",
+      "WebFetch(domain:ui.shadcn.com)",
+      "Bash(git checkout -- src/app/timesheet/project-worklogs/page.tsx src/hooks/use-project-worklogs.ts src/app/api/timesheet/project-worklogs/route.ts)"
     ]
   },
   "enabledMcpjsonServers": [

@@ -410,7 +410,7 @@ export default function LogWorkPage() {
                   <TableHeader className='bg-muted/50 top-0 z-10'>
                     <TableRow>
                       <TableHead className='w-[230px] font-semibold'>
-                        Ticket ID
+                        Key
                       </TableHead>
                       <TableHead className='font-semibold'>
                         Description

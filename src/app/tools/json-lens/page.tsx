@@ -338,7 +338,7 @@ export default function JsonLensPage() {
                     <div className='grid grid-cols-2 gap-x-6 gap-y-3 text-sm'>
                       <div className='flex justify-between'>
                         <span className='text-muted-foreground'>Type</span>
-                        <span className='font-mono font-medium'>
+                        <span className='font-mono font-semibold'>
                           {jsonStats.isArray ? 'Array' : 'Object'}
                         </span>
                       </div>
@@ -346,19 +346,19 @@ export default function JsonLensPage() {
                         <span className='text-muted-foreground'>
                           {jsonStats.isArray ? 'Items' : 'Root Keys'}
                         </span>
-                        <span className='font-mono font-medium'>
+                        <span className='font-mono font-semibold'>
                           {jsonStats.rootKeys}
                         </span>
                       </div>
                       <div className='flex justify-between'>
                         <span className='text-muted-foreground'>Max Depth</span>
-                        <span className='font-mono font-medium'>
+                        <span className='font-mono font-semibold'>
                           {jsonStats.depth}
                         </span>
                       </div>
                       <div className='flex justify-between'>
                         <span className='text-muted-foreground'>Lines</span>
-                        <span className='font-mono font-medium'>
+                        <span className='font-mono font-semibold'>
                           {jsonStats.lines}
                         </span>
                       </div>
@@ -366,13 +366,13 @@ export default function JsonLensPage() {
                         <span className='text-muted-foreground'>
                           Characters
                         </span>
-                        <span className='font-mono font-medium'>
+                        <span className='font-mono font-semibold'>
                           {jsonStats.chars.toLocaleString()}
                         </span>
                       </div>
                       <div className='flex justify-between'>
                         <span className='text-muted-foreground'>Size</span>
-                        <span className='font-mono font-medium'>
+                        <span className='font-mono font-semibold'>
                           {jsonStats.size}
                         </span>
                       </div>
@@ -381,13 +381,13 @@ export default function JsonLensPage() {
                     <div className='grid grid-cols-2 gap-x-6 gap-y-3 text-sm'>
                       <div className='flex justify-between'>
                         <span className='text-muted-foreground'>Formatted</span>
-                        <span className='font-mono font-medium text-blue-500'>
+                        <span className='font-mono font-semibold text-blue-500'>
                           {jsonStats.formattedSize}
                         </span>
                       </div>
                       <div className='flex justify-between'>
                         <span className='text-muted-foreground'>Minified</span>
-                        <span className='font-mono font-medium text-green-500'>
+                        <span className='font-mono font-semibold text-green-500'>
                           {jsonStats.minifiedSize}
                         </span>
                       </div>

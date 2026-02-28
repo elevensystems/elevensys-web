@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Ubuntu } from 'next/font/google';
+import { Ubuntu, Ubuntu_Mono } from 'next/font/google';
 import { headers } from 'next/headers';
 
 import { ThemeProvider } from '@/components/theme-provider';
@@ -18,6 +18,12 @@ const ubuntu = Ubuntu({
   subsets: ['latin'],
   weight: ['300', '400', '500', '700'],
   variable: '--font-ubuntu',
+});
+
+const ubuntuMono = Ubuntu_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-ubuntu-mono',
 });
 
 function resolveDomainConfig(headersList: Headers) {
@@ -58,7 +64,7 @@ export default async function RootLayout({
 
   return (
     <html lang='en' suppressHydrationWarning>
-      <body className={`${ubuntu.variable} antialiased`}>
+      <body className={`${ubuntu.variable} ${ubuntuMono.variable} antialiased`}>
         <ThemeProvider
           attribute='class'
           defaultTheme='system'

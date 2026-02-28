@@ -77,11 +77,6 @@ export default function MyWorklogsPage() {
             title='My Worklogs'
             description='View your logged timesheets from Jira. Search by date range to see all your work entries.'
             error={error || undefined}
-            infoMessage={
-              !error && isConfigured
-                ? 'Your Jira settings are configured. You can start logging work entries.'
-                : undefined
-            }
           />
 
           {!isConfigured && (
@@ -107,8 +102,12 @@ export default function MyWorklogsPage() {
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
                 <Search className='h-5 w-5' />
-                Search Worklogs
+                Search My Worklogs
               </CardTitle>
+              <CardDescription>
+                Select a date range and click &quot;Search&quot; to view your
+                worklogs.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className='flex flex-col sm:flex-row items-end gap-4'>
@@ -191,7 +190,7 @@ export default function MyWorklogsPage() {
                             aria-label='Select all'
                           />
                         </TableHead>
-                        <TableHead>Ticket ID</TableHead>
+                        <TableHead>Key</TableHead>
                         <TableHead>Description</TableHead>
                         <TableHead className='text-right'>Hours</TableHead>
                         <TableHead>Type</TableHead>

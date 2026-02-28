@@ -1,13 +1,10 @@
 'use client';
 
+import * as React from 'react';
+
 import Link from 'next/link';
 
-import {
-  AlertCircle,
-  ClipboardList,
-  Loader2,
-  Search,
-} from 'lucide-react';
+import { AlertCircle, ClipboardList, Loader2, Search } from 'lucide-react';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
@@ -20,6 +17,18 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
+  useComboboxAnchor,
+} from '@/components/ui/combobox';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,13 +42,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
@@ -48,8 +50,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 import { useProjectWorklogs } from '@/hooks/use-project-worklogs';
+import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 
 import { ProjectWorklogRowItem } from './_components/project-worklog-row';
 
@@ -63,8 +65,11 @@ const TYPE_OF_WORK_OPTIONS = [
   'Translate',
 ];
 
+const STATUS_OPTIONS = ['Pending', 'Reopened', 'Approved', 'Rejected'] as const;
+
 export default function ProjectWorklogsPage() {
   const { settings, isConfigured, isLoaded } = useTimesheetSettings();
+  const statusAnchor = useComboboxAnchor();
 
   const {
     projects,
@@ -75,6 +80,8 @@ export default function ProjectWorklogsPage() {
     setUsername,
     typeOfWork,
     setTypeOfWork,
+    filStatus,
+    setFilStatus,
     fromDate,
     setFromDate,
     toDate,
@@ -115,11 +122,6 @@ export default function ProjectWorklogsPage() {
             title='Project Worklogs'
             description='View logged timesheets for a project. Filter by project, username, type of work, and date range.'
             error={error || undefined}
-            infoMessage={
-              !error && isConfigured
-                ? 'Your Jira settings are configured. Select a project to get started.'
-                : undefined
-            }
           />
 
           {!isConfigured && (
@@ -147,49 +149,39 @@ export default function ProjectWorklogsPage() {
                 <Search className='h-5 w-5' />
                 Search Project Worklogs
               </CardTitle>
+              <CardDescription>
+                Choose your project and filters, then run search to load
+                matching worklogs.
+              </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end'>
+              {/* Row 1: primary filters */}
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr_1fr] gap-4'>
                 <div className='space-y-1.5'>
                   <Label htmlFor='project-select'>
                     Project <span className='text-destructive'>*</span>
                   </Label>
-                  <Select
+                  <NativeSelect
+                    id='project-select'
                     value={selectedProject?.id ?? ''}
-                    onValueChange={value => {
-                      const project = projects.find(p => p.id === value) ?? null;
+                    onChange={e => {
+                      const project =
+                        projects.find(p => p.id === e.target.value) ?? null;
                       setSelectedProject(project);
                     }}
                     disabled={!isConfigured || projectsLoading}
                   >
-                    <SelectTrigger id='project-select' className='w-full'>
-                      <SelectValue
-                        placeholder={
-                          projectsLoading
-                            ? 'Loading projects…'
-                            : 'Select a project'
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {projects.map(project => (
-                        <SelectItem key={project.id} value={project.id}>
-                          {project.name} ({project.key})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className='space-y-1.5'>
-                  <Label htmlFor='username-input'>Username</Label>
-                  <Input
-                    id='username-input'
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    placeholder='All users'
-                    disabled={!isConfigured}
-                  />
+                    <option value=''>
+                      {projectsLoading
+                        ? 'Loading projects…'
+                        : 'Select a project'}
+                    </option>
+                    {projects.map(project => (
+                      <option key={project.id} value={project.id}>
+                        {project.name} ({project.key})
+                      </option>
+                    ))}
+                  </NativeSelect>
                 </div>
 
                 <div className='space-y-1.5'>
@@ -207,6 +199,17 @@ export default function ProjectWorklogsPage() {
                 </div>
 
                 <div className='space-y-1.5'>
+                  <Label htmlFor='username-input'>Username</Label>
+                  <Input
+                    id='username-input'
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    placeholder='All users'
+                    disabled={!isConfigured}
+                  />
+                </div>
+
+                <div className='space-y-1.5'>
                   <Label htmlFor='type-of-work-select'>Type of Work</Label>
                   <NativeSelect
                     id='type-of-work-select'
@@ -220,6 +223,56 @@ export default function ProjectWorklogsPage() {
                       </option>
                     ))}
                   </NativeSelect>
+                </div>
+              </div>
+
+              {/* Row 2: secondary filters + action */}
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[5fr_1fr] gap-4 items-end'>
+                <div className='space-y-1.5'>
+                  <Label htmlFor='status-combobox'>Status</Label>
+                  <div>
+                    <Combobox
+                      id='status-combobox'
+                      multiple
+                      autoHighlight
+                      items={STATUS_OPTIONS}
+                      value={filStatus}
+                      onValueChange={setFilStatus}
+                      disabled={!isConfigured}
+                    >
+                      <ComboboxChips
+                        ref={statusAnchor}
+                        className='w-full min-h-9'
+                      >
+                        <ComboboxValue>
+                          {values => (
+                            <React.Fragment>
+                              {(values as string[]).map(v => (
+                                <ComboboxChip key={v}>{v}</ComboboxChip>
+                              ))}
+                              <ComboboxChipsInput
+                                placeholder={
+                                  filStatus.length === 0
+                                    ? 'All statuses'
+                                    : undefined
+                                }
+                              />
+                            </React.Fragment>
+                          )}
+                        </ComboboxValue>
+                      </ComboboxChips>
+                      <ComboboxContent anchor={statusAnchor}>
+                        <ComboboxEmpty>No statuses found.</ComboboxEmpty>
+                        <ComboboxList>
+                          {item => (
+                            <ComboboxItem key={item} value={item}>
+                              {item}
+                            </ComboboxItem>
+                          )}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  </div>
                 </div>
 
                 <div className='flex items-end'>

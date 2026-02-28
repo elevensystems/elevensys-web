@@ -31,7 +31,7 @@ export const ProjectWorklogRowItem = memo(function ProjectWorklogRowItem({
       <TableCell className='text-muted-foreground text-sm'>
         {row.no + 1}
       </TableCell>
-      <TableCell className='font-mono font-medium'>{row.key}</TableCell>
+      <TableCell className='font-mono font-semibold'>{row.key}</TableCell>
       <TableCell className='max-w-[220px]'>
         {row.description ? (
           <Tooltip>

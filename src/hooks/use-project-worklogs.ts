@@ -40,7 +40,7 @@ export function useProjectWorklogs({
   const [selectedProject, setSelectedProject] = useState<JiraProject | null>(
     null
   );
-  const [username, setUsername] = useState(settings.username);
+  const [username, setUsername] = useState('');
   const [typeOfWork, setTypeOfWork] = useState('All');
   const [filStatus, setFilStatus] = useState<string[]>([]);
   const [fromDate, setFromDate] = useState(getMonthStart());

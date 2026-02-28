@@ -361,7 +361,7 @@ describe('MyWorklogsPage', () => {
 
   it('renders search card with title and date range picker', () => {
     render(<MyWorklogsPage />);
-    expect(screen.getByText('Search Worklogs')).toBeInTheDocument();
+    expect(screen.getByText('Search My Worklogs')).toBeInTheDocument();
     expect(screen.getByTestId('date-range-picker')).toBeInTheDocument();
   });
 
@@ -500,7 +500,7 @@ describe('MyWorklogsPage', () => {
       totalHours: 6.5,
     });
     render(<MyWorklogsPage />);
-    expect(screen.getByText('Ticket ID')).toBeInTheDocument();
+    expect(screen.getByText('Key')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
     expect(screen.getByText('Hours')).toBeInTheDocument();
     expect(screen.getByText('Type')).toBeInTheDocument();

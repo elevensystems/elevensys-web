@@ -19,6 +19,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TableCell, TableRow } from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { getWorklogKey } from '@/hooks/use-worklogs';
 import {
   formatDisplayDate,
@@ -68,11 +74,24 @@ export const WorklogRow = memo(function WorklogRow({
           aria-label={`Select ${worklog.issueKey}`}
         />
       </TableCell>
-      <TableCell className='font-mono font-medium'>
+      <TableCell className='font-mono font-semibold'>
         {worklog.issueKey}
       </TableCell>
-      <TableCell className='max-w-[200px] truncate'>
-        {worklog.description || '-'}
+      <TableCell className='max-w-[200px]'>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className='block truncate'>
+                {worklog.description || '-'}
+              </span>
+            </TooltipTrigger>
+            {worklog.description && (
+              <TooltipContent side='bottom' className='max-w-sm'>
+                <p>{worklog.description}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </TableCell>
       <TableCell className='text-right font-medium'>
         {parseFloat(String(worklog.worked))}h
