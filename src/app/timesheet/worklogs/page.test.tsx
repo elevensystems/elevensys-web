@@ -490,9 +490,7 @@ describe('MyWorklogsPage', () => {
     const statusSelect = screen.getByLabelText('Status');
     expect(statusSelect).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'All' })).toBeInTheDocument();
-    expect(
-      screen.getByRole('option', { name: 'Pending' })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Pending' })).toBeInTheDocument();
     expect(
       screen.getByRole('option', { name: 'Approved' })
     ).toBeInTheDocument();
@@ -533,9 +531,7 @@ describe('MyWorklogsPage', () => {
       isLoading: true,
     });
     render(<MyWorklogsPage />);
-    expect(
-      screen.getByRole('button', { name: /Searching/i })
-    ).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Searching/i })).toBeDisabled();
   });
 
   it('renders "Searching..." text while loading', () => {
@@ -545,7 +541,7 @@ describe('MyWorklogsPage', () => {
     });
     render(<MyWorklogsPage />);
     expect(
-      screen.getByText((content) => content.includes('Searching'))
+      screen.getByText(content => content.includes('Searching'))
     ).toBeInTheDocument();
   });
 

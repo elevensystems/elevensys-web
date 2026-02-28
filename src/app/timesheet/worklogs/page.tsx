@@ -227,8 +227,8 @@ export default function MyWorklogsPage() {
                   <CardDescription>
                     {totalRecords} record{totalRecords !== 1 ? 's' : ''}{' '}
                     &middot; {totalHours.toFixed(1)} total hours &middot; page{' '}
-                    {currentPage} of {totalPages} (entries {pageStart}–
-                    {pageEnd})
+                    {currentPage} of {totalPages} (entries {pageStart}–{pageEnd}
+                    )
                   </CardDescription>
                   <BulkDeleteAction
                     selectedCount={selectedIds.size}

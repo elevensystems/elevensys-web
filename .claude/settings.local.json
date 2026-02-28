@@ -19,10 +19,7 @@
       "Bash(npm test)"
     ]
   },
-  "enabledMcpjsonServers": [
-    "next-devtools",
-    "shadcn"
-  ],
+  "enabledMcpjsonServers": ["next-devtools", "shadcn"],
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh",
