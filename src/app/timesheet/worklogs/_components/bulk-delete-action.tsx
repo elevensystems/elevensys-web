@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2 } from 'lucide-react';
+import { EraserIcon, Trash2 } from 'lucide-react';
 
 import {
   AlertDialog,
@@ -70,6 +70,7 @@ export function BulkDeleteAction({
           </AlertDialogContent>
         </AlertDialog>
         <Button variant='ghost' size='sm' onClick={onClearSelection}>
+          <EraserIcon />
           Clear
         </Button>
       </div>

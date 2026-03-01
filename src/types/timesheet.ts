@@ -152,6 +152,15 @@ export interface MyWorklogsRow {
   avatarId: string;
 }
 
+export interface UpdateWorklogRequest {
+  id: number;
+  startDateEdit?: string;
+  description?: string;
+  typeOfWork?: string;
+  worked?: string;
+  jiraInstance: string;
+}
+
 export interface MyWorklogsData {
   rows: MyWorklogsRow[];
   records: number;

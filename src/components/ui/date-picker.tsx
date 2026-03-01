@@ -49,6 +49,7 @@ function DatePicker({
       <PopoverContent className='w-auto p-0' align='start'>
         <Calendar
           mode='single'
+          defaultMonth={selected}
           selected={selected}
           onSelect={(date: Date | undefined) => {
             if (date) {
@@ -57,7 +58,7 @@ function DatePicker({
             }
             setOpen(false);
           }}
-          initialFocus
+          autoFocus
         />
       </PopoverContent>
     </Popover>

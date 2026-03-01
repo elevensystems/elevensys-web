@@ -16,6 +16,7 @@ import type {
   MyWorklogsData,
   MyWorklogsRow,
   TimesheetSettings,
+  UpdateWorklogRequest,
   WorklogEntry,
 } from '@/types/timesheet';
 
@@ -62,6 +63,12 @@ export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
   const [totalRecords, setTotalRecords] = useState(0);
   const [pageStart, setPageStart] = useState(0);
   const [pageEnd, setPageEnd] = useState(0);
+
+  // Edit state
+  const [editingWorklog, setEditingWorklog] = useState<MyWorklogsRow | null>(
+    null
+  );
+  const [isEditing, setIsEditing] = useState(false);
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -265,18 +272,19 @@ export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
       setDeletingId(key);
 
       try {
-        const response = await fetch('/api/timesheet/worklogs/delete', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${settings.token}`,
-          },
-          body: JSON.stringify({
-            issueId,
-            timesheetId: worklogId,
-            jiraInstance: settings.jiraInstance,
-          }),
+        const params = new URLSearchParams({
+          jiraInstance: settings.jiraInstance,
         });
+
+        const response = await fetch(
+          `/api/timesheet/worklogs/${issueId}/${worklogId}?${params.toString()}`,
+          {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${settings.token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
@@ -299,6 +307,94 @@ export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
       }
     },
     [isConfigured, settings, worklogs]
+  );
+
+  const openEditModal = useCallback((worklog: MyWorklogsRow) => {
+    setEditingWorklog(worklog);
+  }, []);
+
+  const closeEditModal = useCallback(() => {
+    setEditingWorklog(null);
+  }, []);
+
+  const handleEdit = useCallback(
+    async (
+      worklog: MyWorklogsRow,
+      changes: Omit<UpdateWorklogRequest, 'id' | 'jiraInstance'>
+    ) => {
+      if (!isConfigured) {
+        toast.error('Jira settings not configured.');
+        return;
+      }
+
+      if (Object.keys(changes).length === 0) {
+        toast.info('No changes to save.');
+        return;
+      }
+
+      setIsEditing(true);
+
+      try {
+        const payload: UpdateWorklogRequest = {
+          id: worklog.id,
+          jiraInstance: settings.jiraInstance,
+          ...changes,
+        };
+
+        const response = await fetch(
+          `/api/timesheet/worklogs/${worklog.issueId}/${worklog.id}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${settings.token}`,
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.error ||
+              `Failed to update worklog: HTTP ${response.status}`
+          );
+        }
+
+        // Update local state with the changes
+        setWorklogs(prev =>
+          prev.map(w =>
+            w.id === worklog.id && w.issueId === worklog.issueId
+              ? {
+                  ...w,
+                  ...(changes.description !== undefined && {
+                    description: changes.description,
+                  }),
+                  ...(changes.worked !== undefined && {
+                    worked: changes.worked,
+                  }),
+                  ...(changes.typeOfWork !== undefined && {
+                    typeOfWork: changes.typeOfWork,
+                  }),
+                  ...(changes.startDateEdit !== undefined && {
+                    startDateEdit: changes.startDateEdit,
+                  }),
+                }
+              : w
+          )
+        );
+
+        setEditingWorklog(null);
+        toast.success('Worklog updated successfully');
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Failed to update worklog';
+        toast.error(message);
+      } finally {
+        setIsEditing(false);
+      }
+    },
+    [isConfigured, settings]
   );
 
   const handleBulkDelete = useCallback(async () => {
@@ -339,18 +435,19 @@ export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
       setBulkDeleteProgress(Math.round(((i + 1) / total) * 100));
 
       try {
-        const response = await fetch('/api/timesheet/worklogs/delete', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${settings.token}`,
-          },
-          body: JSON.stringify({
-            issueId: worklog.issueId,
-            timesheetId: worklog.id,
-            jiraInstance: settings.jiraInstance,
-          }),
+        const deleteParams = new URLSearchParams({
+          jiraInstance: settings.jiraInstance,
         });
+
+        const response = await fetch(
+          `/api/timesheet/worklogs/${worklog.issueId}/${worklog.id}?${deleteParams.toString()}`,
+          {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${settings.token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
@@ -424,6 +521,12 @@ export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
     toggleSelectAll,
     toggleSelect,
     clearSelection,
+    // Edit
+    editingWorklog,
+    isEditing,
+    openEditModal,
+    closeEditModal,
+    handleEdit,
     // Actions
     handleSearch,
     goToPage,

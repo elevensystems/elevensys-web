@@ -41,6 +41,7 @@ import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 import { getWorklogKey, useWorklogs } from '@/hooks/use-worklogs';
 
 import { BulkDeleteAction } from './_components/bulk-delete-action';
+import { EditWorklogModal } from './_components/edit-worklog-modal';
 import { WorklogRow } from './_components/worklog-row';
 
 const STATUS_OPTIONS = ['All', 'Pending', 'Reopened', 'Approved', 'Rejected'];
@@ -75,6 +76,11 @@ export default function MyWorklogsPage() {
     someSelected,
     isBulkDeleting,
     bulkDeleteProgress,
+    editingWorklog,
+    isEditing,
+    openEditModal,
+    closeEditModal,
+    handleEdit,
     toggleSelectAll,
     toggleSelect,
     clearSelection,
@@ -335,6 +341,7 @@ export default function MyWorklogsPage() {
                               isDeleting={deletingId === key}
                               onToggleSelect={toggleSelect}
                               onDelete={handleDelete}
+                              onEdit={openEditModal}
                             />
                           );
                         })}
@@ -420,6 +427,12 @@ export default function MyWorklogsPage() {
               )}
             </CardContent>
           </Card>
+          <EditWorklogModal
+            worklog={editingWorklog}
+            isEditing={isEditing}
+            onClose={closeEditModal}
+            onSave={handleEdit}
+          />
         </div>
       </section>
     </MainLayout>

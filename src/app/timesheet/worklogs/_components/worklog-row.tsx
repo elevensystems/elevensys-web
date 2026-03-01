@@ -2,7 +2,7 @@
 
 import { memo, useCallback } from 'react';
 
-import { Trash2 } from 'lucide-react';
+import { MoreHorizontalIcon, SquarePenIcon, Trash2Icon } from 'lucide-react';
 
 import {
   AlertDialog,
@@ -18,6 +18,13 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Spinner } from '@/components/ui/spinner';
 import { TableCell, TableRow } from '@/components/ui/table';
 import {
@@ -40,6 +47,7 @@ interface WorklogRowProps {
   isDeleting: boolean;
   onToggleSelect: (key: string) => void;
   onDelete: (worklogId: number, issueId: number) => void;
+  onEdit: (worklog: MyWorklogsRow) => void;
 }
 
 export const WorklogRow = memo(function WorklogRow({
@@ -48,6 +56,7 @@ export const WorklogRow = memo(function WorklogRow({
   isDeleting,
   onToggleSelect,
   onDelete,
+  onEdit,
 }: WorklogRowProps) {
   const key = getWorklogKey(worklog);
   const isApproved = worklog.statusWorklog?.toLowerCase() === 'approved';
@@ -59,6 +68,8 @@ export const WorklogRow = memo(function WorklogRow({
     () => onToggleSelect(key),
     [key, onToggleSelect]
   );
+
+  const handleEdit = useCallback(() => onEdit(worklog), [worklog, onEdit]);
 
   const handleDelete = useCallback(
     () => onDelete(worklog.id, worklog.issueId),
@@ -113,23 +124,32 @@ export const WorklogRow = memo(function WorklogRow({
       </TableCell>
       <TableCell>
         <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              aria-label='Delete'
-              variant='ghost'
-              size='icon'
-              className='h-8 w-8 text-destructive hover:bg-destructive hover:text-white'
-              disabled={isApproved || isDeleting}
-              title={
-                isApproved
-                  ? 'Cannot delete an approved worklog'
-                  : 'Delete worklog'
-              }
-            >
-              {isDeleting ? <Spinner /> : <Trash2 className='h-4 w-4' />}
-              <span className='sr-only'>Delete</span>
-            </Button>
-          </AlertDialogTrigger>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='size-8'
+                disabled={isDeleting}
+              >
+                {isDeleting ? <Spinner /> : <MoreHorizontalIcon />}
+                <span className='sr-only'>Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuItem onClick={handleEdit}>
+                <SquarePenIcon />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem variant='destructive' disabled={isApproved}>
+                  <Trash2Icon />
+                  Delete
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Worklog</AlertDialogTitle>
