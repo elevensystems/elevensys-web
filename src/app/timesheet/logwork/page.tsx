@@ -486,19 +486,6 @@ export default function LogWorkPage() {
                   </>
                 )}
               </div>
-
-              {!isConfigured && (
-                <p className='text-xs text-muted-foreground text-center'>
-                  Please{' '}
-                  <Link
-                    href='/timesheet/config'
-                    className='underline underline-offset-4'
-                  >
-                    configure your Jira settings
-                  </Link>{' '}
-                  to start logging work.
-                </p>
-              )}
             </CardContent>
           </Card>
         </div>

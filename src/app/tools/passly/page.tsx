@@ -119,8 +119,7 @@ export default function PasslyPage() {
         }
       } catch (err) {
         console.error('Error generating passwords:', err);
-        const errorMessage =
-          'Failed to generate passwords. Please try again.';
+        const errorMessage = 'Failed to generate passwords. Please try again.';
         setError(errorMessage);
         toast.error(errorMessage, { duration: 5000 });
       }
@@ -247,9 +246,6 @@ export default function PasslyPage() {
                     ? 'Generating...'
                     : 'Generate Passwords'}
                 </Button>
-                <p className='text-xs text-muted-foreground text-center'>
-                  Generates 5 unique passwords
-                </p>
               </CardContent>
             </Card>
 
