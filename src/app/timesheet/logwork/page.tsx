@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -139,15 +139,6 @@ export default function LogWorkPage() {
   const [error, setError] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  const onSubmitRef = useRef(() => {
-    setError('');
-    setShowConfirmDialog(true);
-  });
-  onSubmitRef.current = () => {
-    setError('');
-    setShowConfirmDialog(true);
-  };
-
   const [formOptions] = useState(() => ({
     defaultValues: {
       datesText: '',
@@ -155,7 +146,8 @@ export default function LogWorkPage() {
     },
     validators: { onSubmit: logWorkSchema } as const,
     onSubmit: async () => {
-      onSubmitRef.current();
+      setError('');
+      setShowConfirmDialog(true);
     },
   }));
 
@@ -163,6 +155,7 @@ export default function LogWorkPage() {
 
   const entries = useStore(form.store, s => s.values.entries);
   const datesText = useStore(form.store, s => s.values.datesText);
+  const submitErrors = useStore(form.store, s => s.errorMap?.onSubmit);
 
   const parsedDates = useMemo(() => parseSpecificDates(datesText), [datesText]);
 
@@ -188,6 +181,7 @@ export default function LogWorkPage() {
     } else {
       form.setFieldValue('entries', [createDefaultEntry()]);
     }
+    // form instance is stable (created once via useForm) — safe to omit from deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId]);
 
@@ -227,18 +221,8 @@ export default function LogWorkPage() {
     [form]
   );
 
-  const handleSubmitClick = useCallback(async () => {
-    if (!isConfigured) {
-      const msg = 'Please configure your Jira settings first.';
-      setError(msg);
-      toast.error(msg);
-      return;
-    }
-    setError('');
-    await form.handleSubmit();
-
-    // Surface validation errors (onSubmit handler won't run if validation fails)
-    const submitErrors = form.state.errorMap?.onSubmit;
+  // Reactively surface validation errors from TanStack Form
+  useEffect(() => {
     if (
       submitErrors &&
       Array.isArray(submitErrors) &&
@@ -250,6 +234,17 @@ export default function LogWorkPage() {
       setError(message);
       toast.error(message);
     }
+  }, [submitErrors]);
+
+  const handleSubmitClick = useCallback(async () => {
+    if (!isConfigured) {
+      const msg = 'Please configure your Jira settings first.';
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+    setError('');
+    await form.handleSubmit();
   }, [isConfigured, form]);
 
   const processResults = useCallback(
