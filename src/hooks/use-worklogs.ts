@@ -92,13 +92,18 @@ export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
           headers: { Authorization: `Bearer ${settings.token}` },
         }
       );
-      if (!response.ok) return;
+      if (!response.ok) {
+        toast.error('Failed to fetch projects');
+        return;
+      }
       const data = await response.json();
       if (data.success && Array.isArray(data.data)) {
         setProjects(data.data as JiraProject[]);
+      } else {
+        toast.error(data.error || 'Failed to fetch projects');
       }
     } catch {
-      // Silently fail — project list is non-critical
+      toast.error('Failed to fetch projects');
     } finally {
       setProjectsLoading(false);
     }

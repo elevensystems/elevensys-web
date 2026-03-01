@@ -22,6 +22,7 @@ import {
   Card,
   CardAction,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -382,10 +383,16 @@ export default function LogWorkPage() {
           {/* Work Entries Card */}
           <Card>
             <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <Clock className='h-5 w-5' />
-                Work Entries
-              </CardTitle>
+              <div className='flex flex-col gap-1'>
+                <CardTitle className='flex items-center gap-2'>
+                  <Clock className='h-5 w-5' />
+                  Work Entries
+                </CardTitle>
+                <CardDescription>
+                  Fill in the details of your work entries. You can add multiple
+                  entries and submit them together.
+                </CardDescription>
+              </div>
               <CardAction>
                 <div className='flex items-center gap-3 text-sm'>
                   <span className='text-muted-foreground'>Total:</span>

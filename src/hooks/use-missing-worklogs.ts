@@ -46,14 +46,13 @@ export function useMissingWorklogs({
       .then(result => {
         if (result.success && Array.isArray(result.data)) {
           setProjects(result.data);
-          if (result.data.length > 0) {
-            setSelectedProjectId(result.data[0].id);
-          }
+        } else {
+          toast.error(result.error || 'Failed to fetch projects');
         }
       })
       .catch(err => {
         if (err.name !== 'AbortError') {
-          // Ignore non-abort fetch errors
+          toast.error('Failed to fetch projects');
         }
       })
       .finally(() => setIsLoadingProjects(false));

@@ -86,7 +86,9 @@ export function MissingWorklogsCard({
 
         <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 items-end'>
           <div className='space-y-2'>
-            <Label htmlFor='project-select'>Project</Label>
+            <Label htmlFor='project-select'>
+              Project <span className='text-destructive'>*</span>
+            </Label>
             <NativeSelect
               id='project-select'
               value={selectedProjectId}
