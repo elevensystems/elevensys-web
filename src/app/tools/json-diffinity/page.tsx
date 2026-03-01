@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -435,9 +436,17 @@ export default function JsonDiffinityPage() {
                     {originalValidation.error}
                   </p>
                 ) : (
-                  <p className='text-xs text-muted-foreground'>
-                    JSON is valid and ready to compare.
-                  </p>
+                  <div className='flex items-center gap-2'>
+                    <Badge
+                      variant='default'
+                      className='bg-green-600 font-mono text-xs'
+                    >
+                      Valid
+                    </Badge>
+                    <p className='text-xs text-muted-foreground'>
+                      JSON is valid and ready to compare.
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -505,9 +514,17 @@ export default function JsonDiffinityPage() {
                     {modifiedValidation.error}
                   </p>
                 ) : (
-                  <p className='text-xs text-muted-foreground'>
-                    JSON is valid and ready to compare.
-                  </p>
+                  <div className='flex items-center gap-2'>
+                    <Badge
+                      variant='default'
+                      className='bg-green-600 font-mono text-xs'
+                    >
+                      Valid
+                    </Badge>
+                    <p className='text-xs text-muted-foreground'>
+                      JSON is valid and ready to compare.
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>

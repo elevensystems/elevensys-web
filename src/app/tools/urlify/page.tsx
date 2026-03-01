@@ -15,10 +15,17 @@ import { toast } from 'sonner';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { urlifySchema } from '@/lib/schemas/urlify';
 
@@ -106,10 +113,15 @@ export default function UrlifyPage() {
             {/* Settings Card */}
             <Card>
               <CardHeader>
-                <CardTitle className='flex items-center gap-2'>
-                  <SettingsIcon className='h-5 w-5' />
-                  Settings
-                </CardTitle>
+                <div className='flex flex-col gap-1'>
+                  <CardTitle className='flex items-center gap-2'>
+                    <SettingsIcon className='h-5 w-5' />
+                    Settings
+                  </CardTitle>
+                  <CardDescription>
+                    Configure your URL shortening options below.
+                  </CardDescription>
+                </div>
               </CardHeader>
               <CardContent className='space-y-6'>
                 {/* URL Input */}
@@ -217,8 +229,17 @@ export default function UrlifyPage() {
                   className='w-full'
                   size='lg'
                 >
-                  <Link2 className='h-4 w-4 mr-2' />
-                  {form.state.isSubmitting ? 'Shortening...' : 'Shorten URL'}
+                  {form.state.isSubmitting ? (
+                    <>
+                      <Spinner data-icon='inline-start' />
+                      Shortening...
+                    </>
+                  ) : (
+                    <>
+                      <Link2 className='size-4' />
+                      Shorten URL
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
