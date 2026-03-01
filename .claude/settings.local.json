@@ -18,13 +18,12 @@
       "Bash(npm run build)",
       "Bash(npm test)",
       "mcp__shadcn__get_item_examples_from_registries",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npm ls zod @tanstack/react-form)",
+      "Bash(npm ls zod)"
     ]
   },
-  "enabledMcpjsonServers": [
-    "next-devtools",
-    "shadcn"
-  ],
+  "enabledMcpjsonServers": ["next-devtools", "shadcn"],
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh",

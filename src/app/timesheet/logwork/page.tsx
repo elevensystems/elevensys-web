@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
+import { useForm, useStore } from '@tanstack/react-form';
 import {
   AlertCircle,
   CalendarDays,
@@ -22,6 +23,7 @@ import {
   Card,
   CardAction,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -35,15 +37,12 @@ import {
 import { useLogWorkSubmission } from '@/hooks/use-log-work-submission';
 import { useMissingWorklogs } from '@/hooks/use-missing-worklogs';
 import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
+import { logWorkSchema } from '@/lib/schemas/logwork';
 import {
-  MAX_HOURS,
-  MIN_HOURS,
   STANDARD_HOURS,
   formatHours,
   generateEntryId,
   getTodayISO,
-  isValidApiDate,
-  isValidIssueKey,
   parseSpecificDates,
 } from '@/lib/timesheet';
 import type { LogWorkResult, WorkEntry } from '@/types/timesheet';
@@ -134,37 +133,56 @@ export default function LogWorkPage() {
     resetResults,
   } = useLogWorkSubmission(settings);
 
-  // Work entries state
-  const [entries, setEntries] = useState<WorkEntry[]>([createDefaultEntry()]);
   const [dateMode] = useState<'range' | 'specific'>('specific');
   const [startDate] = useState(getTodayISO());
   const [endDate] = useState(getTodayISO());
-  const [datesText, setDatesText] = useState('');
   const [error, setError] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const [formOptions] = useState(() => ({
+    defaultValues: {
+      datesText: '',
+      entries: [createDefaultEntry()] as WorkEntry[],
+    },
+    validators: { onSubmit: logWorkSchema } as const,
+    onSubmit: async () => {
+      setError('');
+      setShowConfirmDialog(true);
+    },
+  }));
+
+  const form = useForm(formOptions);
+
+  const entries = useStore(form.store, s => s.values.entries);
+  const datesText = useStore(form.store, s => s.values.datesText);
+  const submitErrors = useStore(form.store, s => s.errorMap?.onSubmit);
 
   const parsedDates = useMemo(() => parseSpecificDates(datesText), [datesText]);
 
   const removeDate = useCallback(
     (dateToRemove: string) => {
       const updated = parsedDates.filter(d => d !== dateToRemove).join(', ');
-      setDatesText(updated);
+      form.setFieldValue('datesText', updated);
     },
-    [parsedDates]
+    [parsedDates, form]
   );
 
-  const clearAllDates = useCallback(() => setDatesText(''), []);
+  const clearAllDates = useCallback(
+    () => form.setFieldValue('datesText', ''),
+    [form]
+  );
 
   // Load saved entries from localStorage when project changes
   useEffect(() => {
     if (!selectedProjectId) return;
     const saved = loadSavedEntries(selectedProjectId);
     if (saved.length > 0 && saved[0].issueKey) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setEntries(saved);
+      form.setFieldValue('entries', saved);
     } else {
-      setEntries([createDefaultEntry()]);
+      form.setFieldValue('entries', [createDefaultEntry()]);
     }
+    // form instance is stable (created once via useForm) — safe to omit from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId]);
 
   const totalHours = useMemo(
@@ -173,116 +191,109 @@ export default function LogWorkPage() {
   );
 
   const addEntry = useCallback(() => {
-    setEntries(prev => [...prev, createDefaultEntry()]);
-  }, []);
+    const current = form.getFieldValue('entries');
+    form.setFieldValue('entries', [...current, createDefaultEntry()]);
+  }, [form]);
 
-  const removeEntry = useCallback((id: string) => {
-    setEntries(prev =>
-      prev.length > 1 ? prev.filter(e => e.id !== id) : prev
-    );
-  }, []);
+  const removeEntry = useCallback(
+    (id: string) => {
+      const current = form.getFieldValue('entries');
+      if (current.length > 1) {
+        form.setFieldValue(
+          'entries',
+          current.filter(e => e.id !== id)
+        );
+      }
+    },
+    [form]
+  );
 
   const updateEntry = useCallback(
     (id: string, field: keyof WorkEntry, value: string | number) => {
-      setEntries(prev =>
-        prev.map(entry =>
+      const current = form.getFieldValue('entries');
+      form.setFieldValue(
+        'entries',
+        current.map(entry =>
           entry.id === id ? { ...entry, [field]: value } : entry
         )
       );
     },
-    []
+    [form]
   );
 
-  const validateEntries = useCallback((): string | null => {
+  // Reactively surface validation errors from TanStack Form
+  useEffect(() => {
+    if (
+      submitErrors &&
+      Array.isArray(submitErrors) &&
+      submitErrors.length > 0
+    ) {
+      const message =
+        (submitErrors[0] as { message?: string })?.message ??
+        'Validation failed';
+      setError(message);
+      toast.error(message);
+    }
+  }, [submitErrors]);
+
+  const handleSubmitClick = useCallback(async () => {
     if (!isConfigured) {
-      return 'Please configure your Jira settings first.';
-    }
-
-    if (dateMode === 'range') {
-      if (!startDate || !endDate) {
-        return 'Please select a date range.';
-      }
-      if (new Date(startDate) > new Date(endDate)) {
-        return 'Start date must be before or equal to end date.';
-      }
-    } else {
-      const dates = parseSpecificDates(datesText);
-      if (dates.length === 0) {
-        return 'Please enter at least one date (e.g., 20/Aug/25, 21/Aug/25, 22/Aug/25, 25/Aug/25).';
-      }
-      for (const date of dates) {
-        if (!isValidApiDate(date)) {
-          return `Invalid date: "${date}". Expected format: DD/Mon/YY (e.g., 02/Feb/26).`;
-        }
-      }
-    }
-
-    const validEntries = entries.filter(e => e.issueKey.trim());
-    if (validEntries.length === 0) {
-      return 'Please add at least one work entry with an issue key.';
-    }
-
-    for (const entry of validEntries) {
-      if (!isValidIssueKey(entry.issueKey)) {
-        return `Invalid issue key: "${entry.issueKey}". Expected format: PROJECT-123 (e.g., C99CMSMKPCM1-01)`;
-      }
-      if (entry.hours < MIN_HOURS || entry.hours > MAX_HOURS) {
-        return `Hours for ${entry.issueKey} must be between ${MIN_HOURS} and ${MAX_HOURS}.`;
-      }
-    }
-
-    return null;
-  }, [isConfigured, dateMode, startDate, endDate, datesText, entries]);
-
-  const handleSubmitClick = useCallback(() => {
-    const validationError = validateEntries();
-    if (validationError) {
-      setError(validationError);
-      toast.error(validationError);
+      const msg = 'Please configure your Jira settings first.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
     setError('');
-    setShowConfirmDialog(true);
-  }, [validateEntries]);
+    await form.handleSubmit();
+  }, [isConfigured, form]);
 
-  const processResults = useCallback((logResults: LogWorkResult[]) => {
-    const successCount = logResults.filter(r => r.success).length;
-    const errorCount = logResults.filter(r => !r.success).length;
+  const processResults = useCallback(
+    (logResults: LogWorkResult[]) => {
+      const successCount = logResults.filter(r => r.success).length;
+      const errorCount = logResults.filter(r => !r.success).length;
 
-    if (errorCount === 0) {
-      toast.success(`All ${successCount} entries logged successfully!`);
-    } else if (successCount > 0) {
-      toast.warning(`${successCount} succeeded, ${errorCount} failed`);
-      // Keep only failed entries in the form so user can edit and resubmit
-      const failedIssueKeys = new Set(
-        logResults.filter(r => !r.success).map(r => r.entry.issueKey)
-      );
-      setEntries(prev => prev.filter(e => failedIssueKeys.has(e.issueKey)));
-    } else {
-      toast.error(`All ${errorCount} entries failed`);
-    }
-  }, []);
+      if (errorCount === 0) {
+        toast.success(`All ${successCount} entries logged successfully!`);
+      } else if (successCount > 0) {
+        toast.warning(`${successCount} succeeded, ${errorCount} failed`);
+        // Keep only failed entries in the form so user can edit and resubmit
+        const failedIssueKeys = new Set(
+          logResults.filter(r => !r.success).map(r => r.entry.issueKey)
+        );
+        const current = form.getFieldValue('entries');
+        form.setFieldValue(
+          'entries',
+          current.filter(e => failedIssueKeys.has(e.issueKey))
+        );
+      } else {
+        toast.error(`All ${errorCount} entries failed`);
+      }
+    },
+    [form]
+  );
 
   const handleLogWork = useCallback(async () => {
     setShowConfirmDialog(false);
 
+    const currentEntries = form.getFieldValue('entries');
+    const currentDatesText = form.getFieldValue('datesText');
+
     // Save entries to localStorage before submission (preserves for next session)
-    const validEntries = entries.filter(e => e.issueKey.trim());
+    const validEntries = currentEntries.filter(e => e.issueKey.trim());
     saveEntriesToStorage(validEntries, selectedProjectId);
 
     const logResults = await submitEntries({
-      entries,
+      entries: currentEntries,
       dateMode,
-      datesText,
+      datesText: currentDatesText,
       startDate,
       endDate,
     });
 
     processResults(logResults);
   }, [
-    entries,
+    form,
     dateMode,
-    datesText,
     startDate,
     endDate,
     selectedProjectId,
@@ -372,7 +383,9 @@ export default function LogWorkPage() {
               isSearchingWarnings={isSearchingWarnings}
               onSearchWarnings={handleSearchWarnings}
               datesText={datesText}
-              onDatesTextChange={setDatesText}
+              onDatesTextChange={(text: string) =>
+                form.setFieldValue('datesText', text)
+              }
               parsedDates={parsedDates}
               onRemoveDate={removeDate}
               onClearAllDates={clearAllDates}
@@ -382,10 +395,16 @@ export default function LogWorkPage() {
           {/* Work Entries Card */}
           <Card>
             <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <Clock className='h-5 w-5' />
-                Work Entries
-              </CardTitle>
+              <div className='flex flex-col gap-1'>
+                <CardTitle className='flex items-center gap-2'>
+                  <Clock className='h-5 w-5' />
+                  Work Entries
+                </CardTitle>
+                <CardDescription>
+                  Add work entries with issue key, description, type of work,
+                  and hours spent.
+                </CardDescription>
+              </div>
               <CardAction>
                 <div className='flex items-center gap-3 text-sm'>
                   <span className='text-muted-foreground'>Total:</span>

@@ -99,7 +99,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
         >
           <ComboboxInput
             placeholder={isLoadingIssues ? 'Loading...' : 'Select ticket'}
-            className='h-8 font-mono'
+            className='h-8'
             disabled={isLoadingIssues}
             showClear
           />
@@ -107,7 +107,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
             <ComboboxList>
               {(issue: JiraIssue) => (
                 <ComboboxItem key={issue.id} value={issue}>
-                  <span className='font-mono shrink-0'>{issue.key}</span>
+                  <span className='shrink-0'>{issue.key}</span>
                 </ComboboxItem>
               )}
             </ComboboxList>
