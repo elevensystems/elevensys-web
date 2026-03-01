@@ -164,8 +164,6 @@ export function EditWorklogModal({
     }
   }, [worklog?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!worklog) return null;
-
   return (
     <Dialog open={!!worklog} onOpenChange={open => !open && onClose()}>
       <DialogContent className='sm:max-w-md'>
@@ -173,7 +171,7 @@ export function EditWorklogModal({
           <DialogTitle>Edit Worklog</DialogTitle>
           <DialogDescription>
             Editing worklog for{' '}
-            <span className='font-semibold'>{worklog.issueKey}</span>
+            <span className='font-semibold'>{worklog?.issueKey}</span>
           </DialogDescription>
         </DialogHeader>
         <div className='space-y-4 py-2'>
