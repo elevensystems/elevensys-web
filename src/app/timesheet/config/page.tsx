@@ -9,7 +9,6 @@ import {
   Check,
   Eye,
   EyeOff,
-  Loader2,
   Save,
   Settings as SettingsIcon,
   Trash2,
@@ -32,6 +31,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
+import { Spinner } from '@/components/ui/spinner';
 import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 
 export default function TimesheetConfigPage() {
@@ -113,7 +113,7 @@ export default function TimesheetConfigPage() {
       <MainLayout>
         <section className='container mx-auto px-4 py-12'>
           <div className='flex items-center justify-center h-40'>
-            <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
+            <Spinner className='size-6 text-muted-foreground' />
           </div>
         </section>
       </MainLayout>
@@ -260,7 +260,7 @@ export default function TimesheetConfigPage() {
                   disabled={isSaving || (!hasChanges && isConfigured)}
                 >
                   {isSaving ? (
-                    <Loader2 className='h-4 w-4 animate-spin' />
+                    <Spinner />
                   ) : isConfigured && !hasChanges ? (
                     <Check className='h-4 w-4' />
                   ) : (

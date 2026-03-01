@@ -5,17 +5,14 @@ export const urlifySchema = z
     url: z
       .string()
       .min(1, 'Please enter a URL')
-      .refine(
-        val => {
-          try {
-            const parsed = new URL(val.trim());
-            return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-          } catch {
-            return false;
-          }
-        },
-        'Please enter a valid URL (must start with http:// or https://)'
-      ),
+      .refine(val => {
+        try {
+          const parsed = new URL(val.trim());
+          return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+        } catch {
+          return false;
+        }
+      }, 'Please enter a valid URL (must start with http:// or https://)'),
     autoDelete: z.boolean(),
     ttlDays: z.string(),
   })

@@ -10,7 +10,6 @@ import {
   FileCode,
   FileText,
   Info,
-  Loader2,
   ScrollText,
   Search,
   Settings2,
@@ -42,6 +41,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
@@ -503,7 +503,7 @@ export default function PromptTemplatesPage() {
                     <div className='flex flex-col items-center justify-center py-20 text-muted-foreground'>
                       <div className='relative mb-6'>
                         <div className='absolute inset-0 blur-xl bg-primary/20 animate-pulse rounded-full' />
-                        <Loader2 className='h-14 w-14 animate-spin text-primary relative' />
+                        <Spinner className='size-14 text-primary relative' />
                       </div>
                       <p className='text-lg font-medium'>
                         Loading templates...

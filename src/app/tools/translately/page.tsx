@@ -7,7 +7,6 @@ import {
   Check,
   ChevronDown,
   Copy,
-  Loader2,
   SlidersHorizontal,
   Sparkles,
   X,
@@ -30,6 +29,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
 import { RainbowButton } from '@/components/ui/rainbow-button';
+import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
@@ -408,7 +408,7 @@ export default function TranslatelyPage() {
                 >
                   {loading ? (
                     <>
-                      <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                      <Spinner className='mr-2' />
                       Translating...
                     </>
                   ) : (

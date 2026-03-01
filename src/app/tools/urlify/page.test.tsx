@@ -66,6 +66,14 @@ jest.mock('lucide-react', () => ({
   Settings: () => <span data-testid='icon-settings' />,
 }));
 
+// --- Mock spinner ---
+
+jest.mock('@/components/ui/spinner', () => ({
+  Spinner: (props: React.HTMLAttributes<HTMLSpanElement>) => (
+    <span data-testid='spinner' {...props} />
+  ),
+}));
+
 // --- Mock UI components ---
 
 jest.mock('@/components/ui/button', () => ({
@@ -83,6 +91,9 @@ jest.mock('@/components/ui/card', () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardContent: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
+  ),
+  CardDescription: ({ children }: { children: React.ReactNode }) => (
+    <p>{children}</p>
   ),
   CardHeader: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
@@ -147,7 +158,9 @@ jest.mock('@/components/ui/field', () => ({
     errors?: Array<{ message?: string } | undefined>;
   }) => (
     <div data-testid='field-error' role='alert'>
-      {errors?.map((e, i) => <span key={i}>{e?.message}</span>)}
+      {errors?.map((e, i) => (
+        <span key={i}>{e?.message}</span>
+      ))}
     </div>
   ),
 }));
@@ -265,9 +278,7 @@ describe('UrlifyPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
     await waitFor(() => {
       expect(
-        screen.getByText(
-          /must start with http:\/\/ or https:\/\//
-        )
+        screen.getByText(/must start with http:\/\/ or https:\/\//)
       ).toBeInTheDocument();
     });
   });

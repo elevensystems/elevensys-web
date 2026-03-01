@@ -18,7 +18,9 @@
       "Bash(npm run build)",
       "Bash(npm test)",
       "mcp__shadcn__get_item_examples_from_registries",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npx jest src/app/timesheet/worklogs/page.test.tsx src/app/timesheet/config/page.test.tsx --verbose)",
+      "Bash(npx jest src/app/tools/urlify/page.test.tsx --no-coverage)"
     ]
   },
   "enabledMcpjsonServers": [

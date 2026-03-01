@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarDays, Loader2, Search, Trash2, X } from 'lucide-react';
+import { CalendarDays, Search, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import {
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
+import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import type { JiraProject } from '@/types/timesheet';
 
@@ -129,7 +130,7 @@ export function MissingWorklogsCard({
                 className='w-full sm:w-auto'
               >
                 {isSearchingWarnings ? (
-                  <Loader2 className='h-4 w-4 animate-spin' />
+                  <Spinner />
                 ) : (
                   <Search className='h-4 w-4' />
                 )}

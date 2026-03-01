@@ -2,13 +2,7 @@
 
 import { memo, useCallback } from 'react';
 
-import {
-  ExternalLink,
-  Loader2,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-} from 'lucide-react';
+import { ExternalLink, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 
 import {
   AlertDialog,
@@ -30,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Spinner } from '@/components/ui/spinner';
 import { TableCell, TableRow } from '@/components/ui/table';
 import {
   Tooltip,
@@ -118,7 +113,7 @@ export const UrlRow = memo(function UrlRow({
                 disabled={isDeleting}
               >
                 {isDeleting ? (
-                  <Loader2 className='h-4 w-4 animate-spin' />
+                  <Spinner />
                 ) : (
                   <MoreHorizontal className='h-4 w-4' />
                 )}

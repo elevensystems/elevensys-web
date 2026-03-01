@@ -107,8 +107,11 @@ jest.mock('next/link', () => ({
 jest.mock('lucide-react', () => ({
   AlertCircle: () => <span data-testid='icon-alert-circle' />,
   ClipboardList: () => <span data-testid='icon-clipboard-list' />,
-  Loader2: () => <span data-testid='icon-loader' />,
   Search: () => <span data-testid='icon-search' />,
+}));
+
+jest.mock('@/components/ui/spinner', () => ({
+  Spinner: () => <span data-testid='icon-loader' />,
 }));
 
 jest.mock('@/components/ui/alert', () => ({

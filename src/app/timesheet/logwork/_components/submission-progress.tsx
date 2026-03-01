@@ -2,13 +2,7 @@
 
 import { useState } from 'react';
 
-import {
-  CheckCircle2,
-  ChevronDown,
-  Loader2,
-  RefreshCw,
-  XCircle,
-} from 'lucide-react';
+import { CheckCircle2, ChevronDown, RefreshCw, XCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +10,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { Spinner } from '@/components/ui/spinner';
 import type { LogWorkResult } from '@/types/timesheet';
 
 interface SubmissionProgressProps {
@@ -36,7 +31,7 @@ function ProgressBar({
   return (
     <div className='space-y-2 rounded-lg border bg-card p-4'>
       <div className='flex items-center gap-3'>
-        <Loader2 className='h-4 w-4 animate-spin text-primary' />
+        <Spinner className='text-primary' />
         <span className='text-sm font-medium'>{progressText}</span>
         <span className='ml-auto text-sm tabular-nums text-muted-foreground'>
           {progress}%

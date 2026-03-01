@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 import {
   AlertDialog,
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { CardAction } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
 
 interface BulkDeleteActionProps {
   selectedCount: number;
@@ -42,11 +43,7 @@ export function BulkDeleteAction({
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant='destructive' size='sm' disabled={isBulkDeleting}>
-              {isBulkDeleting ? (
-                <Loader2 className='h-4 w-4 animate-spin' />
-              ) : (
-                <Trash2 className='h-4 w-4' />
-              )}
+              {isBulkDeleting ? <Spinner /> : <Trash2 className='h-4 w-4' />}
               {isBulkDeleting ? `Deleting... ${bulkDeleteProgress}%` : 'Delete'}
             </Button>
           </AlertDialogTrigger>

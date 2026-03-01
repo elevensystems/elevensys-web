@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import Link from 'next/link';
 
-import { AlertCircle, ClipboardList, Loader2, Search } from 'lucide-react';
+import { AlertCircle, ClipboardList, Search } from 'lucide-react';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
@@ -43,6 +43,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Table,
   TableBody,
@@ -104,7 +105,7 @@ export default function ProjectWorklogsPage() {
       <MainLayout>
         <section className='container mx-auto px-4 py-12'>
           <div className='flex items-center justify-center h-40'>
-            <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
+            <Spinner className='size-6 text-muted-foreground' />
           </div>
         </section>
       </MainLayout>
@@ -281,11 +282,7 @@ export default function ProjectWorklogsPage() {
                     disabled={isLoading || !isConfigured || !selectedProject}
                     className='w-full'
                   >
-                    {isLoading ? (
-                      <Loader2 className='h-4 w-4 animate-spin' />
-                    ) : (
-                      <Search className='h-4 w-4' />
-                    )}
+                    {isLoading ? <Spinner /> : <Search className='h-4 w-4' />}
                     {isLoading ? 'Searching…' : 'Search'}
                   </Button>
                 </div>

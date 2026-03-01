@@ -73,10 +73,13 @@ jest.mock('lucide-react', () => ({
   Check: () => <span data-testid='icon-check' />,
   Eye: () => <span data-testid='icon-eye' />,
   EyeOff: () => <span data-testid='icon-eye-off' />,
-  Loader2: () => <span data-testid='icon-loader' />,
   Save: () => <span data-testid='icon-save' />,
   Settings: () => <span data-testid='icon-settings' />,
   Trash2: () => <span data-testid='icon-trash' />,
+}));
+
+jest.mock('@/components/ui/spinner', () => ({
+  Spinner: () => <span data-testid='icon-loader' />,
 }));
 
 // --- Mock UI components ---

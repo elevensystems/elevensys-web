@@ -2,7 +2,7 @@
 
 import { memo, useCallback } from 'react';
 
-import { Loader2, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 import {
   AlertDialog,
@@ -18,6 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Spinner } from '@/components/ui/spinner';
 import { TableCell, TableRow } from '@/components/ui/table';
 import {
   Tooltip,
@@ -125,11 +126,7 @@ export const WorklogRow = memo(function WorklogRow({
                   : 'Delete worklog'
               }
             >
-              {isDeleting ? (
-                <Loader2 className='h-4 w-4 animate-spin' />
-              ) : (
-                <Trash2 className='h-4 w-4' />
-              )}
+              {isDeleting ? <Spinner /> : <Trash2 className='h-4 w-4' />}
               <span className='sr-only'>Delete</span>
             </Button>
           </AlertDialogTrigger>
