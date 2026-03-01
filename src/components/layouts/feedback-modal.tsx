@@ -104,9 +104,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
                     disabled={form.state.isSubmitting}
                     aria-invalid={isInvalid}
                   />
-                  {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
-                  )}
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
             }}
@@ -130,9 +128,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
                     disabled={form.state.isSubmitting}
                     aria-invalid={isInvalid}
                   />
-                  {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
-                  )}
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
             }}
@@ -156,9 +152,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
                     aria-invalid={isInvalid}
                     className='min-h-[120px]'
                   />
-                  {isInvalid && (
-                    <FieldError errors={field.state.meta.errors} />
-                  )}
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
             }}

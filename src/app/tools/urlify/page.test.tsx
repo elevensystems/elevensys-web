@@ -147,7 +147,9 @@ jest.mock('@/components/ui/field', () => ({
     errors?: Array<{ message?: string } | undefined>;
   }) => (
     <div data-testid='field-error' role='alert'>
-      {errors?.map((e, i) => <span key={i}>{e?.message}</span>)}
+      {errors?.map((e, i) => (
+        <span key={i}>{e?.message}</span>
+      ))}
     </div>
   ),
 }));
@@ -265,9 +267,7 @@ describe('UrlifyPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
     await waitFor(() => {
       expect(
-        screen.getByText(
-          /must start with http:\/\/ or https:\/\//
-        )
+        screen.getByText(/must start with http:\/\/ or https:\/\//)
       ).toBeInTheDocument();
     });
   });
