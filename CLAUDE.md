@@ -51,7 +51,7 @@ npm run test:coverage
 | Auth            | AWS Cognito OAuth2 (PKCE)               |
 | Theming         | next-themes                             |
 | Notifications   | sonner                                  |
-| Package Manager | npm                                    |
+| Package Manager | npm                                     |
 
 ## Directory Structure
 
@@ -76,8 +76,7 @@ src/
 │   │   ├── npm-converter/
 │   │   ├── pr-link-shrinker/
 │   │   ├── prompt-templates/
-│   │   ├── song-recommender/
-│   │   └── summary-smith/
+│   │   └── song-recommender/
 │   ├── admin/              # Admin pages (protected by admin role)
 │   │   ├── layout.tsx      # Server-side admin auth check
 │   │   ├── page.tsx        # Admin dashboard

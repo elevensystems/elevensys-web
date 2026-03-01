@@ -7,7 +7,6 @@ import {
   Braces,
   ClipboardList,
   Clock,
-  FileText,
   FolderKanban,
   Key,
   Link2,
@@ -64,7 +63,6 @@ const quickTools = [
   { name: 'JSON Diffinity', href: '/tools/json-diffinity', icon: Braces },
   { name: 'JSON Objectify', href: '/tools/json-objectify', icon: Sparkles },
   { name: 'Passly', href: '/tools/passly', icon: Key },
-  { name: 'Summary Smith', href: '/tools/summary-smith', icon: FileText },
 ] as const;
 
 export default function Home() {

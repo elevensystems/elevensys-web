@@ -2,7 +2,6 @@ import {
   BadgeCheck,
   Braces,
   Clock,
-  FileText,
   Home,
   Key,
   Languages,
@@ -130,11 +129,6 @@ export const appSidebarData = {
       name: 'PR Link Shrinker',
       url: '/tools/pr-link-shrinker',
       icon: Link2,
-    },
-    {
-      name: 'Summary Smith',
-      url: '/tools/summary-smith',
-      icon: FileText,
     },
     {
       name: 'Prompt Templates',

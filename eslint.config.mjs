@@ -11,6 +11,10 @@ const eslintConfig = defineConfig([
         'warn',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+      'react/no-children-prop': [
+        'error',
+        { allowFunctions: true },
+      ],
     },
   },
   globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),

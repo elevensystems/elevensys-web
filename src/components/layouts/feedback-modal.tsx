@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-
+import { useForm } from '@tanstack/react-form';
 import { Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,73 +13,63 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 interface FeedbackModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+const feedbackSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Please enter a valid email'),
+  message: z.string().min(1, 'Message is required'),
+});
+
 export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!name.trim() || !email.trim() || !message.trim()) {
-      toast.error('Please fill in all fields');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          message: message.trim(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit feedback');
-      }
-
-      const result = await response.json();
-
-      if (result.success) {
-        toast.success('Feedback submitted successfully', {
-          description: 'Thank you for your feedback!',
-          icon: <Check className='h-4 w-4' />,
-          duration: 5000,
+  const form = useForm({
+    defaultValues: { name: '', email: '', message: '' },
+    validators: { onSubmit: feedbackSchema },
+    onSubmit: async ({ value }) => {
+      try {
+        const response = await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: value.name.trim(),
+            email: value.email.trim(),
+            message: value.message.trim(),
+          }),
         });
 
-        // Reset form and close modal
-        setName('');
-        setEmail('');
-        setMessage('');
-        onOpenChange(false);
-      } else {
-        throw new Error('Invalid response from server');
+        if (!response.ok) {
+          throw new Error('Failed to submit feedback');
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          toast.success('Feedback submitted successfully', {
+            description: 'Thank you for your feedback!',
+            icon: <Check className='h-4 w-4' />,
+            duration: 5000,
+          });
+
+          form.reset();
+          onOpenChange(false);
+        } else {
+          throw new Error('Invalid response from server');
+        }
+      } catch (err) {
+        console.error('Error submitting feedback:', err);
+        toast.error('Failed to submit feedback. Please try again.', {
+          duration: 5000,
+        });
       }
-    } catch (err) {
-      console.error('Error submitting feedback:', err);
-      toast.error('Failed to submit feedback. Please try again.', {
-        duration: 5000,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -90,53 +80,101 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
             We&apos;d love to hear your thoughts, suggestions, or issues
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className='space-y-4 py-4'>
-          <div className='space-y-2'>
-            <Label htmlFor='name'>Name</Label>
-            <Input
-              id='name'
-              placeholder='Your name'
-              value={name}
-              onChange={e => setName(e.target.value)}
-              disabled={isSubmitting}
-              required
-            />
-          </div>
-          <div className='space-y-2'>
-            <Label htmlFor='email'>Email</Label>
-            <Input
-              id='email'
-              type='email'
-              placeholder='your.email@example.com'
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              disabled={isSubmitting}
-              required
-            />
-          </div>
-          <div className='space-y-2'>
-            <Label htmlFor='message'>Message</Label>
-            <textarea
-              id='message'
-              placeholder='Tell us what you think...'
-              value={message}
-              onChange={e => setMessage(e.target.value)}
-              disabled={isSubmitting}
-              required
-              className='flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
-            />
-          </div>
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className='space-y-4 py-4'
+        >
+          <form.Field
+            name='name'
+            children={field => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                  <Input
+                    id={field.name}
+                    placeholder='Your name'
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={e => field.handleChange(e.target.value)}
+                    disabled={form.state.isSubmitting}
+                    aria-invalid={isInvalid}
+                  />
+                  {isInvalid && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
+                </Field>
+              );
+            }}
+          />
+
+          <form.Field
+            name='email'
+            children={field => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                  <Input
+                    id={field.name}
+                    type='email'
+                    placeholder='your.email@example.com'
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={e => field.handleChange(e.target.value)}
+                    disabled={form.state.isSubmitting}
+                    aria-invalid={isInvalid}
+                  />
+                  {isInvalid && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
+                </Field>
+              );
+            }}
+          />
+
+          <form.Field
+            name='message'
+            children={field => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Message</FieldLabel>
+                  <Textarea
+                    id={field.name}
+                    placeholder='Tell us what you think...'
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={e => field.handleChange(e.target.value)}
+                    disabled={form.state.isSubmitting}
+                    aria-invalid={isInvalid}
+                    className='min-h-[120px]'
+                  />
+                  {isInvalid && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
+                </Field>
+              );
+            }}
+          />
+
           <div className='flex justify-end gap-3'>
             <Button
               type='button'
               variant='outline'
               onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
+              disabled={form.state.isSubmitting}
             >
               Cancel
             </Button>
-            <Button type='submit' disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+            <Button type='submit' disabled={form.state.isSubmitting}>
+              {form.state.isSubmitting ? 'Submitting...' : 'Submit Feedback'}
             </Button>
           </div>
         </form>

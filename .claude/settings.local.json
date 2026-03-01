@@ -16,10 +16,15 @@
       "WebFetch(domain:ui.shadcn.com)",
       "Bash(git checkout -- src/app/timesheet/project-worklogs/page.tsx src/hooks/use-project-worklogs.ts src/app/api/timesheet/project-worklogs/route.ts)",
       "Bash(npm run build)",
-      "Bash(npm test)"
+      "Bash(npm test)",
+      "mcp__shadcn__get_item_examples_from_registries",
+      "Bash(npm run lint)"
     ]
   },
-  "enabledMcpjsonServers": ["next-devtools", "shadcn"],
+  "enabledMcpjsonServers": [
+    "next-devtools",
+    "shadcn"
+  ],
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh",

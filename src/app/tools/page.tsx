@@ -68,12 +68,6 @@ const tools = [
     icon: Link2,
   },
   {
-    title: 'Summary Smith',
-    description: 'Generate formatted status summaries for Rally stories',
-    href: '/tools/summary-smith',
-    icon: FileText,
-  },
-  {
     title: 'Prompt Templates',
     description: 'Browse and copy prompt templates for AI agents and workflows',
     href: '/tools/prompt-templates',

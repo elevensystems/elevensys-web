@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 
+import { useForm, useStore } from '@tanstack/react-form';
 import {
   CalendarClock,
   Check,
@@ -16,26 +17,12 @@ import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
-
-/**
- * Validates if a string is a valid HTTP/HTTPS URL
- */
-const isValidUrl = (urlString: string): boolean => {
-  try {
-    const parsedUrl = new URL(urlString.trim());
-    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
-  } catch {
-    return false;
-  }
-};
+import { urlifySchema } from '@/lib/schemas/urlify';
 
 export default function UrlifyPage() {
-  const [url, setUrl] = useState('');
-  const [autoDelete, setAutoDelete] = useState(false);
-  const [ttlDays, setTtlDays] = useState('');
   const [result, setResult] = useState<{
     shortUrl: string;
     shortCode?: string;
@@ -45,78 +32,54 @@ export default function UrlifyPage() {
   } | null>(null);
   const { copiedId: copied, copy } = useCopyToClipboard();
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleUrlChange = useCallback((value: string) => {
-    setUrl(value);
-    setResult(null);
-    setError('');
-  }, []);
+  const form = useForm({
+    defaultValues: { url: '', autoDelete: false, ttlDays: '' },
+    validators: { onSubmit: urlifySchema },
+    onSubmit: async ({ value }) => {
+      setError('');
+      setResult(null);
 
-  const handleShorten = useCallback(async () => {
-    if (!url.trim()) {
-      setError('Please enter a URL');
-      return;
-    }
-
-    if (!isValidUrl(url)) {
-      setError(
-        'Please enter a valid URL (must start with http:// or https://)'
-      );
-      return;
-    }
-
-    if (autoDelete && ttlDays.trim()) {
-      const parsedTtlDays = Number(ttlDays);
-      if (Number.isNaN(parsedTtlDays) || parsedTtlDays <= 0) {
-        setError('TTL must be a positive number of days');
-        return;
-      }
-    }
-
-    setError('');
-    setIsLoading(true);
-
-    try {
-      const response = await fetch('/api/urlify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          originalUrl: url.trim(),
-          autoDelete,
-          ttlDays: autoDelete && ttlDays.trim() ? Number(ttlDays) : undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to shorten URL');
-      }
-
-      const result = await response.json();
-
-      if (result.shortUrl) {
-        setResult(result);
-        toast.success('URL shortened successfully', {
-          description: 'Your short URL is ready to use.',
-          icon: <Check className='h-4 w-4' />,
-          duration: 5000,
+      try {
+        const response = await fetch('/api/urlify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            originalUrl: value.url.trim(),
+            autoDelete: value.autoDelete,
+            ttlDays:
+              value.autoDelete && value.ttlDays.trim()
+                ? Number(value.ttlDays)
+                : undefined,
+          }),
         });
-      } else {
-        throw new Error('Invalid response from server');
+
+        if (!response.ok) {
+          throw new Error('Failed to shorten URL');
+        }
+
+        const data = await response.json();
+
+        if (data.shortUrl) {
+          setResult(data);
+          toast.success('URL shortened successfully', {
+            description: 'Your short URL is ready to use.',
+            icon: <Check className='h-4 w-4' />,
+            duration: 5000,
+          });
+        } else {
+          throw new Error('Invalid response from server');
+        }
+      } catch (err) {
+        console.error('Error shortening URL:', err);
+        const errorMessage = 'Failed to shorten URL. Please try again.';
+        setError(errorMessage);
+        toast.error(errorMessage, { duration: 5000 });
       }
-    } catch (err) {
-      console.error('Error shortening URL:', err);
-      const errorMessage = 'Failed to shorten URL. Please try again.';
-      setError(errorMessage);
-      toast.error(errorMessage, {
-        duration: 5000,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [autoDelete, ttlDays, url]);
+    },
+  });
+
+  const autoDelete = useStore(form.store, s => s.values.autoDelete);
 
   const handleCopy = useCallback(async () => {
     if (!result?.shortUrl) return;
@@ -127,15 +90,6 @@ export default function UrlifyPage() {
       console.error('Failed to copy to clipboard:', err);
     }
   }, [result?.shortUrl, copy]);
-
-  const handleKeyPress = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        handleShorten();
-      }
-    },
-    [handleShorten]
-  );
 
   return (
     <MainLayout>
@@ -159,69 +113,112 @@ export default function UrlifyPage() {
               </CardHeader>
               <CardContent className='space-y-6'>
                 {/* URL Input */}
-                <div className='space-y-2'>
-                  <Label htmlFor='url'>Enter Long URL</Label>
-                  <Input
-                    id='url'
-                    type='url'
-                    placeholder='https://example.com/very/long/url/path'
-                    value={url}
-                    onChange={e => handleUrlChange(e.target.value)}
-                    onKeyDown={handleKeyPress}
-                    className='h-12'
-                    aria-invalid={!!error}
-                    aria-describedby={error ? 'url-error' : undefined}
-                  />
-                  {error ? (
-                    <p id='url-error' className='text-sm text-destructive'>
-                      {error}
-                    </p>
-                  ) : null}
-                </div>
+                <form.Field
+                  name='url'
+                  children={field => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          Enter Long URL
+                        </FieldLabel>
+                        <Input
+                          id={field.name}
+                          type='url'
+                          placeholder='https://example.com/very/long/url/path'
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={e => {
+                            field.handleChange(e.target.value);
+                            setResult(null);
+                            setError('');
+                          }}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              form.handleSubmit();
+                            }
+                          }}
+                          className='h-12'
+                          aria-invalid={isInvalid}
+                        />
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
 
                 {/* Auto-delete */}
-                <div className='flex items-center gap-3 rounded-lg border bg-muted/30 p-4'>
-                  <Checkbox
-                    id='auto-delete'
-                    checked={autoDelete}
-                    onCheckedChange={checked => setAutoDelete(checked === true)}
-                  />
-                  <div className='space-y-1'>
-                    <Label htmlFor='auto-delete'>Auto-delete link</Label>
-                    <p className='text-xs text-muted-foreground'>
-                      Enable to expire the link after a set number of days.
-                    </p>
-                  </div>
-                </div>
+                <form.Field
+                  name='autoDelete'
+                  children={field => (
+                    <div className='flex items-center gap-3 rounded-lg border bg-muted/30 p-4'>
+                      <Checkbox
+                        id='auto-delete'
+                        checked={field.state.value}
+                        onCheckedChange={checked => {
+                          field.handleChange(checked === true);
+                        }}
+                      />
+                      <div className='space-y-1'>
+                        <FieldLabel htmlFor='auto-delete'>
+                          Auto-delete link
+                        </FieldLabel>
+                        <p className='text-xs text-muted-foreground'>
+                          Enable to expire the link after a set number of days.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                />
 
                 {autoDelete ? (
-                  <div className='space-y-2'>
-                    <Label htmlFor='ttl-days'>Expires After (days)</Label>
-                    <Input
-                      id='ttl-days'
-                      type='number'
-                      min={1}
-                      step={1}
-                      placeholder='30'
-                      value={ttlDays}
-                      onChange={e => setTtlDays(e.target.value)}
-                      className='h-12'
-                    />
-                    <p className='text-xs text-muted-foreground'>
-                      Leave blank to use the default 30-day expiration.
-                    </p>
-                  </div>
+                  <form.Field
+                    name='ttlDays'
+                    children={field => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>
+                            Expires After (days)
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            type='number'
+                            min={1}
+                            step={1}
+                            placeholder='30'
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={e => field.handleChange(e.target.value)}
+                            className='h-12'
+                            aria-invalid={isInvalid}
+                          />
+                          <p className='text-xs text-muted-foreground'>
+                            Leave blank to use the default 30-day expiration.
+                          </p>
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      );
+                    }}
+                  />
                 ) : null}
 
                 {/* Shorten Button */}
                 <Button
-                  onClick={handleShorten}
-                  disabled={isLoading}
+                  onClick={() => form.handleSubmit()}
+                  disabled={form.state.isSubmitting}
                   className='w-full'
                   size='lg'
                 >
                   <Link2 className='h-4 w-4 mr-2' />
-                  {isLoading ? 'Shortening...' : 'Shorten URL'}
+                  {form.state.isSubmitting ? 'Shortening...' : 'Shorten URL'}
                 </Button>
               </CardContent>
             </Card>
@@ -245,9 +242,9 @@ export default function UrlifyPage() {
                 ) : (
                   <div className='space-y-4'>
                     <div className='space-y-2'>
-                      <Label className='text-sm font-medium'>
+                      <FieldLabel className='text-sm font-medium'>
                         Shortened URL
-                      </Label>
+                      </FieldLabel>
                       <div className='flex items-center gap-2 p-3 bg-muted rounded-lg'>
                         <code className='flex-1 text-sm font-mono break-all select-all'>
                           {result.shortUrl}
@@ -283,7 +280,8 @@ export default function UrlifyPage() {
                           Original URL
                         </span>
                         <span className='font-medium break-all text-right'>
-                          {result.originalUrl ?? url.trim()}
+                          {result.originalUrl ??
+                            form.getFieldValue('url').trim()}
                         </span>
                       </div>
                       <div className='flex items-center justify-between gap-3'>
