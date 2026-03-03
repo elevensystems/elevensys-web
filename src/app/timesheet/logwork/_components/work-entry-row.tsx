@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 
 import { Trash2 } from 'lucide-react';
 
@@ -35,6 +35,7 @@ interface WorkEntryRowProps {
     value: string | number
   ) => void;
   onRemove: (id: string) => void;
+  onFetchTypeOfWork: (issueId: number) => Promise<WorkType | null>;
 }
 
 export const WorkEntryRow = memo(function WorkEntryRow({
@@ -44,7 +45,10 @@ export const WorkEntryRow = memo(function WorkEntryRow({
   isLoadingIssues,
   onUpdate,
   onRemove,
+  onFetchTypeOfWork,
 }: WorkEntryRowProps) {
+  const [isLoadingTypeOfWork, setIsLoadingTypeOfWork] = useState(false);
+
   const handleIssueInputChange = useCallback(
     (value: string, eventDetails: { reason: string }) => {
       if (eventDetails.reason === 'input-clear') return;
@@ -57,8 +61,26 @@ export const WorkEntryRow = memo(function WorkEntryRow({
     (value: JiraIssue | null) => {
       onUpdate(entry.id, 'issueKey', value?.key ?? '');
       onUpdate(entry.id, 'description', value?.summary ?? '');
+
+      if (!value) return;
+
+      // Use cached typeOfWork if available
+      if (value.typeOfWork) {
+        onUpdate(entry.id, 'typeOfWork', value.typeOfWork);
+        return;
+      }
+
+      // Fetch typeOfWork from issue detail API
+      setIsLoadingTypeOfWork(true);
+      onFetchTypeOfWork(value.id)
+        .then(typeOfWork => {
+          if (typeOfWork) {
+            onUpdate(entry.id, 'typeOfWork', typeOfWork);
+          }
+        })
+        .finally(() => setIsLoadingTypeOfWork(false));
     },
-    [entry.id, onUpdate]
+    [entry.id, onUpdate, onFetchTypeOfWork]
   );
 
   const handleDescriptionChange = useCallback(
@@ -129,6 +151,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           className='h-8'
           value={entry.typeOfWork}
           onChange={handleTypeChange}
+          disabled={isLoadingTypeOfWork}
         >
           {WORK_TYPES.map(type => (
             <option key={type} value={type}>

@@ -99,6 +99,7 @@ export interface JiraIssue {
   status: string;
   summary: string;
   type: JiraIssueType;
+  typeOfWork?: string;
 }
 
 export interface ProjectWorklogRow {

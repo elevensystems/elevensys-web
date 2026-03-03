@@ -117,6 +117,7 @@ export default function LogWorkPage() {
     setWarningToDate,
     isSearchingWarnings,
     handleSearchWarnings,
+    fetchIssueTypeOfWork,
   } = useMissingWorklogs({ settings, isConfigured });
 
   const {
@@ -435,6 +436,7 @@ export default function LogWorkPage() {
                         isLoadingIssues={isLoadingIssues}
                         onUpdate={updateEntry}
                         onRemove={removeEntry}
+                        onFetchTypeOfWork={fetchIssueTypeOfWork}
                       />
                     ))}
                   </TableBody>
@@ -476,10 +478,10 @@ export default function LogWorkPage() {
                       {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
                     </Button>
                     <Button
-                      variant='outline'
+                      variant='secondary'
                       size='lg'
                       onClick={addEntry}
-                      className='flex-shrink-0 text-primary hover:bg-green-100'
+                      className='flex-shrink-0 text-primary'
                     >
                       <Plus className='h-4 w-4' />
                       Add Entry

@@ -59,7 +59,10 @@ export const WorklogRow = memo(function WorklogRow({
   onEdit,
 }: WorklogRowProps) {
   const key = getWorklogKey(worklog);
-  const isApproved = worklog.statusWorklog?.toLowerCase() === 'approved';
+  const EDITABLE_STATUSES = ['pending', 'rejected', 'reopened'];
+  const isEditable = EDITABLE_STATUSES.includes(
+    worklog.statusWorklog?.toLowerCase() ?? ''
+  );
   const displayDate = worklog.startDateEdit
     ? formatDisplayDate(worklog.startDateEdit)
     : worklog.startDate;
@@ -82,7 +85,7 @@ export const WorklogRow = memo(function WorklogRow({
         <Checkbox
           checked={isSelected}
           onCheckedChange={handleToggle}
-          disabled={isApproved}
+          disabled={!isEditable}
           aria-label={`Select ${worklog.issueKey}`}
         />
       </TableCell>
@@ -140,13 +143,13 @@ export const WorklogRow = memo(function WorklogRow({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
-              <DropdownMenuItem onClick={handleEdit}>
+              <DropdownMenuItem onClick={handleEdit} disabled={!isEditable}>
                 <SquarePenIcon />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <AlertDialogTrigger asChild>
-                <DropdownMenuItem variant='destructive' disabled={isApproved}>
+                <DropdownMenuItem variant='destructive' disabled={!isEditable}>
                   <Trash2Icon />
                   Delete
                 </DropdownMenuItem>

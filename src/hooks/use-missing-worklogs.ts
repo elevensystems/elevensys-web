@@ -10,7 +10,9 @@ import type {
   JiraProject,
   TimesheetSettings,
   WorklogsWarningEntry,
+  WorkType,
 } from '@/types/timesheet';
+import { WORK_TYPES } from '@/types/timesheet';
 
 interface UseMissingWorklogsParams {
   settings: TimesheetSettings;
@@ -179,6 +181,52 @@ export function useMissingWorklogs({
     settings.token,
   ]);
 
+  const fetchIssueTypeOfWork = useCallback(
+    async (issueId: number): Promise<WorkType | null> => {
+      // Check cache first
+      const cached = issues.find(i => i.id === issueId);
+      if (cached?.typeOfWork) {
+        return (WORK_TYPES as readonly string[]).includes(cached.typeOfWork)
+          ? (cached.typeOfWork as WorkType)
+          : null;
+      }
+
+      try {
+        const response = await fetch(`/api/timesheet/issue/${issueId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${settings.token}`,
+          },
+          body: JSON.stringify({ jiraInstance: settings.jiraInstance }),
+        });
+
+        if (!response.ok) return null;
+
+        const result = await response.json();
+        const typeOfWork = result?.data?.fields?.customfield_10400 as
+          | string
+          | null;
+
+        if (
+          typeOfWork &&
+          (WORK_TYPES as readonly string[]).includes(typeOfWork)
+        ) {
+          // Cache the value on the issue object
+          setIssues(prev =>
+            prev.map(i => (i.id === issueId ? { ...i, typeOfWork } : i))
+          );
+          return typeOfWork as WorkType;
+        }
+
+        return null;
+      } catch {
+        return null;
+      }
+    },
+    [issues, settings.token, settings.jiraInstance]
+  );
+
   const selectedProject = useMemo(
     () => projects.find(p => p.id === selectedProjectId),
     [projects, selectedProjectId]
@@ -204,5 +252,6 @@ export function useMissingWorklogs({
     setWarningToDate,
     isSearchingWarnings,
     handleSearchWarnings,
+    fetchIssueTypeOfWork,
   };
 }
