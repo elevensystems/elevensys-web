@@ -24,6 +24,8 @@ export function getWorklogKey(worklog: WorklogEntry | MyWorklogsRow): string {
   return `${worklog.id}_${worklog.issueId}`;
 }
 
+const SELECTABLE_STATUSES = ['pending', 'rejected', 'reopened'];
+
 interface UseWorklogsParams {
   settings: TimesheetSettings;
   isConfigured: boolean;
@@ -78,10 +80,19 @@ export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
   // Store last committed filters for pagination
   const lastFiltersRef = useRef<CommittedFilters | null>(null);
 
+  const selectableWorklogs = useMemo(
+    () =>
+      worklogs.filter(w =>
+        SELECTABLE_STATUSES.includes(w.statusWorklog?.toLowerCase() ?? '')
+      ),
+    [worklogs]
+  );
+
   const allSelected =
-    worklogs.length > 0 && selectedIds.size === worklogs.length;
+    selectableWorklogs.length > 0 &&
+    selectedIds.size === selectableWorklogs.length;
   const someSelected =
-    selectedIds.size > 0 && selectedIds.size < worklogs.length;
+    selectedIds.size > 0 && selectedIds.size < selectableWorklogs.length;
 
   const totalHours = useMemo(
     () => worklogs.reduce((sum, w) => sum + (Number(w.worked) || 0), 0),
@@ -124,9 +135,9 @@ export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
     if (allSelected) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(worklogs.map(getWorklogKey)));
+      setSelectedIds(new Set(selectableWorklogs.map(getWorklogKey)));
     }
-  }, [allSelected, worklogs]);
+  }, [allSelected, selectableWorklogs]);
 
   const toggleSelect = useCallback((key: string) => {
     setSelectedIds(prev => {

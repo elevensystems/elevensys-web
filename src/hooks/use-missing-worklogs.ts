@@ -9,8 +9,8 @@ import type {
   JiraIssue,
   JiraProject,
   TimesheetSettings,
-  WorklogsWarningEntry,
   WorkType,
+  WorklogsWarningEntry,
 } from '@/types/timesheet';
 import { WORK_TYPES } from '@/types/timesheet';
 
