@@ -122,6 +122,9 @@ export const WorklogRow = memo(function WorklogRow({
           {worklog.statusWorklog}
         </Badge>
       </TableCell>
+      <TableCell className='text-muted-foreground text-nowrap'>
+        {worklog.author}
+      </TableCell>
       <TableCell>
         <AlertDialog>
           <DropdownMenu>

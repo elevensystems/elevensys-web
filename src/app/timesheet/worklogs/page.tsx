@@ -256,6 +256,7 @@ export default function MyWorklogsPage() {
                         <TableHead>Type</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>User</TableHead>
                         <TableHead className='w-[60px]' />
                       </TableRow>
                     </TableHeader>
@@ -282,6 +283,9 @@ export default function MyWorklogsPage() {
                           </td>
                           <td className='p-2'>
                             <Skeleton className='h-5 w-16 rounded-full' />
+                          </td>
+                          <td className='p-2'>
+                            <Skeleton className='h-4 w-20' />
                           </td>
                           <td className='p-2'>
                             <Skeleton className='h-4 w-8' />
@@ -327,6 +331,7 @@ export default function MyWorklogsPage() {
                           <TableHead>Type</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Status</TableHead>
+                          <TableHead>User</TableHead>
                           <TableHead className='w-[60px]' />
                         </TableRow>
                       </TableHeader>

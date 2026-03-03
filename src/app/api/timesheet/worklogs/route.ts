@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       worklogsResponse.json(),
       paginationResponse.json(),
     ]);
-    console.log('Fetched project worklogs:', { worklogsData, paginationData });
+
     return NextResponse.json({
       success: true,
       data: {
