@@ -465,10 +465,10 @@ export default function LogWorkPage() {
                 ) : (
                   <>
                     <Button
+                      variant='outline'
                       onClick={handleSubmitClick}
                       disabled={isSubmitting || !isConfigured}
-                      className='flex-1'
-                      size='lg'
+                      className='flex-6'
                     >
                       {isSubmitting ? (
                         <Spinner />
@@ -477,12 +477,7 @@ export default function LogWorkPage() {
                       )}
                       {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
                     </Button>
-                    <Button
-                      variant='secondary'
-                      size='lg'
-                      onClick={addEntry}
-                      className='flex-shrink-0 text-primary'
-                    >
+                    <Button onClick={addEntry} className='flex-shrink-0 flex-1'>
                       <Plus className='h-4 w-4' />
                       Add Entry
                     </Button>
