@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -152,16 +152,18 @@ export default function LogWorkPage() {
   const clearAllDates = useCallback(() => setDatesText(''), []);
 
   // Load saved entries from localStorage when project changes
-  useEffect(() => {
-    if (!selectedProjectId) return;
-    const saved = loadSavedEntries(selectedProjectId);
-    if (saved.length > 0 && saved[0].issueKey) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setEntries(saved);
-    } else {
-      setEntries([createDefaultEntry()]);
-    }
-  }, [selectedProjectId]);
+  const handleProjectChange = useCallback(
+    (projectId: string) => {
+      setSelectedProjectId(projectId);
+      const saved = loadSavedEntries(projectId);
+      if (saved.length > 0 && saved[0].issueKey) {
+        setEntries(saved);
+      } else {
+        setEntries([createDefaultEntry()]);
+      }
+    },
+    [setSelectedProjectId]
+  );
 
   const totalHours = useMemo(
     () => entries.reduce((sum, entry) => sum + (entry.hours || 0), 0),
@@ -359,7 +361,7 @@ export default function LogWorkPage() {
             <MissingWorklogsCard
               projects={projects}
               selectedProjectId={selectedProjectId}
-              onProjectChange={setSelectedProjectId}
+              onProjectChange={handleProjectChange}
               isLoadingProjects={isLoadingProjects}
               warningFromDate={warningFromDate}
               warningToDate={warningToDate}
@@ -477,7 +479,11 @@ export default function LogWorkPage() {
                       )}
                       {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
                     </Button>
-                    <Button onClick={addEntry} className='flex-shrink-0 flex-1'>
+                    <Button
+                      onClick={addEntry}
+                      disabled={isSubmitting || !isConfigured}
+                      className='flex-shrink-0 flex-1'
+                    >
                       <Plus className='h-4 w-4' />
                       Add Entry
                     </Button>

@@ -123,10 +123,11 @@ export function isValidApiDate(dateStr: string): boolean {
  * Returns trimmed, non-empty date strings.
  */
 export function parseSpecificDates(text: string): string[] {
-  return text
+  const dates = text
     .split(',')
     .map(d => d.trim())
     .filter(Boolean);
+  return [...new Set(dates)];
 }
 
 /**
