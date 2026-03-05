@@ -60,21 +60,25 @@ export function LogWorkConfirmDialog({
         <DialogHeader>
           <DialogTitle>Confirm</DialogTitle>
           <DialogDescription>
-            You are about to log the following tickets
-            {selectedProject ? (
-              <>
-                {' '}
-                in <strong>{selectedProject.key}</strong> —{' '}
-                <strong>{selectedProject.name}</strong>
-              </>
-            ) : (
-              ''
-            )}
-            .
+            You are about to log the following tickets.
           </DialogDescription>
         </DialogHeader>
 
         <div className='space-y-3 py-2'>
+          {/* Project */}
+          {selectedProject && (
+            <div className='space-y-1'>
+              <p className='text-sm font-medium text-muted-foreground'>
+                Project
+              </p>
+              <p className='text-sm'>
+                <span className='font-semibold'>{selectedProject.key}</span>
+                <span className='text-muted-foreground'> — </span>
+                {selectedProject.name}
+              </p>
+            </div>
+          )}
+
           {/* Dates */}
           <div className='space-y-1'>
             <p className='text-sm font-medium text-muted-foreground'>Dates</p>
