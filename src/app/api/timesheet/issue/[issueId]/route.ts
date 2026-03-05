@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { sanitizeErrorText } from '@/lib/fetch-utils';
+
 const ISSUE_API_URL = 'https://api.elevensys.dev/timesheet/issue';
 
 export async function POST(
@@ -36,7 +38,7 @@ export async function POST(
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText || `API error: ${response.status}` },
+        { error: sanitizeErrorText(errorText, response.status) },
         { status: response.status }
       );
     }

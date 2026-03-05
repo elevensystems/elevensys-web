@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { sanitizeErrorText } from '@/lib/fetch-utils';
+
 const BASE_API_URL = 'https://api.elevensys.dev/timesheet/projects';
 
 interface JiraIssueRaw {
@@ -44,7 +46,7 @@ export async function GET(
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText || `API error: ${response.status}` },
+        { error: sanitizeErrorText(errorText, response.status) },
         { status: response.status }
       );
     }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { sanitizeErrorText } from '@/lib/fetch-utils';
+
 const AUTH_API_URL = 'https://api.elevensys.dev/timesheet/auth';
 
 export async function GET(request: NextRequest) {
@@ -27,7 +29,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText || `API error: ${response.status}` },
+        { error: sanitizeErrorText(errorText, response.status) },
         { status: response.status }
       );
     }

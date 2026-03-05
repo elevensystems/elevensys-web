@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { sanitizeErrorText } from '@/lib/fetch-utils';
 import type { LogWorkRequest } from '@/types/timesheet';
 
 const LOG_WORK_API_URL = 'https://api.elevensys.dev/timesheet/logwork';
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText || `API error: ${response.status}` },
+        { error: sanitizeErrorText(errorText, response.status) },
         { status: response.status }
       );
     }

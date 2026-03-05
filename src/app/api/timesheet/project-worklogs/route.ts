@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { sanitizeErrorText } from '@/lib/fetch-utils';
+
 const PROJECT_WORKLOGS_API_URL =
   'https://api.elevensys.dev/timesheet/project-worklogs-report/get-all';
 
@@ -83,7 +85,7 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText || `API error: ${response.status}` },
+        { error: sanitizeErrorText(errorText, response.status) },
         { status: response.status }
       );
     }

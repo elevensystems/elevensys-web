@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { sanitizeErrorText } from '@/lib/fetch-utils';
 import type { FetchWorklogsRequest } from '@/types/timesheet';
 
 const WORKLOGS_API_URL = 'https://api.elevensys.dev/timesheet/worklogs';
@@ -56,9 +57,7 @@ export async function GET(request: NextRequest) {
       const errorText = await worklogsResponse.text();
       return NextResponse.json(
         {
-          error:
-            errorText ||
-            `Project worklogs API error: ${worklogsResponse.status}`,
+          error: sanitizeErrorText(errorText, worklogsResponse.status),
         },
         { status: worklogsResponse.status }
       );
@@ -68,8 +67,7 @@ export async function GET(request: NextRequest) {
       const errorText = await paginationResponse.text();
       return NextResponse.json(
         {
-          error:
-            errorText || `Pagination API error: ${paginationResponse.status}`,
+          error: sanitizeErrorText(errorText, paginationResponse.status),
         },
         { status: paginationResponse.status }
       );
@@ -130,7 +128,7 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText || `API error: ${response.status}` },
+        { error: sanitizeErrorText(errorText, response.status) },
         { status: response.status }
       );
     }
