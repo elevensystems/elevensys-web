@@ -180,11 +180,27 @@ export default function LogWorkPage() {
 
   const updateEntry = useCallback(
     (id: string, field: keyof WorkEntry, value: string | number) => {
-      setEntries(prev =>
-        prev.map(entry =>
+      setEntries(prev => {
+        const updated = prev.map(entry =>
           entry.id === id ? { ...entry, [field]: value } : entry
-        )
-      );
+        );
+
+        // Auto-add a new entry when hours are entered in the last incomplete entry
+        if (field === 'hours' && typeof value === 'number' && value > 0) {
+          const entryIndex = updated.findIndex(e => e.id === id);
+          const isLastEntry = entryIndex === updated.length - 1;
+          const isIncomplete =
+            updated[entryIndex].issueKey.trim() === '' ||
+            updated[entryIndex].description.trim() === '';
+
+          // Only auto-add if this is the last entry and it has an incomplete state
+          if (isLastEntry && isIncomplete) {
+            return [...updated, createDefaultEntry()];
+          }
+        }
+
+        return updated;
+      });
     },
     []
   );
