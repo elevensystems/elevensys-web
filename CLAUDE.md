@@ -41,7 +41,7 @@ npm run test:coverage
 
 | Category        | Technology                              |
 | --------------- | --------------------------------------- |
-| Framework       | Next.js 16.0.10 (App Router, Turbopack) |
+| Framework       | Next.js 16.1.6 (App Router, Turbopack)  |
 | UI Library      | React 19.2.0                            |
 | Language        | TypeScript 5 (strict mode)              |
 | Styling         | Tailwind CSS v4                         |
@@ -60,66 +60,95 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── api/                # API route handlers
 │   │   ├── admin/urlify/   # Admin URL management (list, delete)
-│   │   ├── auth/           # OAuth2 endpoints (login, callback, logout, session)
-│   │   ├── password-generator/
-│   │   ├── song-recommender/
-│   │   ├── translate/      # Pro-only feature
+│   │   ├── auth/           # OAuth2 endpoints (login, callback, logout, session, signup)
+│   │   ├── beatly/         # Song recommender API
+│   │   ├── passly/         # Password generator API
+│   │   ├── translately/    # Translation API (Pro-only feature)
 │   │   ├── urlify/         # URL shortener create endpoint
+│   │   ├── timesheet/      # Timesheet feature (projects, issues, worklogs, logwork, auth)
 │   │   ├── templates/
 │   │   └── feedback/
-│   ├── tools/              # Tool pages (11 tools)
-│   │   ├── password-generator/
-│   │   ├── json-diffinity/
-│   │   ├── json-objectify/
-│   │   ├── translate/
-│   │   ├── url-shortener/
+│   ├── tools/              # Tool pages (10 tools)
+│   │   ├── passly/         # Password generator
+│   │   ├── json-diffinity/ # JSON diff tool
+│   │   ├── json-lens/      # JSON lens/viewer tool
+│   │   ├── json-objectify/ # JSON object converter
+│   │   ├── translately/    # Translation tool
+│   │   ├── urlify/         # URL shortener
 │   │   ├── npm-converter/
 │   │   ├── pr-link-shrinker/
 │   │   ├── prompt-templates/
-│   │   └── song-recommender/
+│   │   └── beatly/         # Song recommender
+│   ├── timesheet/          # Timesheet feature pages
+│   │   ├── config/         # Timesheet settings
+│   │   ├── logwork/        # Log work page
+│   │   ├── project-worklogs/ # Per-project worklog view
+│   │   └── worklogs/       # My worklogs page
 │   ├── admin/              # Admin pages (protected by admin role)
 │   │   ├── layout.tsx      # Server-side admin auth check
-│   │   ├── page.tsx        # Admin dashboard
+│   │   ├── page.tsx        # Admin redirect
+│   │   ├── dashboard/      # Admin dashboard
 │   │   └── urlify/         # URL management (table, pagination, bulk actions)
-│   ├── (auth)/             # Auth pages (route group)
+│   ├── login/              # Login page
+│   ├── signup/             # Sign up page
+│   ├── forgot-password/    # Forgot password page
+│   ├── profile/            # User profile page
 │   ├── layout.tsx          # Root layout with providers
 │   └── page.tsx            # Homepage
 ├── components/
-│   ├── ui/                 # shadcn/ui components (27 components)
+│   ├── ui/                 # shadcn/ui components (42 components)
 │   ├── layouts/            # Layout components
 │   │   ├── main-layout.tsx
 │   │   ├── app-sidebar.tsx
+│   │   ├── auth-layout.tsx
 │   │   ├── tool-page-header.tsx
 │   │   ├── nav-main.tsx
 │   │   ├── nav-tools.tsx
 │   │   ├── nav-user.tsx
+│   │   ├── nav-admin.tsx
+│   │   ├── nav-projects.tsx
+│   │   ├── nav-secondary.tsx
 │   │   ├── pro-access-only.tsx  # Pro tier gating
+│   │   ├── guest-login-alert.tsx
 │   │   ├── feedback-modal.tsx
 │   │   └── support-modal.tsx
 │   ├── features/           # Feature-specific components
-│   │   └── auth/
+│   │   └── auth/           # login-form, signup-form, forgot-password-form
+│   ├── header.tsx
 │   └── theme-provider.tsx
 ├── contexts/
 │   └── auth-context.tsx    # Auth state via React Context
 ├── hooks/
-│   ├── use-mobile.ts       # Mobile breakpoint detection
-│   ├── use-copy-to-clipboard.ts  # Clipboard copy with feedback
-│   └── use-urlify-admin.ts # Admin URL management (fetch, paginate, select, delete)
+│   ├── use-mobile.ts                # Mobile breakpoint detection
+│   ├── use-copy-to-clipboard.ts     # Clipboard copy with feedback
+│   ├── use-urlify-admin.ts          # Admin URL management (fetch, paginate, select, delete)
+│   ├── use-timesheet-settings.ts    # Timesheet Jira config state
+│   ├── use-worklogs.ts              # My worklogs list with filtering/pagination
+│   ├── use-project-worklogs.ts      # Per-project worklog view
+│   ├── use-missing-worklogs.ts      # Missing worklog detection
+│   └── use-log-work-submission.ts   # Log work form submission
 ├── lib/
 │   ├── auth.ts             # JWT decoding, session helpers
+│   ├── auth-cookies.ts     # Auth cookie helpers
+│   ├── app-sidebar-config.ts # Sidebar nav config
 │   ├── constants.ts        # Shared constants, validateModel()
+│   ├── domain-config.ts    # Multi-tenant domain/app config
 │   ├── fetch-utils.ts      # fetchWithTimeout() for API routes
 │   ├── pr-utils.ts         # PRItem, parsePrUrls() shared utility
-│   ├── song-recommender-data.ts  # GENRES, RANDOM_MOODS data
+│   ├── beatly-data.ts      # GENRES, RANDOM_MOODS data
+│   ├── timesheet.ts        # Timesheet API helpers
 │   ├── tools-config.ts     # ToolConfig type, TOOL_CATEGORIES
 │   ├── utils.ts            # cn(), hasRole(), requireEnv()
 │   ├── diff.ts             # JSON diff utilities
+│   ├── schemas/urlify.ts   # Zod schemas for urlify
 │   └── shine-palettes.ts
 ├── types/
 │   ├── auth.ts             # AuthUser, UserRole, JwtPayload types
+│   ├── beatly.ts           # MoodRequest, ChatMessage, Song
+│   ├── passly.ts           # Password generator types
+│   ├── timesheet.ts        # Timesheet/worklog types
 │   ├── translate.ts        # TranslateRequestBody
-│   ├── urlify.ts           # ShortenedUrl, UrlStatus, getUrlStatus()
-│   └── song-recommender.ts # MoodRequest, ChatMessage, Song
+│   └── urlify.ts           # ShortenedUrl, UrlStatus, getUrlStatus()
 └── styles/
     └── globals.css         # Global styles, CSS variables
 
@@ -135,7 +164,7 @@ public/
 | Type                | Convention       | Example                                  |
 | ------------------- | ---------------- | ---------------------------------------- |
 | Components          | PascalCase       | `MainLayout`, `ProAccessOnly`            |
-| Files/Folders       | kebab-case       | `password-generator`, `auth-context.tsx` |
+| Files/Folders       | kebab-case       | `passly`, `auth-context.tsx`             |
 | Variables/Functions | camelCase        | `getUserFromSession`, `handleCopy`       |
 | Constants           | UPPER_SNAKE_CASE | `AUTH_COOKIES`, `COPY_FEEDBACK_DURATION` |
 | Types/Interfaces    | PascalCase       | `AuthUser`, `CharacterOptions`           |
@@ -168,8 +197,6 @@ import { toast } from 'sonner';
 import MainLayout from '@/components/layouts/main-layout';
 import { Button } from '@/components/ui/button';
 import type { AuthUser } from '@/types/auth';
-
-// Always use 'use client' directive for client components
 
 // Define interfaces above component
 interface MyComponentProps {
@@ -264,6 +291,7 @@ export async function POST(request: NextRequest) {
 - **Provider**: AWS Cognito with OAuth2 + PKCE
 - **Token Storage**: HttpOnly cookies (`cognito_id_token`, `cognito_refresh_token`)
 - **Session**: Server-side JWT decoding in `src/lib/auth.ts`
+- **Auth pages**: `/login`, `/signup`, `/forgot-password` (self-contained pages)
 
 ### User Roles
 
@@ -272,7 +300,7 @@ type UserRole = 'admin' | 'pro' | 'free';
 ```
 
 - **admin**: Full access to all features
-- **pro**: Access to premium features (translate, etc.)
+- **pro**: Access to premium features (translately, etc.)
 - **free**: Basic features only
 
 ### Auth Context Usage
