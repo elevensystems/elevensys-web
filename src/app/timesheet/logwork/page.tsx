@@ -454,11 +454,11 @@ export default function LogWorkPage() {
               />
 
               {/* Action Buttons */}
-              <div className='flex items-center gap-3'>
+              <div className='flex flex-col sm:flex-row sm:justify-between gap-3 border-t pt-6'>
                 {results.length > 0 &&
                 results.every(r => r.success) &&
                 !isSubmitting ? (
-                  <Button asChild className='flex-1' size='lg'>
+                  <Button asChild size='lg' className='w-full sm:w-auto'>
                     <Link href='/timesheet/worklogs'>
                       <CalendarDays className='h-4 w-4' />
                       View My Worklogs
@@ -468,9 +468,18 @@ export default function LogWorkPage() {
                   <>
                     <Button
                       variant='outline'
+                      onClick={addEntry}
+                      disabled={isSubmitting || !isConfigured}
+                      className='w-full sm:w-auto'
+                    >
+                      <Plus className='h-4 w-4' />
+                      Add Entry
+                    </Button>
+                    <Button
+                      size='lg'
                       onClick={handleSubmitClick}
                       disabled={isSubmitting || !isConfigured}
-                      className='flex-6'
+                      className='w-full sm:w-auto'
                     >
                       {isSubmitting ? (
                         <Spinner />
@@ -478,14 +487,6 @@ export default function LogWorkPage() {
                         <Send className='h-4 w-4' />
                       )}
                       {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
-                    </Button>
-                    <Button
-                      onClick={addEntry}
-                      disabled={isSubmitting || !isConfigured}
-                      className='flex-shrink-0 flex-1'
-                    >
-                      <Plus className='h-4 w-4' />
-                      Add Entry
                     </Button>
                   </>
                 )}
