@@ -487,3 +487,21 @@ Configured in `tsconfig.json`:
 - `.github/repo-instructions.md` - Detailed development guidelines
 - `.github/copilot-instructions.md` - Copilot-specific guidelines
 - `.github/nextjs-instructions.md` - Extended Next.js patterns
+
+## Code Review Sub-Agent Routing
+
+**Parallel dispatch** (all conditions met):
+
+- Reviewing independent modules/files with no shared state
+- Tasks are read-only (no file modification risk)
+
+**Sequential dispatch** (any condition triggers):
+
+- One review feeds the next (readability → then optimize refactored code)
+- Shared files between agents
+
+**Agent Selection**:
+
+- "review", "readability", "naming" → code-reviewer
+- "optimize", "slow", "performance", "render" → performance-optimizer
+- "security", "best practice", "hardening", "AWS" → best-practices-enforcer

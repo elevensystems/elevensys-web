@@ -138,7 +138,6 @@ invalidation.
 import { cacheLife, cacheTag } from 'next/cache';
 import { refresh, revalidateTag, updateTag } from 'next/cache';
 
-
 // lib/data.ts
 
 // Use predefined cache profiles
