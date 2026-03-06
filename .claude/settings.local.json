@@ -22,10 +22,16 @@
       "Bash(npx jest src/app/timesheet/worklogs/page.test.tsx src/app/timesheet/config/page.test.tsx --verbose)",
       "Bash(npx jest src/app/tools/urlify/page.test.tsx --no-coverage)",
       "Bash(git status -u)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh repo:*)",
+      "Bash(git checkout:*)"
     ]
   },
-  "enabledMcpjsonServers": ["next-devtools", "shadcn"],
+  "enabledMcpjsonServers": [
+    "next-devtools",
+    "shadcn"
+  ],
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh",
