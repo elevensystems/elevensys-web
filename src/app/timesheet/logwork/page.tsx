@@ -468,36 +468,45 @@ export default function LogWorkPage() {
               />
 
               {/* Action Buttons */}
-              <div className='flex items-center gap-3'>
+              <div className='border-t pt-6'>
                 {results.length > 0 &&
                 results.every(r => r.success) &&
                 !isSubmitting ? (
-                  <Button asChild className='flex-1' size='lg'>
+                  <Button asChild size='lg' className='w-full'>
                     <Link href='/timesheet/worklogs'>
                       <CalendarDays className='h-4 w-4' />
                       View My Worklogs
                     </Link>
                   </Button>
                 ) : (
-                  <>
+                  <div className='flex flex-col sm:flex-row gap-3 items-stretch sm:items-center sm:justify-between'>
                     <Button
+                      onClick={addEntry}
                       variant='outline'
-                      onClick={handleSubmitClick}
-                      disabled={isSubmitting || !isConfigured}
-                      className='flex-6'
+                      className='flex items-center justify-center gap-2'
                     >
-                      {isSubmitting ? (
-                        <Spinner />
-                      ) : (
-                        <Send className='h-4 w-4' />
-                      )}
-                      {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
-                    </Button>
-                    <Button onClick={addEntry} className='flex-shrink-0 flex-1'>
                       <Plus className='h-4 w-4' />
                       Add Entry
                     </Button>
-                  </>
+                    <Button
+                      onClick={handleSubmitClick}
+                      disabled={isSubmitting || !isConfigured}
+                      size='lg'
+                      className='flex items-center justify-center gap-2'
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Spinner className='h-4 w-4' />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className='h-4 w-4' />
+                          Submit Work Logs
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </div>
             </CardContent>
