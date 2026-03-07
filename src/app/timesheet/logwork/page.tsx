@@ -3,8 +3,9 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { AlertCircle, CalendarDays, Clock, Plus, Send } from 'lucide-react';
+import { AlertCircle, Clock, Plus, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 import MainLayout from '@/components/layouts/main-layout';
@@ -45,6 +46,7 @@ import type { LogWorkResult, WorkEntry } from '@/types/timesheet';
 
 import { LogWorkConfirmDialog } from './_components/confirm-dialog';
 import { MissingWorklogsCard } from './_components/missing-worklogs-card';
+import { ResultsSheet } from './_components/results-sheet';
 import { SubmissionProgress } from './_components/submission-progress';
 import { WorkEntryRow } from './_components/work-entry-row';
 
@@ -100,6 +102,7 @@ function saveEntriesToStorage(entries: WorkEntry[], projectId?: string): void {
 }
 
 export default function LogWorkPage() {
+  const router = useRouter();
   const { settings, isConfigured, isLoaded } = useTimesheetSettings();
 
   const {
@@ -138,6 +141,7 @@ export default function LogWorkPage() {
   const [datesText, setDatesText] = useState('');
   const [error, setError] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const parsedDates = useMemo(() => parseSpecificDates(datesText), [datesText]);
 
@@ -243,23 +247,32 @@ export default function LogWorkPage() {
     setShowConfirmDialog(true);
   }, [validateEntries]);
 
-  const processResults = useCallback((logResults: LogWorkResult[]) => {
-    const successCount = logResults.filter(r => r.success).length;
-    const errorCount = logResults.filter(r => !r.success).length;
+  const processResults = useCallback(
+    (logResults: LogWorkResult[]) => {
+      const successCount = logResults.filter(r => r.success).length;
+      const errorCount = logResults.filter(r => !r.success).length;
 
-    if (errorCount === 0) {
-      toast.success(`All ${successCount} entries logged successfully!`);
-    } else if (successCount > 0) {
-      toast.warning(`${successCount} succeeded, ${errorCount} failed`);
-      // Keep only failed entries in the form so user can edit and resubmit
-      const failedIssueKeys = new Set(
-        logResults.filter(r => !r.success).map(r => r.entry.issueKey)
-      );
-      setEntries(prev => prev.filter(e => failedIssueKeys.has(e.issueKey)));
-    } else {
-      toast.error(`All ${errorCount} entries failed`);
-    }
-  }, []);
+      if (errorCount === 0) {
+        toast.success(`All ${successCount} entries logged successfully!`, {
+          action: {
+            label: 'View Worklogs',
+            onClick: () => router.push('/timesheet/worklogs'),
+          },
+          duration: 10000,
+        });
+      } else if (successCount > 0) {
+        toast.warning(`${successCount} succeeded, ${errorCount} failed`);
+        // Keep only failed entries in the form so user can edit and resubmit
+        const failedIssueKeys = new Set(
+          logResults.filter(r => !r.success).map(r => r.entry.issueKey)
+        );
+        setEntries(prev => prev.filter(e => failedIssueKeys.has(e.issueKey)));
+      } else {
+        toast.error(`All ${errorCount} entries failed`);
+      }
+    },
+    [router]
+  );
 
   const handleLogWork = useCallback(async () => {
     setShowConfirmDialog(false);
@@ -292,6 +305,7 @@ export default function LogWorkPage() {
     const failedResults = results.filter(r => !r.success);
     if (failedResults.length === 0) return;
 
+    setSheetOpen(false);
     resetResults();
 
     const logResults = await retryFailed({
@@ -451,48 +465,43 @@ export default function LogWorkPage() {
                 progressText={progressText}
                 results={results}
                 onRetryFailed={handleRetryFailed}
+                onViewDetails={() => setSheetOpen(true)}
               />
 
               {/* Action Buttons */}
               <div className='flex flex-col sm:flex-row sm:justify-between gap-3 border-t pt-6'>
-                {results.length > 0 &&
-                results.every(r => r.success) &&
-                !isSubmitting ? (
-                  <Button asChild className='w-full sm:w-auto'>
-                    <Link href='/timesheet/worklogs'>
-                      <CalendarDays className='h-4 w-4' />
-                      View My Worklogs
-                    </Link>
-                  </Button>
-                ) : (
-                  <>
-                    <Button
-                      variant='outline'
-                      onClick={addEntry}
-                      disabled={isSubmitting || !isConfigured}
-                      className='w-full sm:w-auto'
-                    >
-                      <Plus className='h-4 w-4' />
-                      Add Entry
-                    </Button>
-                    <Button
-                      onClick={handleSubmitClick}
-                      disabled={isSubmitting || !isConfigured}
-                      className='w-full sm:w-auto'
-                    >
-                      {isSubmitting ? (
-                        <Spinner />
-                      ) : (
-                        <Send className='h-4 w-4' />
-                      )}
-                      {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
-                    </Button>
-                  </>
-                )}
+                <Button
+                  variant='outline'
+                  onClick={addEntry}
+                  disabled={isSubmitting || !isConfigured}
+                  className='w-full sm:w-auto'
+                >
+                  <Plus className='h-4 w-4' />
+                  Add Entry
+                </Button>
+                <Button
+                  onClick={handleSubmitClick}
+                  disabled={isSubmitting || !isConfigured}
+                  className='w-full sm:w-auto'
+                >
+                  {isSubmitting ? (
+                    <Spinner />
+                  ) : (
+                    <Send className='h-4 w-4' />
+                  )}
+                  {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
+                </Button>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        <ResultsSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          results={results}
+          onRetryFailed={handleRetryFailed}
+        />
 
         <LogWorkConfirmDialog
           open={showConfirmDialog}
