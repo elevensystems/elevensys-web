@@ -445,13 +445,15 @@ export default function LogWorkPage() {
                 </Table>
               </div>
 
-              <SubmissionProgress
-                isSubmitting={isSubmitting}
-                progress={progress}
-                progressText={progressText}
-                results={results}
-                onRetryFailed={handleRetryFailed}
-              />
+              {!isSubmitting && results.length > 0 && (
+                <SubmissionProgress
+                  isSubmitting={isSubmitting}
+                  progress={progress}
+                  progressText={progressText}
+                  results={results}
+                  onRetryFailed={handleRetryFailed}
+                />
+              )}
 
               {/* Action Buttons */}
               <div className='flex flex-col sm:flex-row sm:justify-between gap-3 border-t pt-6'>
