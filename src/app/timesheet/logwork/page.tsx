@@ -458,7 +458,7 @@ export default function LogWorkPage() {
                 {results.length > 0 &&
                 results.every(r => r.success) &&
                 !isSubmitting ? (
-                  <Button asChild size='lg' className='w-full sm:w-auto'>
+                  <Button asChild className='w-full sm:w-auto'>
                     <Link href='/timesheet/worklogs'>
                       <CalendarDays className='h-4 w-4' />
                       View My Worklogs
@@ -476,7 +476,6 @@ export default function LogWorkPage() {
                       Add Entry
                     </Button>
                     <Button
-                      size='lg'
                       onClick={handleSubmitClick}
                       disabled={isSubmitting || !isConfigured}
                       className='w-full sm:w-auto'

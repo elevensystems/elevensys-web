@@ -116,7 +116,7 @@ export default function AdminUrlifyPage() {
                         <TableHead className='text-right'>Clicks</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Created</TableHead>
-                        <TableHead className='w-[60px]' />
+                        <TableHead className='w-[60px]'>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -176,7 +176,7 @@ export default function AdminUrlifyPage() {
                           <TableHead className='text-right'>Clicks</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Created</TableHead>
-                          <TableHead className='w-[60px]' />
+                          <TableHead className='w-[60px]'>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

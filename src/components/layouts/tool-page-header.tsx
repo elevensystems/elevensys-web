@@ -1,4 +1,4 @@
-import { AlertCircle, Info } from 'lucide-react';
+import { Info, OctagonX } from 'lucide-react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -32,9 +32,14 @@ export function ToolPageHeader({
       )}
 
       {error && (
-        <Alert variant='destructive' className='mb-4'>
-          <AlertCircle />
-          <AlertDescription>{error}</AlertDescription>
+        <Alert
+          variant='destructive'
+          className='mb-4 border-red-200 bg-red-50 text-red-800 [&>svg]:text-red-800 dark:border-red-800 dark:bg-red-950/50 dark:text-red-200 dark:[&>svg]:text-red-200'
+        >
+          <OctagonX />
+          <AlertDescription className='text-red-800 dark:text-red-200'>
+            {error}
+          </AlertDescription>
         </Alert>
       )}
     </>

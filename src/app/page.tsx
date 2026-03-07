@@ -11,6 +11,7 @@ import {
   Key,
   Link2,
   PenLine,
+  ScanSearch,
   Sparkles,
   Wrench,
 } from 'lucide-react';
@@ -62,6 +63,7 @@ const quickTools = [
   { name: 'Urlify', href: '/tools/urlify', icon: Link2 },
   { name: 'JSON Diffinity', href: '/tools/json-diffinity', icon: Braces },
   { name: 'JSON Objectify', href: '/tools/json-objectify', icon: Sparkles },
+  { name: 'JSON Lens', href: '/tools/json-lens', icon: ScanSearch },
   { name: 'Passly', href: '/tools/passly', icon: Key },
 ] as const;
 

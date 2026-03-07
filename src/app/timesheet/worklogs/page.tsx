@@ -257,7 +257,7 @@ export default function MyWorklogsPage() {
                         <TableHead>Date</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>User</TableHead>
-                        <TableHead className='w-[60px]' />
+                        <TableHead className='w-[60px]'>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -332,7 +332,7 @@ export default function MyWorklogsPage() {
                           <TableHead>Date</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>User</TableHead>
-                          <TableHead className='w-[60px]' />
+                          <TableHead className='w-[60px]'>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

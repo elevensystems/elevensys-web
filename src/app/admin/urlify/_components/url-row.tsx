@@ -2,7 +2,7 @@
 
 import { memo, useCallback } from 'react';
 
-import { ExternalLink, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { ExternalLink, SquarePenIcon, Trash2 } from 'lucide-react';
 
 import {
   AlertDialog,
@@ -18,12 +18,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Spinner } from '@/components/ui/spinner';
 import { TableCell, TableRow } from '@/components/ui/table';
 import {
@@ -103,53 +97,70 @@ export const UrlRow = memo(function UrlRow({
       </TableCell>
       <TableCell className='text-nowrap text-sm'>{createdDate}</TableCell>
       <TableCell>
-        <AlertDialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant='ghost'
-                size='icon'
-                className='h-8 w-8'
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <Spinner />
-                ) : (
-                  <MoreHorizontal className='h-4 w-4' />
-                )}
-                <span className='sr-only'>Actions</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuItem disabled>
-                <Pencil className='h-4 w-4' />
-                Edit (Coming soon)
-              </DropdownMenuItem>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem className='text-destructive focus:text-destructive focus:bg-destructive/10'>
-                  <Trash2 className='h-4 w-4 text-destructive' />
-                  Delete
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete URL</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete the shortened URL{' '}
-                <span className='font-semibold font-mono'>{url.shortCode}</span>
-                ? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction variant='destructive' onClick={handleDelete}>
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <div className='flex items-center gap-1'>
+          {isDeleting ? (
+            <Spinner />
+          ) : (
+            <>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='size-8'
+                      disabled
+                    >
+                      <SquarePenIcon />
+                      <span className='sr-only'>Edit</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit (Coming soon)</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <AlertDialog>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className='size-8 text-destructive hover:text-destructive'
+                        >
+                          <Trash2 />
+                          <span className='sr-only'>Delete</span>
+                        </Button>
+                      </AlertDialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete URL</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete the shortened URL{' '}
+                      <span className='font-semibold font-mono'>
+                        {url.shortCode}
+                      </span>
+                      ? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      variant='destructive'
+                      onClick={handleDelete}
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          )}
+        </div>
       </TableCell>
     </TableRow>
   );
