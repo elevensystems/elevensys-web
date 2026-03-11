@@ -39,19 +39,19 @@ npm run test:coverage
 
 ## Tech Stack
 
-| Category        | Technology                              |
-| --------------- | --------------------------------------- |
-| Framework       | Next.js 16.1.6 (App Router, Turbopack)  |
-| UI Library      | React 19.2.0                            |
-| Language        | TypeScript 5 (strict mode)              |
-| Styling         | Tailwind CSS v4                         |
-| Components      | shadcn/ui + Radix UI primitives         |
-| Icons           | lucide-react                            |
-| Editor          | Monaco Editor                           |
-| Auth            | AWS Cognito OAuth2 (PKCE)               |
-| Theming         | next-themes                             |
-| Notifications   | sonner                                  |
-| Package Manager | npm                                     |
+| Category        | Technology                             |
+| --------------- | -------------------------------------- |
+| Framework       | Next.js 16.1.6 (App Router, Turbopack) |
+| UI Library      | React 19.2.0                           |
+| Language        | TypeScript 5 (strict mode)             |
+| Styling         | Tailwind CSS v4                        |
+| Components      | shadcn/ui + Radix UI primitives        |
+| Icons           | lucide-react                           |
+| Editor          | Monaco Editor                          |
+| Auth            | AWS Cognito OAuth2 (PKCE)              |
+| Theming         | next-themes                            |
+| Notifications   | sonner                                 |
+| Package Manager | npm                                    |
 
 ## Directory Structure
 
@@ -197,6 +197,8 @@ import { toast } from 'sonner';
 import MainLayout from '@/components/layouts/main-layout';
 import { Button } from '@/components/ui/button';
 import type { AuthUser } from '@/types/auth';
+
+// Always use 'use client' directive for client components
 
 // Define interfaces above component
 interface MyComponentProps {
