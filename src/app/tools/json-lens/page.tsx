@@ -16,10 +16,8 @@ import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 
 import MainLayout from '@/components/layouts/main-layout';
-import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -199,214 +197,204 @@ export default function JsonLensPage() {
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-full mx-auto space-y-8'>
-          <ToolPageHeader
-            title='JSON Lens'
-            description='Edit, validate, and format JSON data with syntax highlighting and real-time feedback.'
-          />
-
-          <div className='grid grid-cols-1 xl:grid-cols-[7fr_3fr] gap-6'>
-            {/* JSON Editor Card */}
-            <Card className='flex flex-col'>
-              <CardHeader className='flex flex-row items-center justify-between gap-4'>
-                <CardTitle className='flex items-center gap-2'>
-                  <FileCode2 className='h-5 w-5' />
-                  JSON Editor
-                </CardTitle>
-                <div className='flex items-center gap-2'>
-                  <Button
-                    variant='secondary'
-                    size='sm'
-                    onClick={handleFormat}
-                    disabled={!jsonValidation.isValid}
-                  >
-                    <TextInitial className='h-4 w-4 mr-2' />
-                    Format
-                  </Button>
-                  <Button
-                    variant='secondary'
-                    size='sm'
-                    onClick={handleMinify}
-                    disabled={!jsonValidation.isValid}
-                  >
-                    <Minimize2 className='h-4 w-4 mr-2' />
-                    Minify
-                  </Button>
-                  <Button
-                    variant='secondary'
-                    size='sm'
-                    onClick={handleCopy}
-                    disabled={!jsonText}
-                  >
-                    <Copy className='h-4 w-4 mr-2' />
-                    Copy
-                  </Button>
-                  <Button variant='ghost' size='sm' onClick={handleClear}>
-                    <Eraser className='h-4 w-4 mr-2' />
-                    Clear
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className='flex flex-col gap-3 flex-1'>
-                <div className='rounded-lg border bg-muted/30 overflow-hidden flex-1'>
-                  <Editor
-                    height='500px'
-                    language='json'
-                    value={jsonText}
-                    theme={editorTheme}
-                    onChange={value => setJsonText(value ?? '')}
-                    onMount={handleEditorMount}
-                    options={{
-                      minimap: { enabled: false },
-                      lineNumbers: 'on',
-                      automaticLayout: true,
-                      formatOnPaste: true,
-                      formatOnType: true,
-                      scrollBeyondLastLine: false,
-                      padding: { top: 12, bottom: 12 },
-                    }}
-                  />
-                </div>
-                {jsonText.trim() === '' ? (
-                  <div className='flex items-center gap-2'>
-                    <Badge variant='secondary' className='font-mono text-xs'>
-                      Empty
-                    </Badge>
-                    <p className='text-xs text-muted-foreground'>
-                      Paste or type JSON to get started.
-                    </p>
-                  </div>
-                ) : jsonValidation.error ? (
-                  <div className='flex items-center gap-2'>
-                    <Badge variant='destructive' className='font-mono text-xs'>
-                      Error
-                    </Badge>
-                    <p className='text-xs text-destructive font-mono'>
-                      {jsonValidation.error}
-                    </p>
-                  </div>
-                ) : (
-                  <div className='flex items-center gap-2'>
-                    <Badge
-                      variant='default'
-                      className='bg-green-600 font-mono text-xs'
-                    >
-                      Valid
-                    </Badge>
-                    <p className='text-xs text-muted-foreground'>
-                      JSON is valid.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Inspector Card */}
-            <Card className='flex flex-col'>
-              <CardHeader>
-                <CardTitle className='flex items-center gap-2'>
-                  <ScanSearch className='h-5 w-5' />
-                  Inspector
-                </CardTitle>
-              </CardHeader>
-              <CardContent className='flex flex-col gap-6'>
-                {/* Indent Options */}
-                <div className='space-y-3 p-4 rounded-lg border bg-card'>
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm font-medium'>Indent Style</span>
-                    <Tabs
-                      value={indentSize}
-                      onValueChange={value =>
-                        setIndentSize(value as IndentSize)
-                      }
-                    >
-                      <TabsList className='grid w-[240px] grid-cols-3'>
-                        <TabsTrigger value='2'>2 Spaces</TabsTrigger>
-                        <TabsTrigger value='4'>4 Spaces</TabsTrigger>
-                        <TabsTrigger value='tab'>Tab</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-                </div>
-
-                {/* JSON Statistics */}
-                {jsonStats ? (
-                  <div className='space-y-3 p-4 rounded-lg border bg-card'>
-                    <p className='text-sm font-medium'>Statistics</p>
-                    <Separator />
-                    <div className='grid grid-cols-2 gap-x-6 gap-y-3 text-sm'>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>Type</span>
-                        <span className='font-mono font-semibold'>
-                          {jsonStats.isArray ? 'Array' : 'Object'}
-                        </span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>
-                          {jsonStats.isArray ? 'Items' : 'Root Keys'}
-                        </span>
-                        <span className='font-mono font-semibold'>
-                          {jsonStats.rootKeys}
-                        </span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>Max Depth</span>
-                        <span className='font-mono font-semibold'>
-                          {jsonStats.depth}
-                        </span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>Lines</span>
-                        <span className='font-mono font-semibold'>
-                          {jsonStats.lines}
-                        </span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>
-                          Characters
-                        </span>
-                        <span className='font-mono font-semibold'>
-                          {jsonStats.chars.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>Size</span>
-                        <span className='font-mono font-semibold'>
-                          {jsonStats.size}
-                        </span>
-                      </div>
-                    </div>
-                    <Separator />
-                    <div className='grid grid-cols-2 gap-x-6 gap-y-3 text-sm'>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>Formatted</span>
-                        <span className='font-mono font-semibold text-blue-500'>
-                          {jsonStats.formattedSize}
-                        </span>
-                      </div>
-                      <div className='flex justify-between'>
-                        <span className='text-muted-foreground'>Minified</span>
-                        <span className='font-mono font-semibold text-green-500'>
-                          {jsonStats.minifiedSize}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className='p-4 rounded-lg border bg-card flex items-center justify-center h-[200px]'>
-                    <p className='text-sm text-muted-foreground text-center'>
-                      {jsonText.trim() === ''
-                        ? 'Enter valid JSON to see statistics.'
-                        : 'Fix JSON errors to see statistics.'}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+      <div className='flex flex-col gap-2 pt-4'>
+        {/* Compact toolbar */}
+        <div className='flex flex-wrap items-center justify-between gap-2'>
+          <div className='flex items-center gap-3'>
+            <h1 className='text-lg font-semibold'>JSON Lens</h1>
+            <span className='hidden sm:inline text-sm text-muted-foreground'>
+              Edit, validate, and format JSON with real-time feedback.
+            </span>
+          </div>
+          <div className='flex items-center gap-1.5'>
+            <Tabs
+              value={indentSize}
+              onValueChange={value => setIndentSize(value as IndentSize)}
+            >
+              <TabsList className='h-8'>
+                <TabsTrigger value='2' className='text-xs px-2.5'>
+                  2 sp
+                </TabsTrigger>
+                <TabsTrigger value='4' className='text-xs px-2.5'>
+                  4 sp
+                </TabsTrigger>
+                <TabsTrigger value='tab' className='text-xs px-2.5'>
+                  Tab
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Separator
+              orientation='vertical'
+              className='data-[orientation=vertical]:h-4'
+            />
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleFormat}
+              disabled={!jsonValidation.isValid}
+            >
+              <TextInitial className='h-4 w-4' />
+              <span className='hidden md:inline'>Format</span>
+            </Button>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleMinify}
+              disabled={!jsonValidation.isValid}
+            >
+              <Minimize2 className='h-4 w-4' />
+              <span className='hidden md:inline'>Minify</span>
+            </Button>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleCopy}
+              disabled={!jsonText}
+            >
+              <Copy className='h-4 w-4' />
+              <span className='hidden md:inline'>Copy</span>
+            </Button>
+            <Separator
+              orientation='vertical'
+              className='data-[orientation=vertical]:h-4'
+            />
+            <Button variant='ghost' size='sm' onClick={handleClear}>
+              <Eraser className='h-4 w-4' />
+              <span className='hidden md:inline'>Clear</span>
+            </Button>
           </div>
         </div>
-      </section>
+
+        {/* Editor + Inspector grid */}
+        <div className='grid grid-cols-1 xl:grid-cols-[7fr_3fr] gap-2'>
+          {/* Editor */}
+          <div className='flex flex-col gap-1'>
+            <div className='flex items-center justify-between px-1'>
+              <span className='text-xs font-medium text-muted-foreground flex items-center gap-1.5'>
+                <FileCode2 className='h-3.5 w-3.5' />
+                Editor
+              </span>
+              {jsonText.trim() === '' ? (
+                <Badge
+                  variant='secondary'
+                  className='font-mono text-[10px] px-1.5 py-0'
+                >
+                  Empty
+                </Badge>
+              ) : jsonValidation.error ? (
+                <span className='text-xs text-destructive truncate max-w-[60%]'>
+                  {jsonValidation.error}
+                </span>
+              ) : (
+                <Badge
+                  variant='default'
+                  className='bg-green-600 font-mono text-[10px] px-1.5 py-0'
+                >
+                  Valid
+                </Badge>
+              )}
+            </div>
+            <div className='rounded-lg border bg-muted/30 overflow-hidden'>
+              <Editor
+                height='calc(100vh - 220px)'
+                language='json'
+                value={jsonText}
+                theme={editorTheme}
+                onChange={value => setJsonText(value ?? '')}
+                onMount={handleEditorMount}
+                options={{
+                  minimap: { enabled: false },
+                  lineNumbers: 'on',
+                  automaticLayout: true,
+                  formatOnPaste: true,
+                  formatOnType: true,
+                  scrollBeyondLastLine: false,
+                  padding: { top: 12, bottom: 12 },
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Inspector */}
+          <div className='flex flex-col gap-1'>
+            <div className='flex items-center px-1'>
+              <span className='text-xs font-medium text-muted-foreground flex items-center gap-1.5'>
+                <ScanSearch className='h-3.5 w-3.5' />
+                Inspector
+              </span>
+            </div>
+            <div className='h-[calc(100vh-220px)] overflow-y-auto rounded-lg border bg-muted/30 p-4'>
+              <div className='space-y-2'>
+                {/* Structure */}
+                <div className='space-y-1.5 text-sm'>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Type</span>
+                    <span className='font-mono font-semibold'>
+                      {jsonStats ? (jsonStats.isArray ? 'Array' : 'Object') : '—'}
+                    </span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>
+                      {jsonStats?.isArray ? 'Items' : 'Root Keys'}
+                    </span>
+                    <span className='font-mono font-semibold'>
+                      {jsonStats ? jsonStats.rootKeys : '—'}
+                    </span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Max Depth</span>
+                    <span className='font-mono font-semibold'>
+                      {jsonStats ? jsonStats.depth : '—'}
+                    </span>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Content */}
+                <div className='space-y-1.5 text-sm'>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Lines</span>
+                    <span className='font-mono font-semibold'>
+                      {jsonStats ? jsonStats.lines : '—'}
+                    </span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Characters</span>
+                    <span className='font-mono font-semibold'>
+                      {jsonStats ? jsonStats.chars.toLocaleString() : '—'}
+                    </span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Size</span>
+                    <span className='font-mono font-semibold'>
+                      {jsonStats ? jsonStats.size : '—'}
+                    </span>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Compression */}
+                <div className='space-y-1.5 text-sm'>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Formatted</span>
+                    <span className='font-mono font-semibold text-blue-500'>
+                      {jsonStats ? jsonStats.formattedSize : '—'}
+                    </span>
+                  </div>
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Minified</span>
+                    <span className='font-mono font-semibold text-green-500'>
+                      {jsonStats ? jsonStats.minifiedSize : '—'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </MainLayout>
   );
 }
