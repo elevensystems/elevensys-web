@@ -4,7 +4,14 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 
 import Editor from '@monaco-editor/react';
 import { findNodeAtLocation, parseTree } from 'jsonc-parser';
-import { Braces, ChevronDown, Eraser, GitCompare, TextInitial } from 'lucide-react';
+import {
+  Braces,
+  ChevronDown,
+  Eraser,
+  GitCompare,
+  TextAlignEnd,
+  TextAlignStart,
+} from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
@@ -405,7 +412,7 @@ export default function JsonDiffinityPage() {
               onClick={handleCompare}
               disabled={isCompareDisabled}
             >
-              <GitCompare className='h-4 w-4' />
+              <GitCompare className='size-4' />
               Compare
             </Button>
             <Separator
@@ -424,7 +431,7 @@ export default function JsonDiffinityPage() {
                 )
               }
             >
-              <TextInitial className='h-4 w-4' />
+              <TextAlignStart className='size-4' />
               <span className='hidden md:inline'>Format L</span>
             </Button>
             <Button
@@ -439,7 +446,7 @@ export default function JsonDiffinityPage() {
                 )
               }
             >
-              <TextInitial className='h-4 w-4' />
+              <TextAlignEnd className='size-4' />
               <span className='hidden md:inline'>Format R</span>
             </Button>
             <Separator
@@ -447,8 +454,8 @@ export default function JsonDiffinityPage() {
               className='data-[orientation=vertical]:h-4'
             />
             <Button variant='ghost' size='sm' onClick={handleClearAll}>
-              <Eraser className='h-4 w-4' />
-              <span className='hidden md:inline'>Clear All</span>
+              <Eraser className='size-4' />
+              <span className='hidden md:inline'>Clear all</span>
             </Button>
           </div>
         </div>
@@ -555,7 +562,7 @@ export default function JsonDiffinityPage() {
               )}
               disabled={!diffPaths}
             >
-              <GitCompare className='h-4 w-4 shrink-0' />
+              <GitCompare className='size-4 shrink-0' />
               <span>Diff Viewer</span>
 
               {diffPaths && (
@@ -583,7 +590,7 @@ export default function JsonDiffinityPage() {
 
               <ChevronDown
                 className={cn(
-                  'ml-auto h-4 w-4 transition-transform duration-200',
+                  'ml-auto size-4 transition-transform duration-200',
                   diffOpen && 'rotate-180'
                 )}
               />

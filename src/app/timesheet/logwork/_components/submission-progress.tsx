@@ -26,7 +26,9 @@ function ProgressBar({
     <div className='space-y-2 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/30'>
       <div className='flex items-center gap-3'>
         <Spinner className='text-blue-600 dark:text-blue-400' />
-        <span className='text-sm font-medium text-blue-800 dark:text-blue-300'>{progressText}</span>
+        <span className='text-sm font-medium text-blue-800 dark:text-blue-300'>
+          {progressText}
+        </span>
         <span className='ml-auto text-sm tabular-nums text-blue-600 dark:text-blue-400'>
           {progress}%
         </span>

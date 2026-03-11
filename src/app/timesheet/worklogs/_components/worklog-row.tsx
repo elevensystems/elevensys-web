@@ -168,9 +168,7 @@ export const WorklogRow = memo(function WorklogRow({
                     <AlertDialogTitle>Delete Worklog</AlertDialogTitle>
                     <AlertDialogDescription>
                       Are you sure you want to delete this worklog for{' '}
-                      <span className='font-semibold'>
-                        {worklog.issueKey}
-                      </span>{' '}
+                      <span className='font-semibold'>{worklog.issueKey}</span>{' '}
                       ({parseFloat(String(worklog.worked))}h on {displayDate}
                       )? This action cannot be undone.
                     </AlertDialogDescription>

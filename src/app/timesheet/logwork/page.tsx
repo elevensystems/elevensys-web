@@ -484,11 +484,7 @@ export default function LogWorkPage() {
                   disabled={isSubmitting || !isConfigured}
                   className='w-full sm:w-auto'
                 >
-                  {isSubmitting ? (
-                    <Spinner />
-                  ) : (
-                    <Send className='h-4 w-4' />
-                  )}
+                  {isSubmitting ? <Spinner /> : <Send className='h-4 w-4' />}
                   {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
                 </Button>
               </div>

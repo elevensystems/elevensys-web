@@ -187,40 +187,41 @@ export default function UrlifyPage() {
                   )}
                 />
 
-                {autoDelete ? (
-                  <form.Field
-                    name='ttlDays'
-                    children={field => {
-                      const isInvalid =
-                        field.state.meta.isTouched && !field.state.meta.isValid;
-                      return (
-                        <Field data-invalid={isInvalid}>
-                          <FieldLabel htmlFor={field.name}>
-                            Expires After (days)
-                          </FieldLabel>
-                          <Input
-                            id={field.name}
-                            type='number'
-                            min={1}
-                            step={1}
-                            placeholder='30'
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={e => field.handleChange(e.target.value)}
-                            className='h-12'
-                            aria-invalid={isInvalid}
-                          />
-                          <p className='text-xs text-muted-foreground'>
-                            Leave blank to use the default 30-day expiration.
-                          </p>
-                          {isInvalid && (
-                            <FieldError errors={field.state.meta.errors} />
-                          )}
-                        </Field>
-                      );
-                    }}
-                  />
-                ) : null}
+                <form.Field
+                  name='ttlDays'
+                  children={field => {
+                    const isInvalid =
+                      autoDelete &&
+                      field.state.meta.isTouched &&
+                      !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          Expires After (days)
+                        </FieldLabel>
+                        <Input
+                          id={field.name}
+                          type='number'
+                          min={1}
+                          step={1}
+                          placeholder='30'
+                          value={field.state.value}
+                          disabled={!autoDelete}
+                          onBlur={field.handleBlur}
+                          onChange={e => field.handleChange(e.target.value)}
+                          className='h-12'
+                          aria-invalid={isInvalid}
+                        />
+                        <p className='text-xs text-muted-foreground'>
+                          Leave blank to use the default 30-day expiration.
+                        </p>
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
 
                 {/* Shorten Button */}
                 <Button

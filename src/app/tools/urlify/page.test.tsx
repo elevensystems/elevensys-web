@@ -255,11 +255,9 @@ describe('UrlifyPage', () => {
     expect(screen.getByLabelText('Expires After (days)')).toBeInTheDocument();
   });
 
-  it('hides TTL input when auto-delete is unchecked', () => {
+  it('disables TTL input when auto-delete is unchecked', () => {
     render(<UrlifyPage />);
-    expect(
-      screen.queryByLabelText('Expires After (days)')
-    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Expires After (days)')).toBeDisabled();
   });
 
   // --- Validation ---

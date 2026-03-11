@@ -13,7 +13,7 @@ export default function GuestLoginAlert({
   className,
 }: GuestLoginAlertProps) {
   return (
-    <Alert className={cn('border-dashed', className)}>
+    <Alert className={cn('border-dashed bg-muted/50', className)}>
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
         <span>

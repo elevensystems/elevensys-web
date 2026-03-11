@@ -213,10 +213,10 @@ export default function JsonLensPage() {
             >
               <TabsList className='h-8'>
                 <TabsTrigger value='2' className='text-xs px-2.5'>
-                  2 sp
+                  2 spaces
                 </TabsTrigger>
                 <TabsTrigger value='4' className='text-xs px-2.5'>
-                  4 sp
+                  4 spaces
                 </TabsTrigger>
                 <TabsTrigger value='tab' className='text-xs px-2.5'>
                   Tab
@@ -233,7 +233,7 @@ export default function JsonLensPage() {
               onClick={handleFormat}
               disabled={!jsonValidation.isValid}
             >
-              <TextInitial className='h-4 w-4' />
+              <TextInitial className='size-4' />
               <span className='hidden md:inline'>Format</span>
             </Button>
             <Button
@@ -242,7 +242,7 @@ export default function JsonLensPage() {
               onClick={handleMinify}
               disabled={!jsonValidation.isValid}
             >
-              <Minimize2 className='h-4 w-4' />
+              <Minimize2 className='size-4' />
               <span className='hidden md:inline'>Minify</span>
             </Button>
             <Button
@@ -251,7 +251,7 @@ export default function JsonLensPage() {
               onClick={handleCopy}
               disabled={!jsonText}
             >
-              <Copy className='h-4 w-4' />
+              <Copy className='size-4' />
               <span className='hidden md:inline'>Copy</span>
             </Button>
             <Separator
@@ -259,19 +259,19 @@ export default function JsonLensPage() {
               className='data-[orientation=vertical]:h-4'
             />
             <Button variant='ghost' size='sm' onClick={handleClear}>
-              <Eraser className='h-4 w-4' />
+              <Eraser className='size-4' />
               <span className='hidden md:inline'>Clear</span>
             </Button>
           </div>
         </div>
 
         {/* Editor + Inspector grid */}
-        <div className='grid grid-cols-1 xl:grid-cols-[7fr_3fr] gap-2'>
+        <div className='grid grid-cols-1 xl:grid-cols-[8fr_2fr] gap-2'>
           {/* Editor */}
           <div className='flex flex-col gap-1'>
             <div className='flex items-center justify-between px-1'>
               <span className='text-xs font-medium text-muted-foreground flex items-center gap-1.5'>
-                <FileCode2 className='h-3.5 w-3.5' />
+                <FileCode2 className='size-3.5' />
                 Editor
               </span>
               {jsonText.trim() === '' ? (
@@ -319,7 +319,7 @@ export default function JsonLensPage() {
           <div className='flex flex-col gap-1'>
             <div className='flex items-center px-1'>
               <span className='text-xs font-medium text-muted-foreground flex items-center gap-1.5'>
-                <ScanSearch className='h-3.5 w-3.5' />
+                <ScanSearch className='size-3.5' />
                 Inspector
               </span>
             </div>
@@ -330,7 +330,11 @@ export default function JsonLensPage() {
                   <div className='flex justify-between'>
                     <span className='text-muted-foreground'>Type</span>
                     <span className='font-mono font-semibold'>
-                      {jsonStats ? (jsonStats.isArray ? 'Array' : 'Object') : '—'}
+                      {jsonStats
+                        ? jsonStats.isArray
+                          ? 'Array'
+                          : 'Object'
+                        : '—'}
                     </span>
                   </div>
                   <div className='flex justify-between'>

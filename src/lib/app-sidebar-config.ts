@@ -1,6 +1,7 @@
 import {
   BadgeCheck,
   Braces,
+  CaseSensitive,
   Clock,
   Home,
   Key,
@@ -90,11 +91,6 @@ export const appSidebarData = {
   ],
   tools: [
     {
-      name: 'Urlify',
-      url: '/tools/urlify',
-      icon: LinkIcon,
-    },
-    {
       name: 'JSON Diffinity',
       url: '/tools/json-diffinity',
       icon: Braces,
@@ -108,6 +104,16 @@ export const appSidebarData = {
       name: 'JSON Lens',
       url: '/tools/json-lens',
       icon: ScanSearch,
+    },
+    {
+      name: 'Caseify',
+      url: '/tools/caseify',
+      icon: CaseSensitive,
+    },
+    {
+      name: 'Urlify',
+      url: '/tools/urlify',
+      icon: LinkIcon,
     },
     {
       name: 'Translately',
