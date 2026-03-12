@@ -169,6 +169,19 @@ body {
   background-color: rgba(234, 179, 8, 0.2);
 }
 
+/* Stale diff highlights (dimmed after editing) */
+.diff-stale .monaco-editor .json-diff-added {
+  background-color: rgba(34, 197, 94, 0.06);
+}
+
+.diff-stale .monaco-editor .json-diff-removed {
+  background-color: rgba(239, 68, 68, 0.06);
+}
+
+.diff-stale .monaco-editor .json-diff-modified {
+  background-color: rgba(234, 179, 8, 0.06);
+}
+
 /* jsondiffpatch HTML formatter styling (shadcn/ui-friendly) */
 .json-diff-viewer {
   font-size: 0.875rem;

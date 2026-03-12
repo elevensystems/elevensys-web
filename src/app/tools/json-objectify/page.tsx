@@ -239,14 +239,10 @@ export default function JsonObjectifyPage() {
     <MainLayout>
       <div className='flex flex-col h-[calc(100vh-57px)]'>
         {/* Split Toolbar */}
-        <div className='flex items-center justify-between gap-2 px-4 py-2 border-b'>
-          {/* Left: title + clear */}
+        <div className='flex items-center justify-between gap-2 py-2'>
+          {/* Left: title */}
           <div className='flex items-center gap-3'>
             <h1 className='text-lg font-semibold'>JSON Objectify</h1>
-            <Button variant='ghost' size='sm' onClick={handleClear}>
-              <Eraser className='size-4' />
-              <span className='hidden md:inline'>Clear</span>
-            </Button>
           </div>
 
           {/* Center: options (desktop) */}
@@ -269,28 +265,34 @@ export default function JsonObjectifyPage() {
             </Popover>
           </div>
 
-          {/* Right: copy */}
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={handleCopy}
-            disabled={!jsOutput}
-          >
-            {copiedId ? (
-              <Check className='size-4 text-green-500' />
-            ) : (
-              <Copy className='size-4' />
-            )}
-            <span className='hidden md:inline'>
-              {copiedId ? 'Copied' : 'Copy'}
-            </span>
-          </Button>
+          {/* Right: clear + copy */}
+          <div className='flex items-center gap-1'>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleCopy}
+              disabled={!jsOutput}
+            >
+              {copiedId ? (
+                <Check className='size-4 text-green-500' />
+              ) : (
+                <Copy className='size-4' />
+              )}
+              <span className='hidden md:inline'>
+                {copiedId ? 'Copied' : 'Copy'}
+              </span>
+            </Button>
+            <Button variant='ghost' size='sm' onClick={handleClear}>
+              <Eraser className='size-4' />
+              <span className='hidden md:inline'>Clear</span>
+            </Button>
+          </div>
         </div>
 
         {/* Editors */}
-        <div className='grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0'>
+        <div className='grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0 gap-1'>
           {/* JSON Input */}
-          <div className='flex flex-col min-h-0 lg:border-r'>
+          <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
             <Editor
               height='100%'
               language='json'
@@ -311,7 +313,7 @@ export default function JsonObjectifyPage() {
           </div>
 
           {/* Output */}
-          <div className='flex flex-col min-h-0'>
+          <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
             <Editor
               height='100%'
               language={outputLanguage}
