@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Badge } from '@/components/ui/badge';
+import { ActionButton } from '@/components/action-button';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -206,20 +207,21 @@ export default function TimesheetConfigPage() {
                     onChange={e => setToken(e.target.value)}
                     className='pr-10'
                   />
-                  <Button
+                  <ActionButton
                     type='button'
                     variant='ghost'
                     size='icon-sm'
                     className='absolute right-1 top-1/2 -translate-y-1/2'
                     onClick={() => setShowToken(prev => !prev)}
                     aria-label={showToken ? 'Hide token' : 'Show token'}
-                  >
-                    {showToken ? (
-                      <EyeOff className='h-4 w-4 text-muted-foreground' />
-                    ) : (
-                      <Eye className='h-4 w-4 text-muted-foreground' />
-                    )}
-                  </Button>
+                    leftIcon={
+                      showToken ? (
+                        <EyeOff className='text-muted-foreground' />
+                      ) : (
+                        <Eye className='text-muted-foreground' />
+                      )
+                    }
+                  />
                 </div>
                 <p className='text-xs text-muted-foreground'>
                   Token from for API authentication.
@@ -246,32 +248,30 @@ export default function TimesheetConfigPage() {
                 )}
               </div>
               <div className='flex items-center gap-3'>
-                <Button
+                <ActionButton
                   variant='outline'
                   className='text-destructive hover:bg-destructive/10 hover:text-destructive'
                   onClick={handleClear}
                   disabled={!isConfigured}
+                  leftIcon={<Trash2 />}
                 >
-                  <Trash2 className='h-4 w-4' />
                   Clear
-                </Button>
-                <Button
+                </ActionButton>
+                <ActionButton
                   onClick={handleSave}
                   disabled={isSaving || (!hasChanges && isConfigured)}
+                  leftIcon={
+                    isConfigured && !hasChanges ? (
+                      <Check />
+                    ) : (
+                      <Save />
+                    )
+                  }
+                  isLoading={isSaving}
+                  loadingText='Verifying...'
                 >
-                  {isSaving ? (
-                    <Spinner />
-                  ) : isConfigured && !hasChanges ? (
-                    <Check className='h-4 w-4' />
-                  ) : (
-                    <Save className='h-4 w-4' />
-                  )}
-                  {isSaving
-                    ? 'Verifying...'
-                    : isConfigured && !hasChanges
-                      ? 'Saved'
-                      : 'Save'}
-                </Button>
+                  {isConfigured && !hasChanges ? 'Saved' : 'Save'}
+                </ActionButton>
               </div>
             </CardFooter>
           </Card>

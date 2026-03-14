@@ -4,7 +4,7 @@ import { memo, useCallback, useState } from 'react';
 
 import { Trash2 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Combobox,
   ComboboxContent,
@@ -171,15 +171,14 @@ export const WorkEntryRow = memo(function WorkEntryRow({
         />
       </TableCell>
       <TableCell>
-        <Button
+        <ActionButton
           aria-label='Delete'
           variant='ghost'
           size='icon'
           className='h-8 w-8 text-destructive hover:bg-destructive hover:text-white'
           onClick={handleRemove}
-        >
-          <Trash2 className='h-4 w-4' />
-        </Button>
+          leftIcon={<Trash2 />}
+        />
       </TableCell>
     </TableRow>
   );

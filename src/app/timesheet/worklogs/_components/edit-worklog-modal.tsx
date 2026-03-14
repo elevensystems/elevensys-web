@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
   Dialog,
@@ -18,7 +18,6 @@ import {
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
-import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { WORK_TYPES } from '@/types/timesheet';
 import type { MyWorklogsRow, UpdateWorklogRequest } from '@/types/timesheet';
@@ -268,13 +267,16 @@ export function EditWorklogModal({
           />
         </div>
         <DialogFooter>
-          <Button variant='outline' onClick={onClose} disabled={isEditing}>
+          <ActionButton variant='outline' onClick={onClose} disabled={isEditing}>
             Cancel
-          </Button>
-          <Button onClick={() => form.handleSubmit()} disabled={isEditing}>
-            {isEditing ? <Spinner /> : null}
-            {isEditing ? 'Saving…' : 'Save Changes'}
-          </Button>
+          </ActionButton>
+          <ActionButton
+            onClick={() => form.handleSubmit()}
+            isLoading={isEditing}
+            loadingText='Saving…'
+          >
+            Save Changes
+          </ActionButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

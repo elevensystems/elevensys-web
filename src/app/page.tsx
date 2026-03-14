@@ -18,6 +18,7 @@ import {
 
 import MainLayout from '@/components/layouts/main-layout';
 import { Badge } from '@/components/ui/badge';
+import { ActionButton } from '@/components/action-button';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -161,10 +162,13 @@ export default function Home() {
                     </CardContent>
                     {action.primary && (
                       <CardFooter>
-                        <Button className='w-full' size='sm'>
+                        <ActionButton
+                          className='w-full'
+                          size='sm'
+                          rightIcon={<ArrowRight />}
+                        >
                           Log timesheet
-                          <ArrowRight className='h-4 w-4' />
-                        </Button>
+                        </ActionButton>
                       </CardFooter>
                     )}
                   </Card>

@@ -8,7 +8,7 @@ import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 
 import MainLayout from '@/components/layouts/main-layout';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Popover,
   PopoverContent,
@@ -254,10 +254,9 @@ export default function JsonObjectifyPage() {
           <div className='lg:hidden'>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant='ghost' size='sm'>
-                  <Settings className='size-4' />
-                  <span>Settings</span>
-                </Button>
+                <ActionButton variant='ghost' size='sm' leftIcon={<Settings />}>
+                  Settings
+                </ActionButton>
               </PopoverTrigger>
               <PopoverContent className='w-72'>
                 <div className='flex flex-col gap-3'>{optionsContent}</div>
@@ -267,25 +266,20 @@ export default function JsonObjectifyPage() {
 
           {/* Right: clear + copy */}
           <div className='flex items-center gap-1'>
-            <Button
+            <ActionButton
               variant='ghost'
               size='sm'
               onClick={handleCopy}
               disabled={!jsOutput}
+              leftIcon={copiedId ? <Check className='text-green-500' /> : <Copy />}
             >
-              {copiedId ? (
-                <Check className='size-4 text-green-500' />
-              ) : (
-                <Copy className='size-4' />
-              )}
               <span className='hidden md:inline'>
                 {copiedId ? 'Copied' : 'Copy'}
               </span>
-            </Button>
-            <Button variant='ghost' size='sm' onClick={handleClear}>
-              <Eraser className='size-4' />
+            </ActionButton>
+            <ActionButton variant='ghost' size='sm' onClick={handleClear} leftIcon={<Eraser />}>
               <span className='hidden md:inline'>Clear</span>
-            </Button>
+            </ActionButton>
           </div>
         </div>
 

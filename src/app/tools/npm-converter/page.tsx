@@ -6,7 +6,7 @@ import { Check, Copy, Package } from 'lucide-react';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -154,19 +154,19 @@ export default function NpmConverterPage() {
                 </div>
 
                 <div className='flex gap-2'>
-                  <Button
+                  <ActionButton
                     onClick={handleConvert}
                     disabled={!input.trim()}
                     className='flex-1'
                     size='lg'
+                    leftIcon={<Package />}
                   >
-                    <Package className='h-4 w-4 mr-2' />
                     Convert to NPM Install
-                  </Button>
+                  </ActionButton>
                   {(input || result) && (
-                    <Button onClick={handleClear} variant='outline' size='lg'>
+                    <ActionButton onClick={handleClear} variant='outline' size='lg'>
                       Clear
-                    </Button>
+                    </ActionButton>
                   )}
                 </div>
               </CardContent>
@@ -208,7 +208,7 @@ export default function NpmConverterPage() {
                           readOnly
                           className='font-mono text-sm bg-muted pr-20'
                         />
-                        <Button
+                        <ActionButton
                           size='sm'
                           variant='ghost'
                           onClick={handleCopy}
@@ -216,13 +216,8 @@ export default function NpmConverterPage() {
                           aria-label={
                             copied ? 'Copied to clipboard' : 'Copy to clipboard'
                           }
-                        >
-                          {copied ? (
-                            <Check className='h-4 w-4' aria-hidden='true' />
-                          ) : (
-                            <Copy className='h-4 w-4' aria-hidden='true' />
-                          )}
-                        </Button>
+                          leftIcon={copied ? <Check aria-hidden='true' /> : <Copy aria-hidden='true' />}
+                        />
                       </div>
                       <p className='text-xs text-muted-foreground'>
                         Use this command to install all the published packages

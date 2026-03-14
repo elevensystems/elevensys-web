@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Card,
   CardContent,
@@ -224,24 +224,17 @@ export default function UrlifyPage() {
                 />
 
                 {/* Shorten Button */}
-                <Button
+                <ActionButton
                   onClick={() => form.handleSubmit()}
                   disabled={form.state.isSubmitting}
                   className='w-full'
                   size='lg'
+                  leftIcon={<Link2 />}
+                  isLoading={form.state.isSubmitting}
+                  loadingText='Shortening...'
                 >
-                  {form.state.isSubmitting ? (
-                    <>
-                      <Spinner data-icon='inline-start' />
-                      Shortening...
-                    </>
-                  ) : (
-                    <>
-                      <Link2 className='size-4' />
-                      Shorten URL
-                    </>
-                  )}
-                </Button>
+                  Shorten URL
+                </ActionButton>
               </CardContent>
             </Card>
 
@@ -271,20 +264,15 @@ export default function UrlifyPage() {
                         <code className='flex-1 text-sm font-mono break-all select-all'>
                           {result.shortUrl}
                         </code>
-                        <Button
+                        <ActionButton
                           size='sm'
                           variant='ghost'
                           onClick={handleCopy}
                           aria-label={
                             copied ? 'Copied to clipboard' : 'Copy to clipboard'
                           }
-                        >
-                          {copied ? (
-                            <Check className='h-4 w-4' aria-hidden='true' />
-                          ) : (
-                            <Copy className='h-4 w-4' aria-hidden='true' />
-                          )}
-                        </Button>
+                          leftIcon={copied ? <Check aria-hidden='true' /> : <Copy aria-hidden='true' />}
+                        />
                       </div>
                     </div>
 

@@ -28,7 +28,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -462,14 +462,14 @@ export default function PromptTemplatesPage() {
                   className='pl-12 pr-10 h-12 text-base border-2 focus-visible:ring-2 transition-all'
                 />
                 {searchQuery && (
-                  <Button
+                  <ActionButton
                     variant='ghost'
                     size='sm'
                     onClick={() => setSearchQuery('')}
                     className='absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-muted'
-                  >
-                    <X className='h-4 w-4' />
-                  </Button>
+                    leftIcon={<X />}
+                    aria-label='Clear search'
+                  />
                 )}
               </div>
 
@@ -523,14 +523,14 @@ export default function PromptTemplatesPage() {
                         what you&apos;re looking for
                       </p>
                       {searchQuery && (
-                        <Button
+                        <ActionButton
                           variant='outline'
                           size='sm'
                           onClick={() => setSearchQuery('')}
                           className='mt-4'
                         >
                           Clear search
-                        </Button>
+                        </ActionButton>
                       )}
                     </div>
                   ) : (
@@ -586,7 +586,7 @@ export default function PromptTemplatesPage() {
                                 {/* Template Preview */}
                                 <div className='relative rounded-xl border-2 bg-muted/30 overflow-hidden shadow-inner'>
                                   <div className='absolute top-4 right-4 z-10'>
-                                    <Button
+                                    <ActionButton
                                       size='sm'
                                       variant='ghost'
                                       onClick={e => {
@@ -599,19 +599,8 @@ export default function PromptTemplatesPage() {
                                           ? 'Copied to clipboard'
                                           : 'Copy to clipboard'
                                       }
-                                    >
-                                      {isCopied ? (
-                                        <Check
-                                          className='h-4 w-4'
-                                          aria-hidden='true'
-                                        />
-                                      ) : (
-                                        <Copy
-                                          className='h-4 w-4'
-                                          aria-hidden='true'
-                                        />
-                                      )}
-                                    </Button>
+                                      leftIcon={isCopied ? <Check aria-hidden='true' /> : <Copy aria-hidden='true' />}
+                                    />
                                   </div>
 
                                   <ScrollArea className='h-[400px] w-full'>
@@ -646,7 +635,7 @@ export default function PromptTemplatesPage() {
                                   </div>
                                   <div className='flex items-center gap-2'>
                                     {templateHasInputs(template.id) && (
-                                      <Button
+                                      <ActionButton
                                         size='sm'
                                         variant='outline'
                                         onClick={e => {
@@ -655,10 +644,10 @@ export default function PromptTemplatesPage() {
                                         }}
                                         disabled={isGuest}
                                         className='gap-1.5'
+                                        leftIcon={<Settings2 />}
                                       >
-                                        <Settings2 className='h-3.5 w-3.5' />
                                         Generate With Inputs
-                                      </Button>
+                                      </ActionButton>
                                     )}
                                     <Badge
                                       variant='secondary'
@@ -783,16 +772,15 @@ export default function PromptTemplatesPage() {
           </div>
 
           <DialogFooter className='flex-col sm:flex-row gap-2'>
-            <Button
+            <ActionButton
               variant='outline'
               onClick={() => setIsInputModalOpen(false)}
             >
               Cancel
-            </Button>
-            <Button onClick={handleGenerate} disabled={isGuest || !canGenerate}>
-              <Sparkles className='h-4 w-4 mr-2' />
+            </ActionButton>
+            <ActionButton onClick={handleGenerate} disabled={isGuest || !canGenerate} leftIcon={<Sparkles />}>
               Generate Prompt
-            </Button>
+            </ActionButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -824,26 +812,17 @@ export default function PromptTemplatesPage() {
               </div>
             )}
             <div className='flex gap-2 flex-shrink-0'>
-              <Button variant='outline' onClick={handleCloseModals}>
+              <ActionButton variant='outline' onClick={handleCloseModals}>
                 Close
-              </Button>
-              <Button
+              </ActionButton>
+              <ActionButton
                 onClick={handleCopyGenerated}
                 className='gap-2'
                 disabled={isGuest}
+                leftIcon={resultCopied ? <Check /> : <Copy />}
               >
-                {resultCopied ? (
-                  <>
-                    <Check className='h-4 w-4' />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className='h-4 w-4' />
-                    Copy Prompt
-                  </>
-                )}
-              </Button>
+                {resultCopied ? 'Copied!' : 'Copy Prompt'}
+              </ActionButton>
             </div>
           </DialogFooter>
         </DialogContent>

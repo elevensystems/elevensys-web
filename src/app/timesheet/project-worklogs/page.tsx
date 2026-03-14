@@ -9,7 +9,7 @@ import { AlertCircle, ClipboardList, Search } from 'lucide-react';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Card,
   CardContent,
@@ -277,14 +277,16 @@ export default function ProjectWorklogsPage() {
                 </div>
 
                 <div className='flex items-end'>
-                  <Button
+                  <ActionButton
                     onClick={handleSearch}
-                    disabled={isLoading || !isConfigured || !selectedProject}
+                    disabled={!isConfigured || !selectedProject}
                     className='w-full'
+                    leftIcon={<Search />}
+                    isLoading={isLoading}
+                    loadingText='Searching…'
                   >
-                    {isLoading ? <Spinner /> : <Search className='h-4 w-4' />}
-                    {isLoading ? 'Searching…' : 'Search'}
-                  </Button>
+                    Search
+                  </ActionButton>
                 </div>
               </div>
             </CardContent>

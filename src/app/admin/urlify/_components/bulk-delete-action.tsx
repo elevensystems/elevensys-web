@@ -13,9 +13,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { ActionButton } from '@/components/action-button';
 import { Button } from '@/components/ui/button';
 import { CardAction } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
 
 interface BulkDeleteActionProps {
   selectedCount: number;
@@ -42,10 +42,15 @@ export function BulkDeleteAction({
         </span>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant='destructive' size='sm' disabled={isBulkDeleting}>
-              {isBulkDeleting ? <Spinner /> : <Trash2 className='h-4 w-4' />}
-              {isBulkDeleting ? `Deleting... ${bulkDeleteProgress}%` : 'Delete'}
-            </Button>
+            <ActionButton
+              variant='destructive'
+              size='sm'
+              leftIcon={<Trash2 />}
+              isLoading={isBulkDeleting}
+              loadingText={`Deleting... ${bulkDeleteProgress}%`}
+            >
+              Delete
+            </ActionButton>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>

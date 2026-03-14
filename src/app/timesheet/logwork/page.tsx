@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Card,
   CardAction,
@@ -470,23 +470,25 @@ export default function LogWorkPage() {
 
               {/* Action Buttons */}
               <div className='flex flex-col sm:flex-row sm:justify-between gap-3 border-t pt-6'>
-                <Button
+                <ActionButton
                   variant='outline'
                   onClick={addEntry}
                   disabled={isSubmitting || !isConfigured}
                   className='w-full sm:w-auto'
+                  leftIcon={<Plus />}
                 >
-                  <Plus className='h-4 w-4' />
                   Add Entry
-                </Button>
-                <Button
+                </ActionButton>
+                <ActionButton
                   onClick={handleSubmitClick}
                   disabled={isSubmitting || !isConfigured}
                   className='w-full sm:w-auto'
+                  leftIcon={<Send />}
+                  isLoading={isSubmitting}
+                  loadingText='Submitting...'
                 >
-                  {isSubmitting ? <Spinner /> : <Send className='h-4 w-4' />}
-                  {isSubmitting ? 'Submitting...' : 'Submit Work Logs'}
-                </Button>
+                  Submit Work Logs
+                </ActionButton>
               </div>
             </CardContent>
           </Card>

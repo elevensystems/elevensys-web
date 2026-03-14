@@ -17,6 +17,7 @@ import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { ActionButton } from '@/components/action-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -406,32 +407,22 @@ export default function TranslatelyPage() {
                   onClick={handleTranslate}
                   disabled={isGuest || loading || !inputText.trim()}
                 >
-                  {loading ? (
-                    <>
-                      <Spinner className='mr-2' />
-                      Translating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className='h-4 w-4 mr-2' />
-                      Translate
-                    </>
-                  )}
+                  {loading ? <Spinner /> : <Sparkles />}
+                  {loading ? 'Translating...' : 'Translate'}
                 </RainbowButton>
               </CardContent>
             </Card>
 
             <div className='flex flex-col items-center justify-center gap-3 lg:pt-10'>
-              <Button
+              <ActionButton
                 variant='outline'
                 size='icon'
                 onClick={handleSwap}
                 disabled={loading}
                 aria-label='Swap translation direction'
                 className='h-11 w-11 rounded-full shadow-sm'
-              >
-                <ArrowRightLeft className='h-4 w-4' />
-              </Button>
+                leftIcon={<ArrowRightLeft />}
+              />
               <span className='text-xs text-muted-foreground text-center max-w-[120px]'>
                 Swap direction
               </span>
@@ -441,19 +432,15 @@ export default function TranslatelyPage() {
               <CardHeader>
                 <CardTitle className='flex items-center justify-between'>
                   <span>{outputLabel}</span>
-                  <Button
+                  <ActionButton
                     variant='ghost'
                     size='sm'
                     onClick={handleCopy}
                     disabled={!outputText}
+                    leftIcon={copied ? <Check /> : <Copy />}
                   >
-                    {copied ? (
-                      <Check className='h-4 w-4 mr-2' />
-                    ) : (
-                      <Copy className='h-4 w-4 mr-2' />
-                    )}
                     {copied ? 'Copied' : 'Copy'}
-                  </Button>
+                  </ActionButton>
                 </CardTitle>
               </CardHeader>
               <CardContent className='space-y-4'>

@@ -16,7 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Spinner } from '@/components/ui/spinner';
 import { TableCell, TableRow } from '@/components/ui/table';
@@ -105,15 +105,14 @@ export const UrlRow = memo(function UrlRow({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
+                    <ActionButton
                       variant='ghost'
                       size='icon'
                       className='size-8'
                       disabled
-                    >
-                      <SquarePenIcon />
-                      <span className='sr-only'>Edit</span>
-                    </Button>
+                      leftIcon={<SquarePenIcon />}
+                      aria-label='Edit'
+                    />
                   </TooltipTrigger>
                   <TooltipContent>Edit (Coming soon)</TooltipContent>
                 </Tooltip>
@@ -123,14 +122,13 @@ export const UrlRow = memo(function UrlRow({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <AlertDialogTrigger asChild>
-                        <Button
+                        <ActionButton
                           variant='ghost'
                           size='icon'
                           className='size-8 text-destructive hover:text-destructive'
-                        >
-                          <Trash2 />
-                          <span className='sr-only'>Delete</span>
-                        </Button>
+                          leftIcon={<Trash2 />}
+                          aria-label='Delete'
+                        />
                       </AlertDialogTrigger>
                     </TooltipTrigger>
                     <TooltipContent>Delete</TooltipContent>

@@ -8,7 +8,7 @@ import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 
 import MainLayout from '@/components/layouts/main-layout';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Popover,
   PopoverContent,
@@ -258,10 +258,9 @@ export default function JsonLensPage() {
           <div className='lg:hidden'>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant='ghost' size='sm'>
-                  <Settings className='size-4' />
-                  <span>Settings</span>
-                </Button>
+                <ActionButton variant='ghost' size='sm' leftIcon={<Settings />}>
+                  Settings
+                </ActionButton>
               </PopoverTrigger>
               <PopoverContent className='w-72'>
                 <div className='flex flex-col gap-3'>{optionsContent}</div>
@@ -271,61 +270,44 @@ export default function JsonLensPage() {
 
           {/* Right: actions */}
           <div className='flex items-center gap-1'>
-            <Button
+            <ActionButton
               variant='ghost'
               size='sm'
               onClick={handleFormat}
               disabled={!jsonValidation.isValid}
+              leftIcon={active.has('format') ? <Check className='text-green-500' /> : <TextInitial />}
             >
-              {active.has('format') ? (
-                <Check className='size-4 text-green-500' />
-              ) : (
-                <TextInitial className='size-4' />
-              )}
               <span className='hidden md:inline'>
                 {active.has('format') ? 'Formatted' : 'Format'}
               </span>
-            </Button>
-            <Button
+            </ActionButton>
+            <ActionButton
               variant='ghost'
               size='sm'
               onClick={handleMinify}
               disabled={!jsonValidation.isValid}
+              leftIcon={active.has('minify') ? <Check className='text-green-500' /> : <Minimize2 />}
             >
-              {active.has('minify') ? (
-                <Check className='size-4 text-green-500' />
-              ) : (
-                <Minimize2 className='size-4' />
-              )}
               <span className='hidden md:inline'>
                 {active.has('minify') ? 'Minified' : 'Minify'}
               </span>
-            </Button>
-            <Button
+            </ActionButton>
+            <ActionButton
               variant='ghost'
               size='sm'
               onClick={handleCopy}
               disabled={!jsonText}
+              leftIcon={active.has('copy') ? <Check className='text-green-500' /> : <Copy />}
             >
-              {active.has('copy') ? (
-                <Check className='size-4 text-green-500' />
-              ) : (
-                <Copy className='size-4' />
-              )}
               <span className='hidden md:inline'>
                 {active.has('copy') ? 'Copied' : 'Copy'}
               </span>
-            </Button>
-            <Button variant='ghost' size='sm' onClick={handleClear}>
-              {active.has('clear') ? (
-                <Check className='size-4 text-green-500' />
-              ) : (
-                <Eraser className='size-4' />
-              )}
+            </ActionButton>
+            <ActionButton variant='ghost' size='sm' onClick={handleClear} leftIcon={active.has('clear') ? <Check className='text-green-500' /> : <Eraser />}>
               <span className='hidden md:inline'>
                 {active.has('clear') ? 'Cleared' : 'Clear'}
               </span>
-            </Button>
+            </ActionButton>
           </div>
         </div>
 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { CheckCircle2, ChevronDown, RefreshCw, XCircle } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Collapsible,
   CollapsibleContent,
@@ -146,14 +146,14 @@ export function ResultsSheet({
 
         {failedResults.length > 0 && onRetryFailed && (
           <SheetFooter>
-            <Button
+            <ActionButton
               onClick={onRetryFailed}
               variant='outline'
               className='gap-1.5 border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950/30'
+              leftIcon={<RefreshCw />}
             >
-              <RefreshCw className='h-3.5 w-3.5' />
               Retry Failed
-            </Button>
+            </ActionButton>
           </SheetFooter>
         )}
       </SheetContent>

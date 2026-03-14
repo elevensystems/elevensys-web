@@ -6,7 +6,7 @@ import { Check, Copy, Link2 } from 'lucide-react';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -107,19 +107,19 @@ export default function PRLinkShrinkerPage() {
                 </div>
 
                 <div className='flex gap-2'>
-                  <Button
+                  <ActionButton
                     onClick={handleShrink}
                     disabled={!input.trim()}
                     className='flex-1'
                     size='lg'
+                    leftIcon={<Link2 />}
                   >
-                    <Link2 className='h-4 w-4 mr-2' />
                     Shorten Links
-                  </Button>
+                  </ActionButton>
                   {(input || result) && (
-                    <Button onClick={handleClear} variant='outline' size='lg'>
+                    <ActionButton onClick={handleClear} variant='outline' size='lg'>
                       Clear
-                    </Button>
+                    </ActionButton>
                   )}
                 </div>
               </CardContent>
@@ -169,7 +169,7 @@ export default function PRLinkShrinkerPage() {
                             </span>
                           ))}
                         </div>
-                        <Button
+                        <ActionButton
                           size='sm'
                           variant='ghost'
                           onClick={handleCopy}
@@ -177,13 +177,8 @@ export default function PRLinkShrinkerPage() {
                           aria-label={
                             copied ? 'Copied to clipboard' : 'Copy to clipboard'
                           }
-                        >
-                          {copied ? (
-                            <Check className='h-4 w-4' aria-hidden='true' />
-                          ) : (
-                            <Copy className='h-4 w-4' aria-hidden='true' />
-                          )}
-                        </Button>
+                          leftIcon={copied ? <Check aria-hidden='true' /> : <Copy aria-hidden='true' />}
+                        />
                       </div>
                       <p className='text-xs text-muted-foreground'>
                         Plain text format (without links) has been copied

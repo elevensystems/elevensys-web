@@ -3,7 +3,7 @@
 import { CheckCheckIcon } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Dialog,
   DialogContent,
@@ -148,13 +148,12 @@ export function LogWorkConfirmDialog({
         </div>
 
         <DialogFooter className='gap-2'>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+          <ActionButton variant='outline' onClick={() => onOpenChange(false)}>
             Cancel
-          </Button>
-          <Button onClick={onConfirm}>
-            <CheckCheckIcon className='h-4 w-4' />
+          </ActionButton>
+          <ActionButton onClick={onConfirm} leftIcon={<CheckCheckIcon />}>
             Confirm
-          </Button>
+          </ActionButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -2,7 +2,7 @@
 
 import { Eye, RefreshCw, XCircle } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import { Spinner } from '@/components/ui/spinner';
 import type { LogWorkResult } from '@/types/timesheet';
 
@@ -60,26 +60,26 @@ function CompactFailureBanner({
       </span>
       <div className='ml-auto flex items-center gap-2'>
         {onRetryFailed && (
-          <Button
+          <ActionButton
             variant='outline'
             size='sm'
             onClick={onRetryFailed}
             className='h-7 gap-1.5 border-amber-300 bg-transparent text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/50'
+            leftIcon={<RefreshCw />}
           >
-            <RefreshCw className='h-3 w-3' />
             Retry
-          </Button>
+          </ActionButton>
         )}
         {onViewDetails && (
-          <Button
+          <ActionButton
             variant='outline'
             size='sm'
             onClick={onViewDetails}
             className='h-7 gap-1.5 border-amber-300 bg-transparent text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/50'
+            leftIcon={<Eye />}
           >
-            <Eye className='h-3 w-3' />
             Details
-          </Button>
+          </ActionButton>
         )}
       </div>
     </div>

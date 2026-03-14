@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -235,17 +235,17 @@ export default function PasslyPage() {
                 </div>
 
                 {/* Generate Button */}
-                <Button
+                <ActionButton
                   onClick={() => form.handleSubmit()}
                   disabled={!hasAtLeastOneOption || form.state.isSubmitting}
                   className='w-full'
                   size='lg'
+                  leftIcon={<Key />}
+                  isLoading={form.state.isSubmitting}
+                  loadingText='Generating...'
                 >
-                  <Key className='h-4 w-4 mr-2' />
-                  {form.state.isSubmitting
-                    ? 'Generating...'
-                    : 'Generate Passwords'}
-                </Button>
+                  Generate Passwords
+                </ActionButton>
               </CardContent>
             </Card>
 
@@ -291,7 +291,7 @@ export default function PasslyPage() {
                           <code className='flex-1 text-sm font-mono break-all select-all'>
                             {password.value}
                           </code>
-                          <Button
+                          <ActionButton
                             size='sm'
                             variant='ghost'
                             onClick={() =>
@@ -302,13 +302,8 @@ export default function PasslyPage() {
                                 ? 'Copied to clipboard'
                                 : 'Copy to clipboard'
                             }
-                          >
-                            {copiedId === password.id ? (
-                              <Check className='h-4 w-4' aria-hidden='true' />
-                            ) : (
-                              <Copy className='h-4 w-4' aria-hidden='true' />
-                            )}
-                          </Button>
+                            leftIcon={copiedId === password.id ? <Check aria-hidden='true' /> : <Copy aria-hidden='true' />}
+                          />
                         </div>
                       </div>
                     );

@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -351,14 +351,14 @@ export default function JsonDiffinityPage() {
           <h1 className='text-lg font-semibold'>JSON Diffinity</h1>
 
           <div className='flex items-center gap-1.5'>
-            <Button
+            <ActionButton
               size='sm'
               onClick={handleCompare}
               disabled={isCompareDisabled}
+              leftIcon={<GitCompare />}
             >
-              <GitCompare className='size-4' />
               Compare
-            </Button>
+            </ActionButton>
 
             {diffPaths && (
               <>
@@ -406,10 +406,9 @@ export default function JsonDiffinityPage() {
               orientation='vertical'
               className='data-[orientation=vertical]:h-4'
             />
-            <Button variant='ghost' size='sm' onClick={handleClearAll}>
-              <Eraser className='size-4' />
+            <ActionButton variant='ghost' size='sm' onClick={handleClearAll} leftIcon={<Eraser />}>
               <span className='hidden md:inline'>Clear</span>
-            </Button>
+            </ActionButton>
           </div>
         </div>
 
@@ -477,14 +476,14 @@ export default function JsonDiffinityPage() {
                   <GitCompare className='size-3.5' />
                   Diff Viewer
                 </span>
-                <Button
+                <ActionButton
                   variant='ghost'
                   size='sm'
                   className='h-6 w-6 p-0'
                   onClick={() => setDiffOpen(false)}
-                >
-                  <X className='size-3.5' />
-                </Button>
+                  leftIcon={<X />}
+                  aria-label='Close diff viewer'
+                />
               </div>
               <ScrollArea className='h-[calc(250px-37px)]'>
                 <div className='p-4'>

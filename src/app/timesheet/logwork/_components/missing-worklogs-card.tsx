@@ -4,7 +4,7 @@ import { CalendarDays, Search, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Card,
   CardContent,
@@ -15,7 +15,6 @@ import {
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
-import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import type { JiraProject } from '@/types/timesheet';
 
@@ -119,23 +118,20 @@ export function MissingWorklogsCard({
                 }}
                 className='flex-1 w-full'
               />
-              <Button
+              <ActionButton
                 onClick={handleSearchClick}
                 disabled={
-                  isSearchingWarnings ||
                   !selectedProjectId ||
                   !warningFromDate ||
                   !warningToDate
                 }
                 className='w-full sm:w-auto'
+                leftIcon={<Search />}
+                isLoading={isSearchingWarnings}
+                loadingText='Searching...'
               >
-                {isSearchingWarnings ? (
-                  <Spinner />
-                ) : (
-                  <Search className='h-4 w-4' />
-                )}
-                {isSearchingWarnings ? 'Searching...' : 'Find Dates'}
-              </Button>
+                Find Dates
+              </ActionButton>
             </div>
           </div>
         </div>
@@ -189,14 +185,14 @@ export function MissingWorklogsCard({
                   </button>
                 </Badge>
               ))}
-              <Button
+              <ActionButton
                 variant='ghost'
                 onClick={onClearAllDates}
                 className='h-7 text-xs text-destructive hover:bg-destructive hover:text-white'
+                leftIcon={<Trash2 />}
               >
-                <Trash2 className='h-3 w-3' />
                 Clear all
-              </Button>
+              </ActionButton>
             </div>
           )}
 

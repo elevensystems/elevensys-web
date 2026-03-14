@@ -5,7 +5,7 @@ import { Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Dialog,
   DialogContent,
@@ -159,17 +159,21 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
           />
 
           <div className='flex justify-end gap-3'>
-            <Button
+            <ActionButton
               type='button'
               variant='outline'
               onClick={() => onOpenChange(false)}
               disabled={form.state.isSubmitting}
             >
               Cancel
-            </Button>
-            <Button type='submit' disabled={form.state.isSubmitting}>
-              {form.state.isSubmitting ? 'Submitting...' : 'Submit Feedback'}
-            </Button>
+            </ActionButton>
+            <ActionButton
+              type='submit'
+              isLoading={form.state.isSubmitting}
+              loadingText='Submitting...'
+            >
+              Submit Feedback
+            </ActionButton>
           </div>
         </form>
       </DialogContent>

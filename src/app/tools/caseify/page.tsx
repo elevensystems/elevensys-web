@@ -6,7 +6,7 @@ import { CaseSensitive, Check, ChevronDown, Copy, Eraser } from 'lucide-react';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/action-button';
 import {
   Card,
   CardContent,
@@ -190,15 +190,15 @@ export default function CaseifyPage() {
                 Source Text
               </CardTitle>
               <div className='flex items-center gap-2'>
-                <Button
+                <ActionButton
                   variant='ghost'
                   size='sm'
                   disabled={!input}
                   onClick={() => setInput('')}
+                  leftIcon={<Eraser />}
                 >
-                  <Eraser className='h-4 w-4 mr-2' />
                   Clear
-                </Button>
+                </ActionButton>
               </div>
             </CardHeader>
             <CardContent className='space-y-4'>

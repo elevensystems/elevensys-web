@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Badge } from '@/components/ui/badge';
+import { ActionButton } from '@/components/action-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -323,37 +324,32 @@ export default function BeatlyPage() {
                     size='lg'
                   >
                     {isLoading ? (
-                      <>
-                        <RefreshCw className='mr-2 h-4 w-4 animate-spin' />
-                        Thinking...
-                      </>
+                      <RefreshCw className='animate-spin' />
                     ) : (
-                      <>
-                        <Sparkles className='mr-2 h-4 w-4' />
-                        Get Recommendations
-                      </>
+                      <Sparkles />
                     )}
+                    {isLoading ? 'Thinking...' : 'Get Recommendations'}
                   </RainbowButton>
 
                   <div className='grid grid-cols-2 gap-2'>
-                    <Button
+                    <ActionButton
                       onClick={handleRandomMood}
                       variant='secondary'
                       size='sm'
                       disabled={isLoading}
+                      leftIcon={<Shuffle />}
                     >
-                      <Shuffle className='mr-1.5 h-3.5 w-3.5' />
                       Random
-                    </Button>
-                    <Button
+                    </ActionButton>
+                    <ActionButton
                       onClick={handleReset}
                       variant='secondary'
                       size='sm'
                       disabled={isLoading}
+                      leftIcon={<RefreshCw />}
                     >
-                      <RefreshCw className='mr-1.5 h-3.5 w-3.5' />
                       Reset
-                    </Button>
+                    </ActionButton>
                   </div>
                 </div>
               </CardContent>
@@ -405,7 +401,7 @@ export default function BeatlyPage() {
                               </p>
                             </div>
                             <div className='flex gap-1.5 flex-shrink-0'>
-                              <Button
+                              <ActionButton
                                 variant='ghost'
                                 size='sm'
                                 className='h-8 px-3'
@@ -419,13 +415,13 @@ export default function BeatlyPage() {
                                   );
                                 }}
                                 title='Search on YouTube'
+                                leftIcon={<ExternalLink />}
                               >
-                                <ExternalLink className='h-3.5 w-3.5 mr-1' />
                                 <span className='hidden sm:inline'>
                                   YouTube
                                 </span>
-                              </Button>
-                              <Button
+                              </ActionButton>
+                              <ActionButton
                                 variant='ghost'
                                 size='sm'
                                 className='h-8 px-3'
@@ -439,12 +435,12 @@ export default function BeatlyPage() {
                                   );
                                 }}
                                 title='Search on Spotify'
+                                leftIcon={<ExternalLink />}
                               >
-                                <ExternalLink className='h-3.5 w-3.5 mr-1' />
                                 <span className='hidden sm:inline'>
                                   Spotify
                                 </span>
-                              </Button>
+                              </ActionButton>
                             </div>
                           </div>
                         </CardContent>
@@ -452,25 +448,16 @@ export default function BeatlyPage() {
                     ))}
                   </div>
 
-                  <Button
+                  <ActionButton
                     onClick={handleMoreSongs}
                     disabled={isLoading}
                     variant='outline'
                     className='w-full'
                     size='lg'
+                    leftIcon={isLoading ? <RefreshCw className='animate-spin' /> : <Plus />}
                   >
-                    {isLoading ? (
-                      <>
-                        <RefreshCw className='mr-2 h-4 w-4 animate-spin' />
-                        Finding more songs...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className='mr-2 h-4 w-4' />
-                        Generate More Songs
-                      </>
-                    )}
-                  </Button>
+                    {isLoading ? 'Finding more songs...' : 'Generate More Songs'}
+                  </ActionButton>
                 </div>
               ) : (
                 <Card className='h-full min-h-[500px] flex items-center justify-center'>
