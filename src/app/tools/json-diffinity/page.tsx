@@ -4,14 +4,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 
 import Editor from '@monaco-editor/react';
 import { findNodeAtLocation, parseTree } from 'jsonc-parser';
-import {
-  Braces,
-  ChevronDown,
-  Eraser,
-  GitCompare,
-  TextAlignEnd,
-  TextAlignStart,
-} from 'lucide-react';
+import { Eraser, GitCompare, X } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
@@ -19,11 +12,6 @@ import { toast } from 'sonner';
 import MainLayout from '@/components/layouts/main-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -91,11 +79,6 @@ const parseJsonSafely = (value: string) => {
   }
 };
 
-const formatJson = async (value: string) => {
-  const parsed = JSON.parse(value) as unknown;
-  return `${JSON.stringify(parsed, null, 2)}\n`;
-};
-
 const buildDecorationsForPaths = (
   monaco: typeof Monaco,
   model: Monaco.editor.ITextModel,
@@ -109,8 +92,6 @@ const buildDecorationsForPaths = (
   }
 
   return paths.flatMap(path => {
-    // Diff-to-line mapping is powered by jsonc-parser, which gives us offsets
-    // for any JSON path inside the editor content.
     const node = findNodeAtLocation(tree, path);
 
     if (!node) {
@@ -143,6 +124,7 @@ export default function JsonDiffinityPage() {
   const [diffHtml, setDiffHtml] = useState('');
   const [diffOpen, setDiffOpen] = useState(false);
   const [diffPaths, setDiffPaths] = useState<DiffPaths | null>(null);
+  const [isStale, setIsStale] = useState(false);
 
   const monacoRef = useRef<typeof Monaco | null>(null);
   const isMonacoConfiguredRef = useRef(false);
@@ -243,8 +225,6 @@ export default function JsonDiffinityPage() {
             ),
           ];
 
-          // Monaco decorations are replaced in bulk so we can clear
-          // previous highlights before applying the next comparison.
           originalDecorationsRef.current = originalEditor.deltaDecorations(
             originalDecorationsRef.current,
             newDecorations
@@ -300,6 +280,22 @@ export default function JsonDiffinityPage() {
     }
   }, []);
 
+  const handleOriginalChange = useCallback(
+    (value: string | undefined) => {
+      setOriginalText(value ?? '');
+      if (diffPaths) setIsStale(true);
+    },
+    [diffPaths]
+  );
+
+  const handleModifiedChange = useCallback(
+    (value: string | undefined) => {
+      setModifiedText(value ?? '');
+      if (diffPaths) setIsStale(true);
+    },
+    [diffPaths]
+  );
+
   const handleCompare = useCallback(() => {
     if (isCompareDisabled) {
       toast.error('Fix JSON errors before comparing.');
@@ -315,6 +311,7 @@ export default function JsonDiffinityPage() {
       setDiffHtml('');
       setDiffPaths(null);
       setDiffOpen(false);
+      setIsStale(false);
       applyDecorations({ left: [], right: [], modified: [] });
       toast.success('No differences found.');
       return;
@@ -323,6 +320,7 @@ export default function JsonDiffinityPage() {
     setDiffHtml(formatDiffHtml(delta, originalValidation.value));
     setDiffPaths(paths);
     setDiffOpen(true);
+    setIsStale(false);
     applyDecorations({
       left: paths.removed,
       right: paths.added,
@@ -341,71 +339,17 @@ export default function JsonDiffinityPage() {
     setDiffHtml('');
     setDiffPaths(null);
     setDiffOpen(false);
+    setIsStale(false);
     clearHighlights();
   }, [clearHighlights]);
 
-  const handleFormatJson = useCallback(
-    async (
-      editorRef: React.MutableRefObject<Monaco.editor.IStandaloneCodeEditor | null>,
-      value: string,
-      onChange: (nextValue: string) => void,
-      label: string
-    ) => {
-      const editor = editorRef.current;
-
-      if (!editor) {
-        return;
-      }
-
-      try {
-        // Prettier integration keeps formatting client-side and preserves
-        // cursor position when we rewrite the editor content.
-        const formatted = await formatJson(value);
-        const model = editor.getModel();
-
-        if (!model) {
-          return;
-        }
-
-        const cursorOffset = model.getOffsetAt(
-          editor.getPosition() ?? { lineNumber: 1, column: 1 }
-        );
-
-        editor.pushUndoStop();
-        editor.executeEdits('format-json', [
-          {
-            range: model.getFullModelRange(),
-            text: formatted,
-          },
-        ]);
-        editor.pushUndoStop();
-
-        const clampedOffset = Math.min(cursorOffset, model.getValueLength());
-        const newPosition = model.getPositionAt(clampedOffset);
-        editor.setPosition(newPosition);
-        editor.revealPositionInCenterIfOutsideViewport(newPosition);
-
-        onChange(formatted);
-        toast.success(`${label} formatted.`);
-      } catch {
-        toast.error('Invalid JSON. Unable to format.');
-      }
-    },
-    []
-  );
-
   return (
     <MainLayout>
-      <div className='flex flex-col gap-2 pt-4'>
-        {/* Compact toolbar */}
-        <div className='flex flex-wrap items-center justify-between gap-2'>
-          <div className='flex items-center gap-3'>
-            <h1 className='text-lg font-semibold'>JSON Diffinity</h1>
-            <span className='hidden sm:inline text-sm text-muted-foreground'>
-              Compare two JSON payloads with highlighting and a visual diff
-              viewer.
-            </span>
-          </div>
+      <div className='flex flex-col h-[calc(100vh-57px)]'>
+        {/* Toolbar */}
+        <div className='flex items-center justify-between gap-2 py-2'>
+          <h1 className='text-lg font-semibold'>JSON Diffinity</h1>
+
           <div className='flex items-center gap-1.5'>
             <Button
               size='sm'
@@ -415,80 +359,77 @@ export default function JsonDiffinityPage() {
               <GitCompare className='size-4' />
               Compare
             </Button>
-            <Separator
-              orientation='vertical'
-              className='data-[orientation=vertical]:h-4'
-            />
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={() =>
-                handleFormatJson(
-                  originalEditorRef,
-                  originalText,
-                  setOriginalText,
-                  'Original JSON'
-                )
-              }
-            >
-              <TextAlignStart className='size-4' />
-              <span className='hidden md:inline'>Format L</span>
-            </Button>
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={() =>
-                handleFormatJson(
-                  modifiedEditorRef,
-                  modifiedText,
-                  setModifiedText,
-                  'Modified JSON'
-                )
-              }
-            >
-              <TextAlignEnd className='size-4' />
-              <span className='hidden md:inline'>Format R</span>
-            </Button>
+
+            {diffPaths && (
+              <>
+                <Separator
+                  orientation='vertical'
+                  className='data-[orientation=vertical]:h-4'
+                />
+                <div className='flex items-center gap-1'>
+                  {diffPaths.added.length > 0 && (
+                    <Badge
+                      className={cn(
+                        'bg-green-600 font-mono text-[10px] px-1.5 py-0',
+                        isStale && 'line-through opacity-50'
+                      )}
+                    >
+                      +{diffPaths.added.length}
+                    </Badge>
+                  )}
+                  {diffPaths.removed.length > 0 && (
+                    <Badge
+                      variant='destructive'
+                      className={cn(
+                        'font-mono text-[10px] px-1.5 py-0',
+                        isStale && 'line-through opacity-50'
+                      )}
+                    >
+                      -{diffPaths.removed.length}
+                    </Badge>
+                  )}
+                  {diffPaths.modified.length > 0 && (
+                    <Badge
+                      className={cn(
+                        'bg-yellow-500 text-white font-mono text-[10px] px-1.5 py-0',
+                        isStale && 'line-through opacity-50'
+                      )}
+                    >
+                      ~{diffPaths.modified.length}
+                    </Badge>
+                  )}
+                </div>
+              </>
+            )}
+
             <Separator
               orientation='vertical'
               className='data-[orientation=vertical]:h-4'
             />
             <Button variant='ghost' size='sm' onClick={handleClearAll}>
               <Eraser className='size-4' />
-              <span className='hidden md:inline'>Clear all</span>
+              <span className='hidden md:inline'>Clear</span>
             </Button>
           </div>
         </div>
 
-        {/* Editors grid */}
-        <div className='grid grid-cols-1 xl:grid-cols-2 gap-2'>
-          {/* Original editor */}
-          <div className='flex flex-col gap-1'>
-            <div className='flex items-center justify-between px-1'>
-              <span className='text-xs font-medium text-muted-foreground flex items-center gap-1.5'>
-                <Braces className='h-3.5 w-3.5' />
-                Original
-              </span>
-              {originalValidation.error ? (
-                <span className='text-xs text-destructive truncate max-w-[60%]'>
-                  {originalValidation.error}
-                </span>
-              ) : (
-                <Badge
-                  variant='default'
-                  className='bg-green-600 font-mono text-[10px] px-1.5 py-0'
-                >
-                  Valid
-                </Badge>
-              )}
-            </div>
-            <div className='rounded-lg border bg-muted/30 overflow-hidden'>
+        {/* Editors + Diff drawer */}
+        <div
+          className={cn(
+            'flex flex-col flex-1 min-h-0',
+            isStale && 'diff-stale'
+          )}
+        >
+          {/* Editors grid */}
+          <div className='grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0 gap-1'>
+            {/* Original */}
+            <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
               <Editor
-                height='calc(100vh - 240px)'
+                height='100%'
                 language='json'
                 value={originalText}
                 theme={editorTheme}
-                onChange={value => setOriginalText(value ?? '')}
+                onChange={handleOriginalChange}
                 onMount={(editor, monaco) =>
                   handleEditorMount(editor, monaco, 'original')
                 }
@@ -503,35 +444,15 @@ export default function JsonDiffinityPage() {
                 }}
               />
             </div>
-          </div>
 
-          {/* Modified editor */}
-          <div className='flex flex-col gap-1'>
-            <div className='flex items-center justify-between px-1'>
-              <span className='text-xs font-medium text-muted-foreground flex items-center gap-1.5'>
-                <Braces className='h-3.5 w-3.5' />
-                Modified
-              </span>
-              {modifiedValidation.error ? (
-                <span className='text-xs text-destructive truncate max-w-[60%]'>
-                  {modifiedValidation.error}
-                </span>
-              ) : (
-                <Badge
-                  variant='default'
-                  className='bg-green-600 font-mono text-[10px] px-1.5 py-0'
-                >
-                  Valid
-                </Badge>
-              )}
-            </div>
-            <div className='rounded-lg border bg-muted/30 overflow-hidden'>
+            {/* Modified */}
+            <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
               <Editor
-                height='calc(100vh - 240px)'
+                height='100%'
                 language='json'
                 value={modifiedText}
                 theme={editorTheme}
-                onChange={value => setModifiedText(value ?? '')}
+                onChange={handleModifiedChange}
                 onMount={(editor, monaco) =>
                   handleEditorMount(editor, monaco, 'modified')
                 }
@@ -547,66 +468,35 @@ export default function JsonDiffinityPage() {
               />
             </div>
           </div>
-        </div>
 
-        {/* Collapsible diff panel */}
-        <Collapsible open={diffOpen} onOpenChange={setDiffOpen}>
-          <CollapsibleTrigger asChild>
-            <button
-              type='button'
-              className={cn(
-                'flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
-                diffPaths
-                  ? 'bg-muted/50 hover:bg-muted'
-                  : 'bg-muted/30 text-muted-foreground cursor-default'
-              )}
-              disabled={!diffPaths}
-            >
-              <GitCompare className='size-4 shrink-0' />
-              <span>Diff Viewer</span>
-
-              {diffPaths && (
-                <div className='flex items-center gap-1.5 ml-2'>
-                  {diffPaths.added.length > 0 && (
-                    <Badge className='bg-green-600 font-mono text-[10px] px-1.5 py-0'>
-                      +{diffPaths.added.length}
-                    </Badge>
-                  )}
-                  {diffPaths.removed.length > 0 && (
-                    <Badge
-                      variant='destructive'
-                      className='font-mono text-[10px] px-1.5 py-0'
-                    >
-                      -{diffPaths.removed.length}
-                    </Badge>
-                  )}
-                  {diffPaths.modified.length > 0 && (
-                    <Badge className='bg-yellow-500 text-white font-mono text-[10px] px-1.5 py-0'>
-                      ~{diffPaths.modified.length}
-                    </Badge>
-                  )}
-                </div>
-              )}
-
-              <ChevronDown
-                className={cn(
-                  'ml-auto size-4 transition-transform duration-200',
-                  diffOpen && 'rotate-180'
-                )}
-              />
-            </button>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <ScrollArea className='h-[420px] rounded-lg rounded-t-none border border-t-0 bg-muted/30'>
-              <div className='p-4'>
-                <div
-                  className='json-diff-viewer'
-                  dangerouslySetInnerHTML={{ __html: diffHtml }}
-                />
+          {/* Diff drawer */}
+          {diffOpen && (
+            <div className='h-[250px] shrink-0 border-t'>
+              <div className='flex items-center justify-between px-3 py-1.5 border-b bg-muted/30'>
+                <span className='text-xs font-medium text-muted-foreground flex items-center gap-1.5'>
+                  <GitCompare className='size-3.5' />
+                  Diff Viewer
+                </span>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='h-6 w-6 p-0'
+                  onClick={() => setDiffOpen(false)}
+                >
+                  <X className='size-3.5' />
+                </Button>
               </div>
-            </ScrollArea>
-          </CollapsibleContent>
-        </Collapsible>
+              <ScrollArea className='h-[calc(250px-37px)]'>
+                <div className='p-4'>
+                  <div
+                    className='json-diff-viewer'
+                    dangerouslySetInnerHTML={{ __html: diffHtml }}
+                  />
+                </div>
+              </ScrollArea>
+            </div>
+          )}
+        </div>
       </div>
     </MainLayout>
   );

@@ -3,146 +3,48 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import Editor from '@monaco-editor/react';
-import { Braces, Copy, Eraser, Sparkles, TextInitial } from 'lucide-react';
+import { Check, Copy, Eraser, Settings } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
-import { toast } from 'sonner';
 
 import MainLayout from '@/components/layouts/main-layout';
-import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-const DEFAULT_JSON = `{
-  "name": "John Doe",
-  "age": 30,
-  "isActive": true,
-  "roles": ["admin", "user"],
-  "metadata": {
-    "createdAt": "2024-01-15T10:30:00Z",
-    "lastLogin": null
-  }
-}`;
-
-interface ConversionOptions {
-  useConst: boolean;
-  singleQuotes: boolean;
-  trailingComma: boolean;
-  includeUndefined: boolean;
-}
-
-const parseJsonSafely = (value: string) => {
-  try {
-    return {
-      value: JSON.parse(value) as unknown,
-      error: '',
-      isValid: true,
-    };
-  } catch (error) {
-    return {
-      value: null as unknown,
-      error: error instanceof Error ? error.message : 'Invalid JSON',
-      isValid: false,
-    };
-  }
-};
-
-const formatJson = async (value: string) => {
-  const parsed = JSON.parse(value) as unknown;
-  return `${JSON.stringify(parsed, null, 2)}\n`;
-};
-
-const convertToJsObject = (
-  obj: unknown,
-  options: ConversionOptions,
-  indent = 0
-): string => {
-  const indentStr = '  '.repeat(indent);
-  const nextIndentStr = '  '.repeat(indent + 1);
-
-  if (obj === null) {
-    return 'null';
-  }
-
-  if (obj === undefined) {
-    return 'undefined';
-  }
-
-  if (typeof obj === 'string') {
-    const quote = options.singleQuotes ? "'" : '"';
-    return `${quote}${obj}${quote}`;
-  }
-
-  if (typeof obj === 'number' || typeof obj === 'boolean') {
-    return String(obj);
-  }
-
-  if (Array.isArray(obj)) {
-    if (obj.length === 0) {
-      return '[]';
-    }
-
-    const items = obj.map(item => convertToJsObject(item, options, indent + 1));
-    const trailing = options.trailingComma ? ',' : '';
-    return `[\n${items.map(item => `${nextIndentStr}${item}`).join(',\n')}${trailing}\n${indentStr}]`;
-  }
-
-  if (typeof obj === 'object') {
-    const entries = Object.entries(obj);
-
-    if (entries.length === 0) {
-      return '{}';
-    }
-
-    const props = entries.map(([key, value]) => {
-      // Check if key is a valid JS identifier
-      const needsQuotes = !/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key);
-      const quote = options.singleQuotes ? "'" : '"';
-      const keyStr = needsQuotes ? `${quote}${key}${quote}` : key;
-      const valueStr = convertToJsObject(value, options, indent + 1);
-      return `${nextIndentStr}${keyStr}: ${valueStr}`;
-    });
-
-    const trailing = options.trailingComma ? ',' : '';
-    return `{\n${props.join(',\n')}${trailing}\n${indentStr}}`;
-  }
-
-  return String(obj);
-};
-
-const generateJsCode = (
-  json: unknown,
-  options: ConversionOptions,
-  variableName: string = 'data'
-): string => {
-  const keyword = options.useConst ? 'const' : 'let';
-  const objectStr = convertToJsObject(json, options);
-  return `${keyword} ${variableName} = ${objectStr};`;
-};
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import {
+  DEFAULT_JSON,
+  generateJsCode,
+  parseJsonSafely,
+} from '@/lib/json-objectify';
+import type { ConversionOptions } from '@/lib/json-objectify';
 
 export default function JsonObjectifyPage() {
   const { resolvedTheme } = useTheme();
   const editorTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'light';
+  const { copiedId, copy } = useCopyToClipboard();
 
   const [jsonText, setJsonText] = useState(DEFAULT_JSON);
   const [outputType, setOutputType] = useState<'const' | 'let'>('const');
   const [quoteStyle, setQuoteStyle] = useState<'single' | 'double'>('single');
   const [trailingComma, setTrailingComma] = useState(true);
+  const [semicolons, setSemicolons] = useState(true);
+  const [typescript, setTypescript] = useState(false);
   const [variableName, setVariableName] = useState('data');
 
   const jsonEditorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(
-    null
-  );
-  const outputEditorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(
     null
   );
 
   const jsonValidation = useMemo(() => parseJsonSafely(jsonText), [jsonText]);
 
   const jsOutput = useMemo(() => {
-    if (!jsonValidation.isValid) {
+    if (!jsonValidation.isValid || !jsonText.trim()) {
       return '';
     }
 
@@ -150,18 +52,27 @@ export default function JsonObjectifyPage() {
       useConst: outputType === 'const',
       singleQuotes: quoteStyle === 'single',
       trailingComma,
-      includeUndefined: false,
+      semicolons,
+      typescript,
+      variableName: variableName || 'data',
     };
 
-    return generateJsCode(jsonValidation.value, options, variableName);
+    return generateJsCode(jsonValidation.value, options);
   }, [
     jsonValidation.isValid,
     jsonValidation.value,
+    jsonText,
     outputType,
     quoteStyle,
     trailingComma,
+    semicolons,
+    typescript,
     variableName,
   ]);
+
+  const outputLanguage = typescript ? 'typescript' : 'javascript';
+  const outputDisplayValue =
+    jsOutput || '// Paste valid JSON on the left to see the output here';
 
   const handleJsonEditorMount = useCallback(
     (editor: Monaco.editor.IStandaloneCodeEditor) => {
@@ -174,253 +85,252 @@ export default function JsonObjectifyPage() {
     []
   );
 
-  const handleOutputEditorMount = useCallback(
-    (editor: Monaco.editor.IStandaloneCodeEditor) => {
-      outputEditorRef.current = editor;
-    },
-    []
-  );
-
-  const handleFormatJson = useCallback(async () => {
-    const editor = jsonEditorRef.current;
-
-    if (!editor) {
-      return;
-    }
-
-    try {
-      const formatted = await formatJson(jsonText);
-      const model = editor.getModel();
-
-      if (!model) {
-        return;
-      }
-
-      const cursorOffset = model.getOffsetAt(
-        editor.getPosition() ?? { lineNumber: 1, column: 1 }
-      );
-
-      editor.pushUndoStop();
-      editor.executeEdits('format-json', [
-        {
-          range: model.getFullModelRange(),
-          text: formatted,
-        },
-      ]);
-      editor.pushUndoStop();
-
-      const clampedOffset = Math.min(cursorOffset, model.getValueLength());
-      const newPosition = model.getPositionAt(clampedOffset);
-      editor.setPosition(newPosition);
-      editor.revealPositionInCenterIfOutsideViewport(newPosition);
-
-      setJsonText(formatted);
-      toast.success('JSON formatted.');
-    } catch {
-      toast.error('Invalid JSON. Unable to format.');
-    }
-  }, [jsonText]);
-
-  const handleClearJson = useCallback(() => {
+  const handleClear = useCallback(() => {
     setJsonText('');
-    toast.success('JSON input cleared.');
   }, []);
 
-  const handleCopyOutput = useCallback(async () => {
-    if (!jsOutput) {
-      toast.error('No output to copy.');
-      return;
+  const handleCopy = useCallback(() => {
+    if (jsOutput) {
+      copy(jsOutput);
     }
+  }, [jsOutput, copy]);
 
-    try {
-      await navigator.clipboard.writeText(jsOutput);
-      toast.success('JavaScript code copied to clipboard.');
-    } catch {
-      toast.error('Failed to copy to clipboard.');
-    }
-  }, [jsOutput]);
+  const optionsContent = (
+    <>
+      <div className='flex items-center justify-between lg:justify-start gap-2'>
+        <span className='text-xs text-muted-foreground lg:hidden'>Type</span>
+        <Tabs
+          value={outputType}
+          onValueChange={value => setOutputType(value as 'const' | 'let')}
+        >
+          <TabsList className='h-8'>
+            <TabsTrigger value='const' className='text-xs px-2.5'>
+              const
+            </TabsTrigger>
+            <TabsTrigger value='let' className='text-xs px-2.5'>
+              let
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <Separator
+        orientation='vertical'
+        className='hidden lg:block data-[orientation=vertical]:h-4'
+      />
+      <Separator className='lg:hidden' />
+
+      <div className='flex items-center justify-between lg:justify-start gap-2'>
+        <span className='text-xs text-muted-foreground lg:hidden'>Quotes</span>
+        <Tabs
+          value={quoteStyle}
+          onValueChange={value => setQuoteStyle(value as 'single' | 'double')}
+        >
+          <TabsList className='h-8'>
+            <TabsTrigger value='single' className='text-xs px-2.5'>
+              &apos;single&apos;
+            </TabsTrigger>
+            <TabsTrigger value='double' className='text-xs px-2.5'>
+              &quot;double&quot;
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <Separator
+        orientation='vertical'
+        className='hidden lg:block data-[orientation=vertical]:h-4'
+      />
+      <Separator className='lg:hidden' />
+
+      <div className='flex items-center justify-between lg:justify-start gap-2'>
+        <span className='text-xs text-muted-foreground lg:hidden'>
+          Trailing Comma
+        </span>
+        <Tabs
+          value={trailingComma ? 'yes' : 'no'}
+          onValueChange={value => setTrailingComma(value === 'yes')}
+        >
+          <TabsList className='h-8'>
+            <TabsTrigger value='yes' className='text-xs px-2.5'>
+              Comma
+            </TabsTrigger>
+            <TabsTrigger value='no' className='text-xs px-2.5'>
+              No comma
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <Separator
+        orientation='vertical'
+        className='hidden lg:block data-[orientation=vertical]:h-4'
+      />
+      <Separator className='lg:hidden' />
+
+      <div className='flex items-center justify-between lg:justify-start gap-2'>
+        <span className='text-xs text-muted-foreground lg:hidden'>
+          Semicolons
+        </span>
+        <Tabs
+          value={semicolons ? 'yes' : 'no'}
+          onValueChange={value => setSemicolons(value === 'yes')}
+        >
+          <TabsList className='h-8'>
+            <TabsTrigger value='yes' className='text-xs px-2.5'>
+              Semi
+            </TabsTrigger>
+            <TabsTrigger value='no' className='text-xs px-2.5'>
+              No semi
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <Separator
+        orientation='vertical'
+        className='hidden lg:block data-[orientation=vertical]:h-4'
+      />
+      <Separator className='lg:hidden' />
+
+      <div className='flex items-center justify-between lg:justify-start gap-2'>
+        <span className='text-xs text-muted-foreground lg:hidden'>Output</span>
+        <Tabs
+          value={typescript ? 'ts' : 'js'}
+          onValueChange={value => setTypescript(value === 'ts')}
+        >
+          <TabsList className='h-8'>
+            <TabsTrigger value='js' className='text-xs px-2.5'>
+              JS
+            </TabsTrigger>
+            <TabsTrigger value='ts' className='text-xs px-2.5'>
+              TS
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <Separator
+        orientation='vertical'
+        className='hidden lg:block data-[orientation=vertical]:h-4'
+      />
+      <Separator className='lg:hidden' />
+
+      <div className='flex items-center justify-between lg:justify-start gap-2'>
+        <label
+          htmlFor='variableName'
+          className='text-xs text-muted-foreground lg:hidden'
+        >
+          Variable Name
+        </label>
+        <input
+          id='variableName'
+          type='text'
+          value={variableName}
+          onChange={e => setVariableName(e.target.value)}
+          className='w-full lg:w-24 h-8 px-2 text-xs rounded-md border bg-background'
+          placeholder='data'
+        />
+      </div>
+    </>
+  );
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-full mx-auto space-y-8'>
-          <ToolPageHeader
-            title='JSON Objectify'
-            description='Transform JSON into clean, idiomatic JavaScript object notation with customizable formatting options.'
-          />
+      <div className='flex flex-col h-[calc(100vh-57px)]'>
+        {/* Split Toolbar */}
+        <div className='flex items-center justify-between gap-2 py-2'>
+          {/* Left: title */}
+          <div className='flex items-center gap-3'>
+            <h1 className='text-lg font-semibold'>JSON Objectify</h1>
+          </div>
 
-          <div className='grid grid-cols-1 xl:grid-cols-2 gap-6'>
-            {/* JSON Input Card */}
-            <Card className='flex flex-col'>
-              <CardHeader className='flex flex-row items-center justify-between gap-4'>
-                <CardTitle className='flex items-center gap-2'>
-                  <Braces className='h-5 w-5' />
-                  JSON Input
-                </CardTitle>
-                <div className='flex items-center gap-2'>
-                  <Button
-                    variant='secondary'
-                    size='sm'
-                    onClick={handleFormatJson}
-                    disabled={!jsonValidation.isValid}
-                  >
-                    <TextInitial className='h-4 w-4 mr-2' />
-                    Format
-                  </Button>
-                  <Button variant='ghost' size='sm' onClick={handleClearJson}>
-                    <Eraser className='h-4 w-4 mr-2' />
-                    Clear
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className='flex flex-col gap-3 flex-1'>
-                <div className='rounded-lg border bg-muted/30 overflow-hidden flex-1'>
-                  <Editor
-                    height='500px'
-                    language='json'
-                    value={jsonText}
-                    theme={editorTheme}
-                    onChange={value => setJsonText(value ?? '')}
-                    onMount={handleJsonEditorMount}
-                    options={{
-                      minimap: { enabled: false },
-                      lineNumbers: 'on',
-                      automaticLayout: true,
-                      formatOnPaste: true,
-                      formatOnType: true,
-                      scrollBeyondLastLine: false,
-                      padding: { top: 12, bottom: 12 },
-                    }}
-                  />
-                </div>
-                {jsonValidation.error ? (
-                  <div className='flex items-center gap-2'>
-                    <Badge variant='destructive' className='font-mono text-xs'>
-                      Error
-                    </Badge>
-                    <p className='text-xs text-destructive'>
-                      {jsonValidation.error}
-                    </p>
-                  </div>
-                ) : (
-                  <div className='flex items-center gap-2'>
-                    <Badge
-                      variant='default'
-                      className='bg-green-600 font-mono text-xs'
-                    >
-                      Valid
-                    </Badge>
-                    <p className='text-xs text-muted-foreground'>
-                      JSON is valid and ready to convert.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          {/* Center: options (desktop) */}
+          <div className='hidden lg:flex items-center gap-2'>
+            {optionsContent}
+          </div>
 
-            {/* JavaScript Output Card */}
-            <Card className='flex flex-col'>
-              <CardHeader className='flex flex-row items-center justify-between gap-4'>
-                <CardTitle className='flex items-center gap-2'>
-                  <Sparkles className='h-5 w-5' />
-                  JavaScript Output
-                </CardTitle>
-                <Button
-                  variant='secondary'
-                  size='sm'
-                  onClick={handleCopyOutput}
-                  disabled={!jsOutput}
-                >
-                  <Copy className='h-4 w-4 mr-2' />
-                  Copy
+          {/* Center: settings popover (mobile) */}
+          <div className='lg:hidden'>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant='ghost' size='sm'>
+                  <Settings className='size-4' />
+                  <span>Settings</span>
                 </Button>
-              </CardHeader>
-              <CardContent className='flex flex-col gap-4 flex-1'>
-                <div className='rounded-lg border bg-muted/30 overflow-hidden flex-1'>
-                  <Editor
-                    height='500px'
-                    language='javascript'
-                    value={jsOutput}
-                    theme={editorTheme}
-                    onMount={handleOutputEditorMount}
-                    options={{
-                      minimap: { enabled: false },
-                      lineNumbers: 'on',
-                      automaticLayout: true,
-                      readOnly: true,
-                      scrollBeyondLastLine: false,
-                      padding: { top: 12, bottom: 12 },
-                    }}
-                  />
-                </div>
+              </PopoverTrigger>
+              <PopoverContent className='w-72'>
+                <div className='flex flex-col gap-3'>{optionsContent}</div>
+              </PopoverContent>
+            </Popover>
+          </div>
 
-                {/* Options Panel */}
-                <div className='space-y-4 p-4 rounded-lg border bg-card'>
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm font-medium'>Variable Type</span>
-                    <Tabs
-                      value={outputType}
-                      onValueChange={value =>
-                        setOutputType(value as 'const' | 'let')
-                      }
-                    >
-                      <TabsList className='grid w-[200px] grid-cols-2'>
-                        <TabsTrigger value='const'>const</TabsTrigger>
-                        <TabsTrigger value='let'>let</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm font-medium'>Quote Style</span>
-                    <Tabs
-                      value={quoteStyle}
-                      onValueChange={value =>
-                        setQuoteStyle(value as 'single' | 'double')
-                      }
-                    >
-                      <TabsList className='grid w-[200px] grid-cols-2'>
-                        <TabsTrigger value='single'>Single</TabsTrigger>
-                        <TabsTrigger value='double'>Double</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm font-medium'>Trailing Comma</span>
-                    <Tabs
-                      value={trailingComma ? 'yes' : 'no'}
-                      onValueChange={value => setTrailingComma(value === 'yes')}
-                    >
-                      <TabsList className='grid w-[200px] grid-cols-2'>
-                        <TabsTrigger value='yes'>Yes</TabsTrigger>
-                        <TabsTrigger value='no'>No</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-
-                  <div className='flex items-center justify-between gap-4'>
-                    <label
-                      htmlFor='variableName'
-                      className='text-sm font-medium'
-                    >
-                      Variable Name
-                    </label>
-                    <input
-                      id='variableName'
-                      type='text'
-                      value={variableName}
-                      onChange={e => setVariableName(e.target.value)}
-                      className='w-[200px] px-3 py-1.5 text-sm rounded-md border bg-background'
-                      placeholder='data'
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Right: clear + copy */}
+          <div className='flex items-center gap-1'>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleCopy}
+              disabled={!jsOutput}
+            >
+              {copiedId ? (
+                <Check className='size-4 text-green-500' />
+              ) : (
+                <Copy className='size-4' />
+              )}
+              <span className='hidden md:inline'>
+                {copiedId ? 'Copied' : 'Copy'}
+              </span>
+            </Button>
+            <Button variant='ghost' size='sm' onClick={handleClear}>
+              <Eraser className='size-4' />
+              <span className='hidden md:inline'>Clear</span>
+            </Button>
           </div>
         </div>
-      </section>
+
+        {/* Editors */}
+        <div className='grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0 gap-1'>
+          {/* JSON Input */}
+          <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
+            <Editor
+              height='100%'
+              language='json'
+              value={jsonText}
+              theme={editorTheme}
+              onChange={value => setJsonText(value ?? '')}
+              onMount={handleJsonEditorMount}
+              options={{
+                minimap: { enabled: false },
+                lineNumbers: 'on',
+                automaticLayout: true,
+                formatOnPaste: true,
+                formatOnType: true,
+                scrollBeyondLastLine: false,
+                padding: { top: 12, bottom: 12 },
+              }}
+            />
+          </div>
+
+          {/* Output */}
+          <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
+            <Editor
+              height='100%'
+              language={outputLanguage}
+              value={outputDisplayValue}
+              theme={editorTheme}
+              options={{
+                minimap: { enabled: false },
+                lineNumbers: 'on',
+                automaticLayout: true,
+                readOnly: true,
+                scrollBeyondLastLine: false,
+                padding: { top: 12, bottom: 12 },
+              }}
+            />
+          </div>
+        </div>
+      </div>
     </MainLayout>
   );
 }
