@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -35,12 +35,10 @@ import {
   MAX_HOURS,
   MIN_HOURS,
   STANDARD_HOURS,
+  formatDateForApi,
   formatHours,
   generateEntryId,
-  getTodayISO,
-  isValidApiDate,
   isValidIssueKey,
-  parseSpecificDates,
 } from '@/lib/timesheet';
 import type { LogWorkResult, WorkEntry } from '@/types/timesheet';
 
@@ -101,6 +99,14 @@ function saveEntriesToStorage(entries: WorkEntry[], projectId?: string): void {
   }
 }
 
+/** Convert a Date to DD/Mon/YY API format */
+function dateToApiFormat(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return formatDateForApi(`${y}-${m}-${d}`);
+}
+
 export default function LogWorkPage() {
   const router = useRouter();
   const { settings, isConfigured, isLoaded } = useTimesheetSettings();
@@ -133,29 +139,40 @@ export default function LogWorkPage() {
     resetResults,
   } = useLogWorkSubmission(settings);
 
-  // Work entries state
   const [entries, setEntries] = useState<WorkEntry[]>([createDefaultEntry()]);
-  const [dateMode] = useState<'range' | 'specific'>('specific');
-  const [startDate] = useState(getTodayISO());
-  const [endDate] = useState(getTodayISO());
-  const [datesText, setDatesText] = useState('');
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [error, setError] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const parsedDates = useMemo(() => parseSpecificDates(datesText), [datesText]);
-
-  const removeDate = useCallback(
-    (dateToRemove: string) => {
-      const updated = parsedDates.filter(d => d !== dateToRemove).join(', ');
-      setDatesText(updated);
-    },
-    [parsedDates]
+  // Derive parsedDates (DD/Mon/YY strings) from selectedDates
+  const parsedDates = useMemo(
+    () =>
+      [...selectedDates]
+        .sort((a, b) => a.getTime() - b.getTime())
+        .map(dateToApiFormat),
+    [selectedDates]
   );
 
-  const clearAllDates = useCallback(() => setDatesText(''), []);
+  const removeDate = useCallback((dateToRemove: string) => {
+    setSelectedDates(prev =>
+      prev.filter(d => dateToApiFormat(d) !== dateToRemove)
+    );
+  }, []);
 
-  // Load saved entries from localStorage when project changes
+  const clearAllDates = useCallback(() => setSelectedDates([]), []);
+
+  // Warn before navigating away if there are unsaved entries
+  useEffect(() => {
+    const hasEntries = entries.some(e => e.issueKey.trim());
+    if (!hasEntries) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [entries]);
+
   const handleProjectChange = useCallback(
     (projectId: string) => {
       setSelectedProjectId(projectId);
@@ -167,6 +184,11 @@ export default function LogWorkPage() {
       }
     },
     [setSelectedProjectId]
+  );
+
+  const validEntryCount = useMemo(
+    () => entries.filter(e => e.issueKey.trim()).length,
+    [entries]
   );
 
   const totalHours = useMemo(
@@ -200,23 +222,8 @@ export default function LogWorkPage() {
       return 'Please configure your Jira settings first.';
     }
 
-    if (dateMode === 'range') {
-      if (!startDate || !endDate) {
-        return 'Please select a date range.';
-      }
-      if (new Date(startDate) > new Date(endDate)) {
-        return 'Start date must be before or equal to end date.';
-      }
-    } else {
-      const dates = parseSpecificDates(datesText);
-      if (dates.length === 0) {
-        return 'Please enter at least one date (e.g., 20/Aug/25, 21/Aug/25, 22/Aug/25, 25/Aug/25).';
-      }
-      for (const date of dates) {
-        if (!isValidApiDate(date)) {
-          return `Invalid date: "${date}". Expected format: DD/Mon/YY (e.g., 02/Feb/26).`;
-        }
-      }
+    if (parsedDates.length === 0) {
+      return 'Please select at least one date on the calendar.';
     }
 
     const validEntries = entries.filter(e => e.issueKey.trim());
@@ -226,7 +233,7 @@ export default function LogWorkPage() {
 
     for (const entry of validEntries) {
       if (!isValidIssueKey(entry.issueKey)) {
-        return `Invalid issue key: "${entry.issueKey}". Expected format: PROJECT-123 (e.g., C99CMSMKPCM1-01)`;
+        return `Invalid issue key: "${entry.issueKey}". Expected format: PROJECT-123`;
       }
       if (entry.hours < MIN_HOURS || entry.hours > MAX_HOURS) {
         return `Hours for ${entry.issueKey} must be between ${MIN_HOURS} and ${MAX_HOURS}.`;
@@ -234,7 +241,7 @@ export default function LogWorkPage() {
     }
 
     return null;
-  }, [isConfigured, dateMode, startDate, endDate, datesText, entries]);
+  }, [isConfigured, parsedDates, entries]);
 
   const handleSubmitClick = useCallback(() => {
     const validationError = validateEntries();
@@ -262,7 +269,6 @@ export default function LogWorkPage() {
         });
       } else if (successCount > 0) {
         toast.warning(`${successCount} succeeded, ${errorCount} failed`);
-        // Keep only failed entries in the form so user can edit and resubmit
         const failedIssueKeys = new Set(
           logResults.filter(r => !r.success).map(r => r.entry.issueKey)
         );
@@ -277,29 +283,19 @@ export default function LogWorkPage() {
   const handleLogWork = useCallback(async () => {
     setShowConfirmDialog(false);
 
-    // Save entries to localStorage before submission (preserves for next session)
     const validEntries = entries.filter(e => e.issueKey.trim());
     saveEntriesToStorage(validEntries, selectedProjectId);
 
     const logResults = await submitEntries({
       entries,
-      dateMode,
-      datesText,
-      startDate,
-      endDate,
+      dateMode: 'specific',
+      datesText: parsedDates.join(', '),
+      startDate: '',
+      endDate: '',
     });
 
     processResults(logResults);
-  }, [
-    entries,
-    dateMode,
-    datesText,
-    startDate,
-    endDate,
-    selectedProjectId,
-    submitEntries,
-    processResults,
-  ]);
+  }, [entries, parsedDates, selectedProjectId, submitEntries, processResults]);
 
   const handleRetryFailed = useCallback(async () => {
     const failedResults = results.filter(r => !r.success);
@@ -310,21 +306,13 @@ export default function LogWorkPage() {
 
     const logResults = await retryFailed({
       failedResults,
-      dateMode,
-      startDate,
-      endDate,
+      dateMode: 'specific',
+      startDate: '',
+      endDate: '',
     });
 
     processResults(logResults);
-  }, [
-    results,
-    dateMode,
-    startDate,
-    endDate,
-    retryFailed,
-    resetResults,
-    processResults,
-  ]);
+  }, [results, retryFailed, resetResults, processResults]);
 
   if (!isLoaded) {
     return (
@@ -338,13 +326,20 @@ export default function LogWorkPage() {
     );
   }
 
+  const hoursColor =
+    totalHours === STANDARD_HOURS
+      ? 'text-green-600 dark:text-green-400'
+      : totalHours > STANDARD_HOURS
+        ? 'text-orange-600 dark:text-orange-400'
+        : 'text-foreground';
+
   return (
     <MainLayout>
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-full mx-auto space-y-8'>
           <ToolPageHeader
             title='Log Work'
-            description='Log your work entries to Jira timesheet. Add work entries and submit them in bulk.'
+            description='Log your work entries to Jira timesheet. Select dates, add work entries, and submit them in bulk.'
             error={error || undefined}
             infoMessage={
               !error && isConfigured
@@ -383,8 +378,8 @@ export default function LogWorkPage() {
               onWarningToDateChange={setWarningToDate}
               isSearchingWarnings={isSearchingWarnings}
               onSearchWarnings={handleSearchWarnings}
-              datesText={datesText}
-              onDatesTextChange={setDatesText}
+              selectedDates={selectedDates}
+              onSelectedDatesChange={setSelectedDates}
               parsedDates={parsedDates}
               onRemoveDate={removeDate}
               onClearAllDates={clearAllDates}
@@ -396,28 +391,45 @@ export default function LogWorkPage() {
             <CardHeader>
               <div className='flex flex-col gap-1'>
                 <CardTitle className='flex items-center gap-2'>
+                  <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
+                    3
+                  </span>
                   <Clock className='h-5 w-5' />
                   Work Entries
                 </CardTitle>
                 <CardDescription>
-                  Fill in the details of your work entries. You can add multiple
-                  entries and submit them together.
+                  Add work entries for each Jira issue. Every entry will be
+                  logged for all selected dates.
                 </CardDescription>
               </div>
               <CardAction>
-                <div className='flex items-center gap-3 text-sm'>
-                  <span className='text-muted-foreground'>Total:</span>
-                  <span
-                    className={`font-semibold ${
-                      totalHours === STANDARD_HOURS
-                        ? 'text-green-600 dark:text-green-400'
-                        : totalHours > STANDARD_HOURS
-                          ? 'text-orange-600 dark:text-orange-400'
-                          : 'text-foreground'
-                    }`}
-                  >
-                    {formatHours(totalHours)}h / {formatHours(STANDARD_HOURS)}h
-                  </span>
+                <div className='flex flex-col items-end gap-0.5 text-sm'>
+                  {parsedDates.length > 0 ? (
+                    <>
+                      <span className='text-muted-foreground text-xs'>
+                        {validEntryCount} entr
+                        {validEntryCount !== 1 ? 'ies' : 'y'} ×{' '}
+                        {parsedDates.length} date
+                        {parsedDates.length !== 1 ? 's' : ''}
+                      </span>
+                      <span className={`font-semibold ${hoursColor}`}>
+                        {formatHours(totalHours)}h/day ×{' '}
+                        {parsedDates.length}{' '}
+                        {parsedDates.length !== 1 ? 'days' : 'day'} ={' '}
+                        {formatHours(totalHours * parsedDates.length)}h total
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className='text-muted-foreground text-xs'>
+                        Daily target
+                      </span>
+                      <span className={`font-semibold ${hoursColor}`}>
+                        {formatHours(totalHours)}h /{' '}
+                        {formatHours(STANDARD_HOURS)}h
+                      </span>
+                    </>
+                  )}
                 </div>
               </CardAction>
             </CardHeader>
@@ -486,6 +498,11 @@ export default function LogWorkPage() {
                   leftIcon={<Send />}
                   isLoading={isSubmitting}
                   loadingText='Submitting...'
+                  title={
+                    parsedDates.length > 0 && validEntryCount > 0
+                      ? `Will submit ${validEntryCount * parsedDates.length} worklogs (${validEntryCount} entr${validEntryCount !== 1 ? 'ies' : 'y'} × ${parsedDates.length} date${parsedDates.length !== 1 ? 's' : ''})`
+                      : undefined
+                  }
                 >
                   Submit Work Logs
                 </ActionButton>
@@ -506,9 +523,6 @@ export default function LogWorkPage() {
           onOpenChange={setShowConfirmDialog}
           onConfirm={handleLogWork}
           entries={entries}
-          dateMode={dateMode}
-          startDate={startDate}
-          endDate={endDate}
           parsedDates={parsedDates}
           selectedProject={selectedProject}
           totalHours={totalHours}

@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 import { HOUR_STEP, MIN_HOURS } from '@/lib/timesheet';
 import {
   type JiraIssue,
@@ -47,7 +48,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
   onRemove,
   onFetchTypeOfWork,
 }: WorkEntryRowProps) {
-  const [isLoadingTypeOfWork, setIsLoadingTypeOfWork] = useState(false);
+  const [isFetchingTypeOfWork, setIsFetchingTypeOfWork] = useState(false);
 
   const handleIssueInputChange = useCallback(
     (value: string, eventDetails: { reason: string }) => {
@@ -70,15 +71,18 @@ export const WorkEntryRow = memo(function WorkEntryRow({
         return;
       }
 
-      // Fetch typeOfWork from issue detail API
-      setIsLoadingTypeOfWork(true);
+      // Fetch in background — row stays fully interactive
+      setIsFetchingTypeOfWork(true);
       onFetchTypeOfWork(value.id)
         .then(typeOfWork => {
           if (typeOfWork) {
             onUpdate(entry.id, 'typeOfWork', typeOfWork);
           }
         })
-        .finally(() => setIsLoadingTypeOfWork(false));
+        .catch(() => {
+          // Silent failure — field stays on current value
+        })
+        .finally(() => setIsFetchingTypeOfWork(false));
     },
     [entry.id, onUpdate, onFetchTypeOfWork]
   );
@@ -147,18 +151,25 @@ export const WorkEntryRow = memo(function WorkEntryRow({
         />
       </TableCell>
       <TableCell>
-        <NativeSelect
-          className='h-8'
-          value={entry.typeOfWork}
-          onChange={handleTypeChange}
-          disabled={isLoadingTypeOfWork}
+        {/* Subtle pulse border while background fetch is in flight */}
+        <div
+          className={cn(
+            'rounded-md',
+            isFetchingTypeOfWork && 'ring-2 ring-primary/30 animate-pulse'
+          )}
         >
-          {WORK_TYPES.map(type => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </NativeSelect>
+          <NativeSelect
+            className='h-8'
+            value={entry.typeOfWork}
+            onChange={handleTypeChange}
+          >
+            {WORK_TYPES.map(type => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
       </TableCell>
       <TableCell>
         <Input

@@ -3,8 +3,9 @@
 import { CalendarDays, Search, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Badge } from '@/components/ui/badge';
 import { ActionButton } from '@/components/action-button';
+import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Card,
   CardContent,
@@ -15,8 +16,45 @@ import {
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
-import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import type { JiraProject } from '@/types/timesheet';
+
+const MONTH_ABBRS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+/** Parse "D/Mon/YY" or "DD/Mon/YY" → Date (local time) */
+function parseApiDate(dateStr: string): Date | null {
+  const match = dateStr.match(/^(\d{1,2})\/([A-Za-z]{3})\/(\d{2})$/);
+  if (!match) return null;
+  const [, day, monthAbbr, yearShort] = match;
+  const monthIndex = MONTH_ABBRS.findIndex(
+    m => m.toLowerCase() === monthAbbr.toLowerCase()
+  );
+  if (monthIndex === -1) return null;
+  return new Date(
+    2000 + parseInt(yearShort, 10),
+    monthIndex,
+    parseInt(day, 10)
+  );
+}
+
+/** Weekend matcher for react-day-picker disabled prop */
+const isWeekend = (date: Date) => {
+  const day = date.getDay();
+  return day === 0 || day === 6;
+};
 
 interface MissingWorklogsCardProps {
   projects: JiraProject[];
@@ -29,8 +67,8 @@ interface MissingWorklogsCardProps {
   onWarningToDateChange: (date: string) => void;
   isSearchingWarnings: boolean;
   onSearchWarnings: () => Promise<{ dates: string; count: number } | null>;
-  datesText: string;
-  onDatesTextChange: (text: string) => void;
+  selectedDates: Date[];
+  onSelectedDatesChange: (dates: Date[]) => void;
   parsedDates: string[];
   onRemoveDate: (date: string) => void;
   onClearAllDates: () => void;
@@ -47,8 +85,8 @@ export function MissingWorklogsCard({
   onWarningToDateChange,
   isSearchingWarnings,
   onSearchWarnings,
-  datesText,
-  onDatesTextChange,
+  selectedDates,
+  onSelectedDatesChange,
   parsedDates,
   onRemoveDate,
   onClearAllDates,
@@ -56,7 +94,13 @@ export function MissingWorklogsCard({
   const handleSearchClick = async () => {
     const result = await onSearchWarnings();
     if (result) {
-      onDatesTextChange(result.dates);
+      const dates = result.dates
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .map(parseApiDate)
+        .filter((d): d is Date => d !== null && !isWeekend(d));
+      onSelectedDatesChange(dates);
       toast.success(`Found missing dates for ${result.count} user(s)`);
     }
   };
@@ -70,8 +114,8 @@ export function MissingWorklogsCard({
             Find Missing Worklogs
           </CardTitle>
           <CardDescription>
-            Search for dates with missing worklogs in a project and auto-fill
-            the dates below
+            Search for dates with missing worklogs in a project, then select
+            dates on the calendar below
           </CardDescription>
         </div>
       </CardHeader>
@@ -81,7 +125,7 @@ export function MissingWorklogsCard({
           <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
             1
           </span>
-          Select project & date range
+          Select project &amp; date range
         </div>
 
         <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 items-end'>
@@ -89,21 +133,23 @@ export function MissingWorklogsCard({
             <Label htmlFor='project-select'>
               Project <span className='text-destructive'>*</span>
             </Label>
-            <NativeSelect
-              id='project-select'
-              value={selectedProjectId}
-              onChange={e => onProjectChange(e.target.value)}
-              disabled={isLoadingProjects}
-            >
-              <option value=''>
-                {isLoadingProjects ? 'Loading projects...' : 'Select a project'}
-              </option>
-              {projects.map(project => (
-                <option key={project.id} value={project.id}>
-                  {project.key} — {project.name}
+              <NativeSelect
+                id='project-select'
+                value={selectedProjectId}
+                onChange={e => onProjectChange(e.target.value)}
+                disabled={isLoadingProjects}
+              >
+                <option value=''>
+                  {isLoadingProjects
+                    ? 'Loading projects...'
+                    : 'Select a project'}
                 </option>
-              ))}
-            </NativeSelect>
+                {projects.map(project => (
+                  <option key={project.id} value={project.id}>
+                    {project.key} — {project.name}
+                  </option>
+                ))}
+              </NativeSelect>
           </div>
           <div className='space-y-2 sm:col-span-2'>
             <Label>Date Range</Label>
@@ -121,9 +167,7 @@ export function MissingWorklogsCard({
               <ActionButton
                 onClick={handleSearchClick}
                 disabled={
-                  !selectedProjectId ||
-                  !warningFromDate ||
-                  !warningToDate
+                  !selectedProjectId || !warningFromDate || !warningToDate
                 }
                 className='w-full sm:w-auto'
                 leftIcon={<Search />}
@@ -136,14 +180,14 @@ export function MissingWorklogsCard({
           </div>
         </div>
 
-        {/* Step 2 — Dates Editor */}
+        {/* Step 2 — Calendar Date Picker */}
         <div className='space-y-3'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
               <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
                 2
               </span>
-              Review & edit dates
+              Select dates
               {parsedDates.length > 0 && (
                 <Badge
                   variant='secondary'
@@ -156,16 +200,25 @@ export function MissingWorklogsCard({
             </div>
           </div>
 
-          <Textarea
-            id='specific-dates'
-            value={datesText}
-            onChange={e => onDatesTextChange(e.target.value)}
-            placeholder='E.g., 20/Aug/25, 21/Aug/25, 22/Aug/25, 25/Aug/25'
-            rows={2}
-            className='font-mono text-sm'
-          />
+          <div className='rounded-lg border bg-card p-2 w-full'>
+            <Calendar
+              mode='multiple'
+              selected={selectedDates}
+              onSelect={dates => onSelectedDatesChange(dates ?? [])}
+              disabled={isWeekend}
+              numberOfMonths={6}
+              showOutsideDays={false}
+              className='w-full'
+              classNames={{ root: 'w-full' }}
+            />
+          </div>
 
-          {/* Date Badges */}
+          <p className='text-xs text-muted-foreground'>
+            Click days to select or deselect. Weekends are disabled. Use
+            &quot;Find Dates&quot; above to auto-select missing worklog dates.
+          </p>
+
+          {/* Date Chips */}
           {parsedDates.length > 0 && (
             <div className='flex flex-wrap gap-2'>
               {parsedDates.map(date => (
@@ -195,11 +248,6 @@ export function MissingWorklogsCard({
               </ActionButton>
             </div>
           )}
-
-          <p className='text-xs text-muted-foreground'>
-            Comma-separated dates in DD/Mon/YY format. Each work entry will be
-            logged for every date listed above.
-          </p>
         </div>
       </CardContent>
     </Card>
