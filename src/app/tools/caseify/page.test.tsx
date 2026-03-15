@@ -6,10 +6,15 @@ import CaseifyPage from './page';
 
 // --- Mock clipboard ---
 
-const mockCopy = jest.fn().mockResolvedValue(undefined);
-const mockUseCopyToClipboard = jest.fn();
-jest.mock('@/hooks/use-copy-to-clipboard', () => ({
-  useCopyToClipboard: () => mockUseCopyToClipboard(),
+Object.assign(navigator, {
+  clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
+});
+
+const mockTrigger = jest.fn();
+const mockIsActive = jest.fn().mockReturnValue(false);
+const mockUseActionFeedback = jest.fn();
+jest.mock('@/hooks/use-action-feedback', () => ({
+  useActionFeedback: () => mockUseActionFeedback(),
 }));
 
 // --- Mock layouts ---
@@ -130,9 +135,10 @@ jest.mock('@/components/ui/collapsible', () => ({
 describe('CaseifyPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCopyToClipboard.mockReturnValue({
-      copiedId: null,
-      copy: mockCopy,
+    mockIsActive.mockReturnValue(false);
+    mockUseActionFeedback.mockReturnValue({
+      isActive: mockIsActive,
+      trigger: mockTrigger,
     });
   });
 
@@ -269,13 +275,14 @@ describe('CaseifyPage', () => {
       name: 'Copy to clipboard',
     });
     await userEvent.click(copyButtons[0]);
-    expect(mockCopy).toHaveBeenCalledWith('hello world', 'lowercase');
+    expect(mockTrigger).toHaveBeenCalledWith('lowercase');
   });
 
-  it('shows check icon when copiedId matches', async () => {
-    mockUseCopyToClipboard.mockReturnValue({
-      copiedId: 'lowercase',
-      copy: mockCopy,
+  it('shows check icon when feedback is active', async () => {
+    mockIsActive.mockImplementation((id: string) => id === 'lowercase');
+    mockUseActionFeedback.mockReturnValue({
+      isActive: mockIsActive,
+      trigger: mockTrigger,
     });
     render(<CaseifyPage />);
     await userEvent.type(

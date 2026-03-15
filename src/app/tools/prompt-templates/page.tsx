@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   AlertTriangle,
-  Check,
   Code2,
   Copy,
   FileCode,
@@ -45,6 +44,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
+import { useActionFeedback } from '@/hooks/use-action-feedback';
 import { cn } from '@/lib/utils';
 
 import {
@@ -75,7 +75,7 @@ export default function PromptTemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { isActive, trigger } = useActionFeedback();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('all');
@@ -88,7 +88,6 @@ export default function PromptTemplatesPage() {
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState('');
-  const [resultCopied, setResultCopied] = useState(false);
 
   // Get input config for selected template
   const selectedInputConfig = useMemo<TemplateInputConfig | null>(() => {
@@ -207,12 +206,12 @@ export default function PromptTemplatesPage() {
   const handleCopy = useCallback(async (template: Template) => {
     try {
       await navigator.clipboard.writeText(template.content);
-      setCopiedId(template.id);
-      setTimeout(() => setCopiedId(null), 2000);
+      trigger(template.id);
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
+      trigger(template.id, { error: true });
     }
-  }, []);
+  }, [trigger]);
 
   // Open input modal for a template
   const handleOpenInputModal = useCallback((template: Template) => {
@@ -250,21 +249,20 @@ export default function PromptTemplatesPage() {
     setGeneratedPrompt(prompt);
     setIsInputModalOpen(false);
     setIsResultModalOpen(true);
-    setResultCopied(false);
   }, [selectedTemplate, selectedInputConfig, inputValues]);
 
   // Copy generated prompt
   const handleCopyGenerated = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(generatedPrompt);
-      setResultCopied(true);
+      trigger('generated');
       toast.success('Prompt copied to clipboard!');
-      setTimeout(() => setResultCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
       toast.error('Failed to copy prompt');
+      trigger('generated', { error: true });
     }
-  }, [generatedPrompt]);
+  }, [generatedPrompt, trigger]);
 
   // Close modals and reset state
   const handleCloseModals = useCallback(() => {
@@ -273,7 +271,6 @@ export default function PromptTemplatesPage() {
     setSelectedTemplate(null);
     setInputValues({});
     setGeneratedPrompt('');
-    setResultCopied(false);
   }, []);
 
   const getCategoryLabel = (category: string) => {
@@ -536,8 +533,6 @@ export default function PromptTemplatesPage() {
                   ) : (
                     <Accordion type='multiple' className='space-y-3'>
                       {filteredTemplates.map((template, index) => {
-                        const isCopied = copiedId === template.id;
-
                         return (
                           <AccordionItem
                             key={template.id}
@@ -594,12 +589,9 @@ export default function PromptTemplatesPage() {
                                         handleCopy(template);
                                       }}
                                       disabled={isGuest}
-                                      aria-label={
-                                        isCopied
-                                          ? 'Copied to clipboard'
-                                          : 'Copy to clipboard'
-                                      }
-                                      leftIcon={isCopied ? <Check aria-hidden='true' /> : <Copy aria-hidden='true' />}
+                                      aria-label='Copy to clipboard'
+                                      leftIcon={<Copy aria-hidden='true' />}
+                                      feedbackActive={isActive(template.id)}
                                     />
                                   </div>
 
@@ -819,9 +811,10 @@ export default function PromptTemplatesPage() {
                 onClick={handleCopyGenerated}
                 className='gap-2'
                 disabled={isGuest}
-                leftIcon={resultCopied ? <Check /> : <Copy />}
+                leftIcon={<Copy />}
+                feedbackActive={isActive('generated')}
               >
-                {resultCopied ? 'Copied!' : 'Copy Prompt'}
+                Copy Prompt
               </ActionButton>
             </div>
           </DialogFooter>

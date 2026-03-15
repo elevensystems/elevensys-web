@@ -26,7 +26,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useActionFeedback } from '@/hooks/use-action-feedback';
 import { urlifySchema } from '@/lib/schemas/urlify';
 
 export default function UrlifyPage() {
@@ -37,7 +37,7 @@ export default function UrlifyPage() {
     createdAt?: string;
     expiresAt?: string;
   } | null>(null);
-  const { copiedId: copied, copy } = useCopyToClipboard();
+  const { isActive, trigger } = useActionFeedback();
   const [error, setError] = useState('');
 
   const form = useForm({
@@ -92,11 +92,13 @@ export default function UrlifyPage() {
     if (!result?.shortUrl) return;
 
     try {
-      await copy(result.shortUrl);
+      await navigator.clipboard.writeText(result.shortUrl);
+      trigger('copy');
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
+      trigger('copy', { error: true });
     }
-  }, [result?.shortUrl, copy]);
+  }, [result?.shortUrl, trigger]);
 
   return (
     <MainLayout>
@@ -268,10 +270,9 @@ export default function UrlifyPage() {
                           size='sm'
                           variant='ghost'
                           onClick={handleCopy}
-                          aria-label={
-                            copied ? 'Copied to clipboard' : 'Copy to clipboard'
-                          }
-                          leftIcon={copied ? <Check aria-hidden='true' /> : <Copy aria-hidden='true' />}
+                          aria-label='Copy to clipboard'
+                          leftIcon={<Copy aria-hidden='true' />}
+                          feedbackActive={isActive('copy')}
                         />
                       </div>
                     </div>

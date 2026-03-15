@@ -3,7 +3,7 @@
  */
 
 // UI Constants
-export const COPY_FEEDBACK_DURATION = 2000;
+export const ACTION_FEEDBACK_DURATION = 2000;
 
 // Password Generator Constants
 export const PASSWORD_MIN_LENGTH = 4;

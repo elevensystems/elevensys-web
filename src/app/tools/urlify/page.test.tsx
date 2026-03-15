@@ -20,10 +20,11 @@ beforeAll(() => {
 
 // --- Mock clipboard ---
 
-const mockCopy = jest.fn();
-const mockUseCopyToClipboard = jest.fn();
-jest.mock('@/hooks/use-copy-to-clipboard', () => ({
-  useCopyToClipboard: () => mockUseCopyToClipboard(),
+const mockTrigger = jest.fn();
+const mockIsActive = jest.fn().mockReturnValue(false);
+const mockUseActionFeedback = jest.fn();
+jest.mock('@/hooks/use-action-feedback', () => ({
+  useActionFeedback: () => mockUseActionFeedback(),
 }));
 
 // --- Mock layouts ---
@@ -170,10 +171,10 @@ jest.mock('@/components/ui/field', () => ({
 describe('UrlifyPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCopy.mockResolvedValue(undefined);
-    mockUseCopyToClipboard.mockReturnValue({
-      copiedId: null,
-      copy: mockCopy,
+    mockIsActive.mockReturnValue(false);
+    mockUseActionFeedback.mockReturnValue({
+      isActive: mockIsActive,
+      trigger: mockTrigger,
     });
     mockFetch.mockResolvedValue({
       ok: true,
@@ -465,7 +466,11 @@ describe('UrlifyPage', () => {
 
   // --- Copy functionality ---
 
-  it('calls copy when copy button is clicked', async () => {
+  it('calls trigger when copy button is clicked', async () => {
+    Object.assign(navigator, {
+      clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
+    });
+
     render(<UrlifyPage />);
     await userEvent.type(
       screen.getByLabelText('Enter Long URL'),
@@ -480,34 +485,10 @@ describe('UrlifyPage', () => {
     await userEvent.click(
       screen.getByRole('button', { name: 'Copy to clipboard' })
     );
-    expect(mockCopy).toHaveBeenCalledWith('https://short.url/abc123');
-  });
-
-  it('shows copied state when copiedId is truthy', async () => {
-    mockUseCopyToClipboard.mockReturnValue({
-      copiedId: true,
-      copy: mockCopy,
-    });
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          shortUrl: 'https://short.url/abc123',
-        }),
-    });
-
-    render(<UrlifyPage />);
-    await userEvent.type(
-      screen.getByLabelText('Enter Long URL'),
-      'https://example.com/long'
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      'https://short.url/abc123'
     );
-    await userEvent.click(screen.getByRole('button', { name: /Shorten URL/i }));
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole('button', { name: 'Copied to clipboard' })
-      ).toBeInTheDocument();
-    });
+    expect(mockTrigger).toHaveBeenCalledWith('copy');
   });
 
   // --- Keyboard interaction ---

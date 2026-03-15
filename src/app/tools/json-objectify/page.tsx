@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import Editor from '@monaco-editor/react';
-import { Check, Copy, Eraser, Settings } from 'lucide-react';
+import { Copy, Eraser, Settings } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 
@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useActionFeedback } from '@/hooks/use-action-feedback';
 import {
   DEFAULT_JSON,
   generateJsCode,
@@ -27,7 +27,7 @@ import type { ConversionOptions } from '@/lib/json-objectify';
 export default function JsonObjectifyPage() {
   const { resolvedTheme } = useTheme();
   const editorTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'light';
-  const { copiedId, copy } = useCopyToClipboard();
+  const { isActive, trigger } = useActionFeedback();
 
   const [jsonText, setJsonText] = useState(DEFAULT_JSON);
   const [outputType, setOutputType] = useState<'const' | 'let'>('const');
@@ -89,11 +89,15 @@ export default function JsonObjectifyPage() {
     setJsonText('');
   }, []);
 
-  const handleCopy = useCallback(() => {
-    if (jsOutput) {
-      copy(jsOutput);
+  const handleCopy = useCallback(async () => {
+    if (!jsOutput) return;
+    try {
+      await navigator.clipboard.writeText(jsOutput);
+      trigger('copy');
+    } catch {
+      trigger('copy', { error: true });
     }
-  }, [jsOutput, copy]);
+  }, [jsOutput, trigger]);
 
   const optionsContent = (
     <>
@@ -271,11 +275,10 @@ export default function JsonObjectifyPage() {
               size='sm'
               onClick={handleCopy}
               disabled={!jsOutput}
-              leftIcon={copiedId ? <Check className='text-green-500' /> : <Copy />}
+              leftIcon={<Copy />}
+              feedbackActive={isActive('copy')}
             >
-              <span className='hidden md:inline'>
-                {copiedId ? 'Copied' : 'Copy'}
-              </span>
+              <span className='hidden md:inline'>Copy</span>
             </ActionButton>
             <ActionButton variant='ghost' size='sm' onClick={handleClear} leftIcon={<Eraser />}>
               <span className='hidden md:inline'>Clear</span>

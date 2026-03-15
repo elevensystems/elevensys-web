@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 
-import { Check, Copy, Package } from 'lucide-react';
+import { Copy, Package } from 'lucide-react';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
@@ -10,7 +10,7 @@ import { ActionButton } from '@/components/action-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useActionFeedback } from '@/hooks/use-action-feedback';
 
 /**
  * Converts Lerna publish output to npm install command
@@ -64,7 +64,7 @@ export default function NpmConverterPage() {
     count: number;
   } | null>(null);
   const [error, setError] = useState('');
-  const { copiedId: copied, copy, reset: resetCopied } = useCopyToClipboard();
+  const { isActive, trigger } = useActionFeedback();
 
   const handleConvert = useCallback(() => {
     const trimmedInput = input.trim();
@@ -72,8 +72,6 @@ export default function NpmConverterPage() {
     // Clear previous results
     setResult(null);
     setError('');
-    resetCopied();
-
     if (!trimmedInput) {
       setError('Please paste Lerna output to convert');
       return;
@@ -93,25 +91,26 @@ export default function NpmConverterPage() {
     }
 
     setResult({ command, count });
-  }, [input, resetCopied]);
+  }, [input]);
 
   const handleCopy = useCallback(async () => {
     if (!result?.command) return;
 
     try {
-      await copy(result.command);
+      await navigator.clipboard.writeText(result.command);
+      trigger('copy');
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
       setError('Failed to copy to clipboard');
+      trigger('copy', { error: true });
     }
-  }, [result, copy]);
+  }, [result, trigger]);
 
   const handleClear = useCallback(() => {
     setInput('');
     setResult(null);
     setError('');
-    resetCopied();
-  }, [resetCopied]);
+  }, []);
 
   return (
     <MainLayout>
@@ -213,10 +212,9 @@ export default function NpmConverterPage() {
                           variant='ghost'
                           onClick={handleCopy}
                           className='absolute top-2 right-2'
-                          aria-label={
-                            copied ? 'Copied to clipboard' : 'Copy to clipboard'
-                          }
-                          leftIcon={copied ? <Check aria-hidden='true' /> : <Copy aria-hidden='true' />}
+                          aria-label='Copy to clipboard'
+                          leftIcon={<Copy aria-hidden='true' />}
+                          feedbackActive={isActive('copy')}
                         />
                       </div>
                       <p className='text-xs text-muted-foreground'>

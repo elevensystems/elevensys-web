@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import Editor from '@monaco-editor/react';
-import { Check, Copy, Eraser, Minimize2, Settings, TextInitial } from 'lucide-react';
+import { Copy, Eraser, Minimize2, Settings, TextInitial } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 
@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { COPY_FEEDBACK_DURATION } from '@/lib/constants';
+import { useActionFeedback } from '@/hooks/use-action-feedback';
 
 const DEFAULT_JSON = `{
   "name": "John Doe",
@@ -72,42 +72,10 @@ const getIndentValue = (indentSize: IndentSize): string | number => {
   return parseInt(indentSize, 10);
 };
 
-function useActionFeedback() {
-  const [active, setActive] = useState<Set<string>>(new Set());
-  const timeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
-
-  const trigger = useCallback((id: string) => {
-    const existing = timeouts.current.get(id);
-    if (existing) clearTimeout(existing);
-
-    setActive(prev => new Set(prev).add(id));
-
-    const timeout = setTimeout(() => {
-      setActive(prev => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-      timeouts.current.delete(id);
-    }, COPY_FEEDBACK_DURATION);
-
-    timeouts.current.set(id, timeout);
-  }, []);
-
-  useEffect(() => {
-    const refs = timeouts.current;
-    return () => {
-      refs.forEach(t => clearTimeout(t));
-    };
-  }, []);
-
-  return { active, trigger };
-}
-
 export default function JsonLensPage() {
   const { resolvedTheme } = useTheme();
   const editorTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'light';
-  const { active, trigger } = useActionFeedback();
+  const { isActive, trigger } = useActionFeedback();
 
   const [jsonText, setJsonText] = useState(DEFAULT_JSON);
   const [indentSize, setIndentSize] = useState<IndentSize>('2');
@@ -179,7 +147,7 @@ export default function JsonLensPage() {
       applyTextToEditor(formatted);
       trigger('format');
     } catch {
-      // silently fail
+      trigger('format', { error: true });
     }
   }, [
     jsonValidation.isValid,
@@ -197,7 +165,7 @@ export default function JsonLensPage() {
       applyTextToEditor(minified);
       trigger('minify');
     } catch {
-      // silently fail
+      trigger('minify', { error: true });
     }
   }, [jsonValidation.isValid, jsonValidation.value, applyTextToEditor, trigger]);
 
@@ -213,7 +181,7 @@ export default function JsonLensPage() {
       await navigator.clipboard.writeText(jsonText);
       trigger('copy');
     } catch {
-      // silently fail
+      trigger('copy', { error: true });
     }
   }, [jsonText, trigger]);
 
@@ -275,38 +243,39 @@ export default function JsonLensPage() {
               size='sm'
               onClick={handleFormat}
               disabled={!jsonValidation.isValid}
-              leftIcon={active.has('format') ? <Check className='text-green-500' /> : <TextInitial />}
+              leftIcon={<TextInitial />}
+              feedbackActive={isActive('format')}
             >
-              <span className='hidden md:inline'>
-                {active.has('format') ? 'Formatted' : 'Format'}
-              </span>
+              <span className='hidden md:inline'>Format</span>
             </ActionButton>
             <ActionButton
               variant='ghost'
               size='sm'
               onClick={handleMinify}
               disabled={!jsonValidation.isValid}
-              leftIcon={active.has('minify') ? <Check className='text-green-500' /> : <Minimize2 />}
+              leftIcon={<Minimize2 />}
+              feedbackActive={isActive('minify')}
             >
-              <span className='hidden md:inline'>
-                {active.has('minify') ? 'Minified' : 'Minify'}
-              </span>
+              <span className='hidden md:inline'>Minify</span>
             </ActionButton>
             <ActionButton
               variant='ghost'
               size='sm'
               onClick={handleCopy}
               disabled={!jsonText}
-              leftIcon={active.has('copy') ? <Check className='text-green-500' /> : <Copy />}
+              leftIcon={<Copy />}
+              feedbackActive={isActive('copy')}
             >
-              <span className='hidden md:inline'>
-                {active.has('copy') ? 'Copied' : 'Copy'}
-              </span>
+              <span className='hidden md:inline'>Copy</span>
             </ActionButton>
-            <ActionButton variant='ghost' size='sm' onClick={handleClear} leftIcon={active.has('clear') ? <Check className='text-green-500' /> : <Eraser />}>
-              <span className='hidden md:inline'>
-                {active.has('clear') ? 'Cleared' : 'Clear'}
-              </span>
+            <ActionButton
+              variant='ghost'
+              size='sm'
+              onClick={handleClear}
+              leftIcon={<Eraser />}
+              feedbackActive={isActive('clear')}
+            >
+              <span className='hidden md:inline'>Clear</span>
             </ActionButton>
           </div>
         </div>

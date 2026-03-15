@@ -10,7 +10,6 @@ import { ActionButton } from '@/components/action-button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -25,7 +24,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useActionFeedback } from '@/hooks/use-action-feedback';
 import {
   COMMON_CASES,
   type CaseDefinition,
@@ -40,12 +39,12 @@ import {
 interface CaseResultRowProps {
   def: CaseDefinition;
   result: string;
-  copiedId: string | true | null;
+  isActive: (id: string) => boolean;
   onCopy: (text: string, id: string) => void;
 }
 
-function CaseResultRow({ def, result, copiedId, onCopy }: CaseResultRowProps) {
-  const isCopied = copiedId === def.id;
+function CaseResultRow({ def, result, isActive, onCopy }: CaseResultRowProps) {
+  const isCopied = isActive(def.id);
 
   return (
     <Tooltip>
@@ -84,7 +83,7 @@ interface CaseSectionProps {
   title: string;
   cases: readonly CaseDefinition[];
   results: Map<string, string>;
-  copiedId: string | true | null;
+  isActive: (id: string) => boolean;
   onCopy: (text: string, id: string) => void;
 }
 
@@ -92,7 +91,7 @@ function CaseSection({
   title,
   cases,
   results,
-  copiedId,
+  isActive,
   onCopy,
 }: CaseSectionProps) {
   const [open, setOpen] = useState(true);
@@ -112,7 +111,7 @@ function CaseSection({
               key={def.id}
               def={def}
               result={results.get(def.id) ?? ''}
-              copiedId={copiedId}
+              isActive={isActive}
               onCopy={onCopy}
             />
           ))}
@@ -129,7 +128,7 @@ function CaseSection({
 export default function CaseifyPage() {
   const [input, setInput] = useState('');
   const deferredInput = useDeferredValue(input);
-  const { copiedId, copy } = useCopyToClipboard();
+  const { isActive, trigger } = useActionFeedback();
 
   // Memoise tokenisation (shared across all converters)
   const lineTokens = useMemo(() => {
@@ -169,8 +168,13 @@ export default function CaseifyPage() {
 
   const hasInput = deferredInput.trim().length > 0;
 
-  const handleCopy = (text: string, id: string) => {
-    copy(text, id);
+  const handleCopy = async (text: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      trigger(id);
+    } catch {
+      trigger(id, { error: true });
+    }
   };
 
   return (
@@ -223,14 +227,14 @@ export default function CaseifyPage() {
                 title='Common Text Cases'
                 cases={COMMON_CASES}
                 results={results}
-                copiedId={copiedId}
+                isActive={isActive}
                 onCopy={handleCopy}
               />
               <CaseSection
                 title='Programming / Code Cases'
                 cases={PROGRAMMING_CASES}
                 results={results}
-                copiedId={copiedId}
+                isActive={isActive}
                 onCopy={handleCopy}
               />
             </div>

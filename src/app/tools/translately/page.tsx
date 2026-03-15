@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   ArrowRightLeft,
-  Check,
   ChevronDown,
   Copy,
   SlidersHorizontal,
@@ -33,7 +32,7 @@ import { RainbowButton } from '@/components/ui/rainbow-button';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useActionFeedback } from '@/hooks/use-action-feedback';
 import {
   AI_MODELS,
   MAX_TRANSLATE_INPUT_LENGTH,
@@ -67,7 +66,7 @@ export default function TranslatelyPage() {
   const [model, setModel] = useState('gpt-5-nano');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { copiedId: copied, copy } = useCopyToClipboard();
+  const { isActive, trigger } = useActionFeedback();
   const [isToneModalOpen, setIsToneModalOpen] = useState(false);
 
   const directionLabel = useMemo(
@@ -205,12 +204,14 @@ export default function TranslatelyPage() {
     if (!outputText) return;
 
     try {
-      await copy(outputText);
+      await navigator.clipboard.writeText(outputText);
+      trigger('copy');
     } catch (err) {
       console.error('Failed to copy translation:', err);
       setError('Failed to copy to clipboard. Please try again.');
+      trigger('copy', { error: true });
     }
-  }, [outputText, copy]);
+  }, [outputText, trigger]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -437,9 +438,10 @@ export default function TranslatelyPage() {
                     size='sm'
                     onClick={handleCopy}
                     disabled={!outputText}
-                    leftIcon={copied ? <Check /> : <Copy />}
+                    leftIcon={<Copy />}
+                    feedbackActive={isActive('copy')}
                   >
-                    {copied ? 'Copied' : 'Copy'}
+                    Copy
                   </ActionButton>
                 </CardTitle>
               </CardHeader>

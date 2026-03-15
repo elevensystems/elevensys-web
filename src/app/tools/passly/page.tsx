@@ -15,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useActionFeedback } from '@/hooks/use-action-feedback';
 import {
   PASSWORD_DEFAULT_LENGTH,
   PASSWORD_MAX_LENGTH,
@@ -66,7 +66,7 @@ const passlySchema = z.object({
 
 export default function PasslyPage() {
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
-  const { copiedId, copy, reset: resetCopied } = useCopyToClipboard();
+  const { isActive, trigger } = useActionFeedback();
   const [error, setError] = useState('');
 
   const form = useForm({
@@ -82,8 +82,6 @@ export default function PasslyPage() {
     validators: { onSubmit: passlySchema },
     onSubmit: async ({ value }) => {
       setError('');
-      resetCopied();
-
       try {
         const response = await fetch('/api/passly', {
           method: 'POST',
@@ -132,12 +130,14 @@ export default function PasslyPage() {
   const handleCopy = useCallback(
     async (password: string, id: string) => {
       try {
-        await copy(password, id);
+        await navigator.clipboard.writeText(password);
+        trigger(id);
       } catch (err) {
         console.error('Failed to copy to clipboard:', err);
+        trigger(id, { error: true });
       }
     },
-    [copy]
+    [trigger]
   );
 
   return (
@@ -297,12 +297,9 @@ export default function PasslyPage() {
                             onClick={() =>
                               handleCopy(password.value, password.id)
                             }
-                            aria-label={
-                              copiedId === password.id
-                                ? 'Copied to clipboard'
-                                : 'Copy to clipboard'
-                            }
-                            leftIcon={copiedId === password.id ? <Check aria-hidden='true' /> : <Copy aria-hidden='true' />}
+                            aria-label='Copy to clipboard'
+                            leftIcon={<Copy aria-hidden='true' />}
+                            feedbackActive={isActive(password.id)}
                           />
                         </div>
                       </div>

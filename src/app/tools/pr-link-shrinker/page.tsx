@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 
-import { Check, Copy, Link2 } from 'lucide-react';
+import { Copy, Link2 } from 'lucide-react';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
@@ -10,7 +10,7 @@ import { ActionButton } from '@/components/action-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useActionFeedback } from '@/hooks/use-action-feedback';
 import { type PRItem, parsePrUrls } from '@/lib/pr-utils';
 
 export default function PRLinkShrinkerPage() {
@@ -20,7 +20,7 @@ export default function PRLinkShrinkerPage() {
     items: PRItem[];
   } | null>(null);
   const [error, setError] = useState('');
-  const { copiedId: copied, copy, reset: resetCopied } = useCopyToClipboard();
+  const { isActive, trigger } = useActionFeedback();
 
   const handleShrink = useCallback(() => {
     const trimmedInput = input.trim();
@@ -28,8 +28,6 @@ export default function PRLinkShrinkerPage() {
     // Clear previous results
     setResult(null);
     setError('');
-    resetCopied();
-
     if (!trimmedInput) {
       setError('Please paste PR links to shorten');
       return;
@@ -45,25 +43,26 @@ export default function PRLinkShrinkerPage() {
     }
 
     setResult({ plainText, items });
-  }, [input, resetCopied]);
+  }, [input]);
 
   const handleCopy = useCallback(async () => {
     if (!result?.plainText) return;
 
     try {
-      await copy(result.plainText);
+      await navigator.clipboard.writeText(result.plainText);
+      trigger('copy');
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
       setError('Failed to copy to clipboard');
+      trigger('copy', { error: true });
     }
-  }, [result, copy]);
+  }, [result, trigger]);
 
   const handleClear = useCallback(() => {
     setInput('');
     setResult(null);
     setError('');
-    resetCopied();
-  }, [resetCopied]);
+  }, []);
 
   return (
     <MainLayout>
@@ -174,10 +173,9 @@ export default function PRLinkShrinkerPage() {
                           variant='ghost'
                           onClick={handleCopy}
                           className='absolute top-2 right-2'
-                          aria-label={
-                            copied ? 'Copied to clipboard' : 'Copy to clipboard'
-                          }
-                          leftIcon={copied ? <Check aria-hidden='true' /> : <Copy aria-hidden='true' />}
+                          aria-label='Copy to clipboard'
+                          leftIcon={<Copy aria-hidden='true' />}
+                          feedbackActive={isActive('copy')}
                         />
                       </div>
                       <p className='text-xs text-muted-foreground'>
