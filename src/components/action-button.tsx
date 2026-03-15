@@ -52,15 +52,6 @@ function ActionButton({
     prevFeedbackActive.current = feedbackActive;
   }, [feedbackActive, feedbackError]);
 
-  const IconSlot = React.useCallback(
-    ({ children: slotChildren }: { children: React.ReactNode }) => (
-      <span className='inline-flex items-center justify-center [&>svg]:shrink-0'>
-        {slotChildren}
-      </span>
-    ),
-    []
-  );
-
   const feedbackIcon = feedbackError ? (
     <X
       key={feedbackKey}
@@ -76,7 +67,7 @@ function ActionButton({
   const hasIconSlot = !!(leftIcon || feedbackActive || exiting || isLoading);
 
   const resolvedLeft = hasIconSlot ? (
-    <IconSlot>
+    <span className='inline-flex items-center justify-center [&>svg]:shrink-0'>
       {isLoading ? (
         <Spinner />
       ) : feedbackActive || exiting ? (
@@ -89,7 +80,7 @@ function ActionButton({
           {leftIcon}
         </span>
       )}
-    </IconSlot>
+    </span>
   ) : null;
 
   if (process.env.NODE_ENV === 'development') {

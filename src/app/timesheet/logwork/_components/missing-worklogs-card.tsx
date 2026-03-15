@@ -16,7 +16,6 @@ import {
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
-import { cn } from '@/lib/utils';
 import type { JiraProject } from '@/types/timesheet';
 
 const MONTH_ABBRS = [

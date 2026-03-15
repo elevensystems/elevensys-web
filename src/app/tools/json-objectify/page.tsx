@@ -84,7 +84,7 @@ export default function JsonObjectifyPage() {
   const handleClear = useCallback(() => {
     setJsonText('');
     trigger('clear');
-  }, []);
+  }, [trigger]);
 
   const handleCopy = useCallback(async () => {
     if (!jsOutput) return;

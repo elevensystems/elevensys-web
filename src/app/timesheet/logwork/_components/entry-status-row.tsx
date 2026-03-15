@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 import {
   CheckCircle2,
@@ -91,8 +91,8 @@ export function EntryStatusRow({
   dateStatuses,
   isActive,
 }: EntryStatusRowProps) {
-  const [expanded, setExpanded] = useState(false);
-  const prevIsActive = useRef(isActive);
+  const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
+  const [prevIsActive, setPrevIsActive] = useState(isActive);
   const hasFailed = dateStatuses.some((s) => s.status === 'failed');
   const allDone = dateStatuses.every(
     (s) =>
@@ -105,23 +105,26 @@ export function EntryStatusRow({
     (s) => s.status === 'success' || s.status === 'failed' || s.status === 'skipped'
   ).length;
 
-  // Auto-expand when entry becomes active
-  useEffect(() => {
-    if (isActive && !prevIsActive.current) {
-      setExpanded(true);
+  // Track isActive transitions via setState-during-render pattern (allowed by React)
+  if (isActive !== prevIsActive) {
+    setPrevIsActive(isActive);
+    if (isActive && !prevIsActive) {
+      setManualExpanded(null);
     }
-    // Auto-collapse when done with all success (no failures)
-    if (allDone && prevIsActive.current && !hasFailed) {
-      setExpanded(false);
+    if (!isActive && prevIsActive && allDone && !hasFailed) {
+      setManualExpanded(null);
     }
-    prevIsActive.current = isActive;
-  }, [isActive, allDone, hasFailed]);
+  }
+
+  // Derive expanded: manual override takes precedence, otherwise auto-expand when active (and not all-done-success)
+  const autoExpanded = isActive && !(allDone && !hasFailed);
+  const expanded = manualExpanded ?? autoExpanded;
 
   return (
     <div className='border-b last:border-b-0'>
       <button
         type='button'
-        onClick={() => setExpanded(!expanded)}
+        onClick={() => setManualExpanded(!expanded)}
         className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-muted/50 transition-colors'
       >
         <ChevronRight
