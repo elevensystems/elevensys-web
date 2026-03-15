@@ -1,22 +1,24 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import Editor from '@monaco-editor/react';
-import { Copy, Eraser, Minimize2, Settings, TextInitial } from 'lucide-react';
+import { Copy, Eraser, Minimize2, TextInitial } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ActionButton } from '@/components/action-button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { JsonToolToolbar } from '@/components/layouts/json-tool-toolbar';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useActionFeedback } from '@/hooks/use-action-feedback';
+import { parseJsonSafely } from '@/lib/json-utils';
+import {
+  BASE_EDITOR_OPTIONS,
+  getEditorTheme,
+  registerFormatOnPaste,
+} from '@/lib/monaco-config';
 
 const DEFAULT_JSON = `{
   "name": "John Doe",
@@ -30,22 +32,6 @@ const DEFAULT_JSON = `{
 }`;
 
 type IndentSize = '2' | '4' | 'tab';
-
-const parseJsonSafely = (value: string) => {
-  try {
-    return {
-      value: JSON.parse(value) as unknown,
-      error: '',
-      isValid: true,
-    };
-  } catch (error) {
-    return {
-      value: null as unknown,
-      error: error instanceof Error ? error.message : 'Invalid JSON',
-      isValid: false,
-    };
-  }
-};
 
 const getJsonDepth = (obj: unknown, depth = 0): number => {
   if (typeof obj !== 'object' || obj === null) return depth;
@@ -74,7 +60,7 @@ const getIndentValue = (indentSize: IndentSize): string | number => {
 
 export default function JsonLensPage() {
   const { resolvedTheme } = useTheme();
-  const editorTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'light';
+  const editorTheme = getEditorTheme(resolvedTheme);
   const { isActive, trigger } = useActionFeedback();
 
   const [jsonText, setJsonText] = useState(DEFAULT_JSON);
@@ -106,10 +92,7 @@ export default function JsonLensPage() {
   const handleEditorMount = useCallback(
     (editor: Monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
-
-      editor.onDidPaste(() => {
-        editor.getAction('editor.action.formatDocument')?.run();
-      });
+      registerFormatOnPaste(editor);
     },
     []
   );
@@ -210,75 +193,53 @@ export default function JsonLensPage() {
   return (
     <MainLayout>
       <div className='flex flex-col h-[calc(100vh-57px)]'>
-        {/* Toolbar */}
-        <div className='flex items-center justify-between gap-2 py-2'>
-          {/* Left: title */}
-          <div className='flex items-center gap-3'>
-            <h1 className='text-lg font-semibold'>JSON Lens</h1>
-          </div>
-
-          {/* Center: options (desktop) */}
-          <div className='hidden lg:flex items-center gap-2'>
-            {optionsContent}
-          </div>
-
-          {/* Center: settings popover (mobile) */}
-          <div className='lg:hidden'>
-            <Popover>
-              <PopoverTrigger asChild>
-                <ActionButton variant='ghost' size='sm' leftIcon={<Settings />}>
-                  Settings
-                </ActionButton>
-              </PopoverTrigger>
-              <PopoverContent className='w-72'>
-                <div className='flex flex-col gap-3'>{optionsContent}</div>
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Right: actions */}
-          <div className='flex items-center gap-1'>
-            <ActionButton
-              variant='ghost'
-              size='sm'
-              onClick={handleFormat}
-              disabled={!jsonValidation.isValid}
-              leftIcon={<TextInitial />}
-              feedbackActive={isActive('format')}
-            >
-              <span className='hidden md:inline'>Format</span>
-            </ActionButton>
-            <ActionButton
-              variant='ghost'
-              size='sm'
-              onClick={handleMinify}
-              disabled={!jsonValidation.isValid}
-              leftIcon={<Minimize2 />}
-              feedbackActive={isActive('minify')}
-            >
-              <span className='hidden md:inline'>Minify</span>
-            </ActionButton>
-            <ActionButton
-              variant='ghost'
-              size='sm'
-              onClick={handleCopy}
-              disabled={!jsonText}
-              leftIcon={<Copy />}
-              feedbackActive={isActive('copy')}
-            >
-              <span className='hidden md:inline'>Copy</span>
-            </ActionButton>
-            <ActionButton
-              variant='ghost'
-              size='sm'
-              onClick={handleClear}
-              leftIcon={<Eraser />}
-              feedbackActive={isActive('clear')}
-            >
-              <span className='hidden md:inline'>Clear</span>
-            </ActionButton>
-          </div>
-        </div>
+        <JsonToolToolbar
+          title='JSON Lens'
+          options={optionsContent}
+          actions={
+            <>
+              <ActionButton
+                variant='ghost'
+                size='sm'
+                onClick={handleFormat}
+                disabled={!jsonValidation.isValid}
+                leftIcon={<TextInitial />}
+                feedbackActive={isActive('format')}
+              >
+                <span className='hidden md:inline'>Format</span>
+              </ActionButton>
+              <ActionButton
+                variant='ghost'
+                size='sm'
+                onClick={handleMinify}
+                disabled={!jsonValidation.isValid}
+                leftIcon={<Minimize2 />}
+                feedbackActive={isActive('minify')}
+              >
+                <span className='hidden md:inline'>Minify</span>
+              </ActionButton>
+              <ActionButton
+                variant='ghost'
+                size='sm'
+                onClick={handleCopy}
+                disabled={!jsonText}
+                leftIcon={<Copy />}
+                feedbackActive={isActive('copy')}
+              >
+                <span className='hidden md:inline'>Copy</span>
+              </ActionButton>
+              <ActionButton
+                variant='ghost'
+                size='sm'
+                onClick={handleClear}
+                leftIcon={<Eraser />}
+                feedbackActive={isActive('clear')}
+              >
+                <span className='hidden md:inline'>Clear</span>
+              </ActionButton>
+            </>
+          }
+        />
 
         {/* Editor + Inspector */}
         <div className='grid grid-cols-1 lg:grid-cols-[8fr_2fr] flex-1 min-h-0 gap-1'>
@@ -291,15 +252,7 @@ export default function JsonLensPage() {
               theme={editorTheme}
               onChange={value => setJsonText(value ?? '')}
               onMount={handleEditorMount}
-              options={{
-                minimap: { enabled: false },
-                lineNumbers: 'on',
-                automaticLayout: true,
-                formatOnPaste: true,
-                formatOnType: true,
-                scrollBeyondLastLine: false,
-                padding: { top: 12, bottom: 12 },
-              }}
+              options={BASE_EDITOR_OPTIONS}
             />
           </div>
 

@@ -3,30 +3,29 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import Editor from '@monaco-editor/react';
-import { Copy, Eraser, Settings } from 'lucide-react';
+import { Copy, Eraser } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 
 import MainLayout from '@/components/layouts/main-layout';
 import { ActionButton } from '@/components/action-button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { JsonToolToolbar } from '@/components/layouts/json-tool-toolbar';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useActionFeedback } from '@/hooks/use-action-feedback';
-import {
-  DEFAULT_JSON,
-  generateJsCode,
-  parseJsonSafely,
-} from '@/lib/json-objectify';
+import { parseJsonSafely } from '@/lib/json-utils';
+import { DEFAULT_JSON, generateJsCode } from '@/lib/json-objectify';
 import type { ConversionOptions } from '@/lib/json-objectify';
+import {
+  BASE_EDITOR_OPTIONS,
+  READONLY_EDITOR_OPTIONS,
+  getEditorTheme,
+  registerFormatOnPaste,
+} from '@/lib/monaco-config';
 
 export default function JsonObjectifyPage() {
   const { resolvedTheme } = useTheme();
-  const editorTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'light';
+  const editorTheme = getEditorTheme(resolvedTheme);
   const { isActive, trigger } = useActionFeedback();
 
   const [jsonText, setJsonText] = useState(DEFAULT_JSON);
@@ -77,16 +76,14 @@ export default function JsonObjectifyPage() {
   const handleJsonEditorMount = useCallback(
     (editor: Monaco.editor.IStandaloneCodeEditor) => {
       jsonEditorRef.current = editor;
-
-      editor.onDidPaste(() => {
-        editor.getAction('editor.action.formatDocument')?.run();
-      });
+      registerFormatOnPaste(editor);
     },
     []
   );
 
   const handleClear = useCallback(() => {
     setJsonText('');
+    trigger('clear');
   }, []);
 
   const handleCopy = useCallback(async () => {
@@ -242,49 +239,33 @@ export default function JsonObjectifyPage() {
   return (
     <MainLayout>
       <div className='flex flex-col h-[calc(100vh-57px)]'>
-        {/* Split Toolbar */}
-        <div className='flex items-center justify-between gap-2 py-2'>
-          {/* Left: title */}
-          <div className='flex items-center gap-3'>
-            <h1 className='text-lg font-semibold'>JSON Objectify</h1>
-          </div>
-
-          {/* Center: options (desktop) */}
-          <div className='hidden lg:flex items-center gap-2'>
-            {optionsContent}
-          </div>
-
-          {/* Center: settings popover (mobile) */}
-          <div className='lg:hidden'>
-            <Popover>
-              <PopoverTrigger asChild>
-                <ActionButton variant='ghost' size='sm' leftIcon={<Settings />}>
-                  Settings
-                </ActionButton>
-              </PopoverTrigger>
-              <PopoverContent className='w-72'>
-                <div className='flex flex-col gap-3'>{optionsContent}</div>
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Right: clear + copy */}
-          <div className='flex items-center gap-1'>
-            <ActionButton
-              variant='ghost'
-              size='sm'
-              onClick={handleCopy}
-              disabled={!jsOutput}
-              leftIcon={<Copy />}
-              feedbackActive={isActive('copy')}
-            >
-              <span className='hidden md:inline'>Copy</span>
-            </ActionButton>
-            <ActionButton variant='ghost' size='sm' onClick={handleClear} leftIcon={<Eraser />}>
-              <span className='hidden md:inline'>Clear</span>
-            </ActionButton>
-          </div>
-        </div>
+        <JsonToolToolbar
+          title='JSON Objectify'
+          options={optionsContent}
+          actions={
+            <>
+              <ActionButton
+                variant='ghost'
+                size='sm'
+                onClick={handleCopy}
+                disabled={!jsOutput}
+                leftIcon={<Copy />}
+                feedbackActive={isActive('copy')}
+              >
+                <span className='hidden md:inline'>Copy</span>
+              </ActionButton>
+              <ActionButton
+                variant='ghost'
+                size='sm'
+                onClick={handleClear}
+                leftIcon={<Eraser />}
+                feedbackActive={isActive('clear')}
+              >
+                <span className='hidden md:inline'>Clear</span>
+              </ActionButton>
+            </>
+          }
+        />
 
         {/* Editors */}
         <div className='grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0 gap-1'>
@@ -297,15 +278,7 @@ export default function JsonObjectifyPage() {
               theme={editorTheme}
               onChange={value => setJsonText(value ?? '')}
               onMount={handleJsonEditorMount}
-              options={{
-                minimap: { enabled: false },
-                lineNumbers: 'on',
-                automaticLayout: true,
-                formatOnPaste: true,
-                formatOnType: true,
-                scrollBeyondLastLine: false,
-                padding: { top: 12, bottom: 12 },
-              }}
+              options={BASE_EDITOR_OPTIONS}
             />
           </div>
 
@@ -316,14 +289,7 @@ export default function JsonObjectifyPage() {
               language={outputLanguage}
               value={outputDisplayValue}
               theme={editorTheme}
-              options={{
-                minimap: { enabled: false },
-                lineNumbers: 'on',
-                automaticLayout: true,
-                readOnly: true,
-                scrollBeyondLastLine: false,
-                padding: { top: 12, bottom: 12 },
-              }}
+              options={READONLY_EDITOR_OPTIONS}
             />
           </div>
         </div>

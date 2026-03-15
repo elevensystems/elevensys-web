@@ -18,22 +18,6 @@ export interface ConversionOptions {
   variableName: string;
 }
 
-export const parseJsonSafely = (value: string) => {
-  try {
-    return {
-      value: JSON.parse(value) as unknown,
-      error: '',
-      isValid: true,
-    };
-  } catch (error) {
-    return {
-      value: null as unknown,
-      error: error instanceof Error ? error.message : 'Invalid JSON',
-      isValid: false,
-    };
-  }
-};
-
 export const convertToJsObject = (
   obj: unknown,
   options: ConversionOptions,

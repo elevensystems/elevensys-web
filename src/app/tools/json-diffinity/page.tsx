@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import MainLayout from '@/components/layouts/main-layout';
 import { Badge } from '@/components/ui/badge';
 import { ActionButton } from '@/components/action-button';
+import { JsonToolToolbar } from '@/components/layouts/json-tool-toolbar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -20,6 +21,12 @@ import {
   computeJsonDiff,
   formatDiffHtml,
 } from '@/lib/diff';
+import { parseJsonSafely } from '@/lib/json-utils';
+import {
+  BASE_EDITOR_OPTIONS,
+  getEditorTheme,
+  registerFormatOnPaste,
+} from '@/lib/monaco-config';
 import { cn } from '@/lib/utils';
 
 const DEFAULT_ORIGINAL = `{
@@ -63,22 +70,6 @@ const DEFAULT_MODIFIED = `{
   }
 }`;
 
-const parseJsonSafely = (value: string) => {
-  try {
-    return {
-      value: JSON.parse(value) as unknown,
-      error: '',
-      isValid: true,
-    };
-  } catch (error) {
-    return {
-      value: null as unknown,
-      error: error instanceof Error ? error.message : 'Invalid JSON',
-      isValid: false,
-    };
-  }
-};
-
 const buildDecorationsForPaths = (
   monaco: typeof Monaco,
   model: Monaco.editor.ITextModel,
@@ -117,7 +108,7 @@ const buildDecorationsForPaths = (
 
 export default function JsonDiffinityPage() {
   const { resolvedTheme } = useTheme();
-  const editorTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'light';
+  const editorTheme = getEditorTheme(resolvedTheme);
 
   const [originalText, setOriginalText] = useState(DEFAULT_ORIGINAL);
   const [modifiedText, setModifiedText] = useState(DEFAULT_MODIFIED);
@@ -181,10 +172,7 @@ export default function JsonDiffinityPage() {
     ) => {
       configureMonaco(monaco);
       monacoRef.current = monaco;
-
-      editor.onDidPaste(() => {
-        editor.getAction('editor.action.formatDocument')?.run();
-      });
+      registerFormatOnPaste(editor);
 
       if (side === 'original') {
         originalEditorRef.current = editor;
@@ -346,71 +334,76 @@ export default function JsonDiffinityPage() {
   return (
     <MainLayout>
       <div className='flex flex-col h-[calc(100vh-57px)]'>
-        {/* Toolbar */}
-        <div className='flex items-center justify-between gap-2 py-2'>
-          <h1 className='text-lg font-semibold'>JSON Diffinity</h1>
+        <JsonToolToolbar
+          title='JSON Diffinity'
+          actions={
+            <div className='flex items-center gap-1.5'>
+              <ActionButton
+                size='sm'
+                onClick={handleCompare}
+                disabled={isCompareDisabled}
+                leftIcon={<GitCompare />}
+              >
+                Compare
+              </ActionButton>
 
-          <div className='flex items-center gap-1.5'>
-            <ActionButton
-              size='sm'
-              onClick={handleCompare}
-              disabled={isCompareDisabled}
-              leftIcon={<GitCompare />}
-            >
-              Compare
-            </ActionButton>
+              {diffPaths && (
+                <>
+                  <Separator
+                    orientation='vertical'
+                    className='data-[orientation=vertical]:h-4'
+                  />
+                  <div className='flex items-center gap-1'>
+                    {diffPaths.added.length > 0 && (
+                      <Badge
+                        className={cn(
+                          'bg-green-600 font-mono text-[10px] px-1.5 py-0',
+                          isStale && 'line-through opacity-50'
+                        )}
+                      >
+                        +{diffPaths.added.length}
+                      </Badge>
+                    )}
+                    {diffPaths.removed.length > 0 && (
+                      <Badge
+                        variant='destructive'
+                        className={cn(
+                          'font-mono text-[10px] px-1.5 py-0',
+                          isStale && 'line-through opacity-50'
+                        )}
+                      >
+                        -{diffPaths.removed.length}
+                      </Badge>
+                    )}
+                    {diffPaths.modified.length > 0 && (
+                      <Badge
+                        className={cn(
+                          'bg-yellow-500 text-white font-mono text-[10px] px-1.5 py-0',
+                          isStale && 'line-through opacity-50'
+                        )}
+                      >
+                        ~{diffPaths.modified.length}
+                      </Badge>
+                    )}
+                  </div>
+                </>
+              )}
 
-            {diffPaths && (
-              <>
-                <Separator
-                  orientation='vertical'
-                  className='data-[orientation=vertical]:h-4'
-                />
-                <div className='flex items-center gap-1'>
-                  {diffPaths.added.length > 0 && (
-                    <Badge
-                      className={cn(
-                        'bg-green-600 font-mono text-[10px] px-1.5 py-0',
-                        isStale && 'line-through opacity-50'
-                      )}
-                    >
-                      +{diffPaths.added.length}
-                    </Badge>
-                  )}
-                  {diffPaths.removed.length > 0 && (
-                    <Badge
-                      variant='destructive'
-                      className={cn(
-                        'font-mono text-[10px] px-1.5 py-0',
-                        isStale && 'line-through opacity-50'
-                      )}
-                    >
-                      -{diffPaths.removed.length}
-                    </Badge>
-                  )}
-                  {diffPaths.modified.length > 0 && (
-                    <Badge
-                      className={cn(
-                        'bg-yellow-500 text-white font-mono text-[10px] px-1.5 py-0',
-                        isStale && 'line-through opacity-50'
-                      )}
-                    >
-                      ~{diffPaths.modified.length}
-                    </Badge>
-                  )}
-                </div>
-              </>
-            )}
-
-            <Separator
-              orientation='vertical'
-              className='data-[orientation=vertical]:h-4'
-            />
-            <ActionButton variant='ghost' size='sm' onClick={handleClearAll} leftIcon={<Eraser />}>
-              <span className='hidden md:inline'>Clear</span>
-            </ActionButton>
-          </div>
-        </div>
+              <Separator
+                orientation='vertical'
+                className='data-[orientation=vertical]:h-4'
+              />
+              <ActionButton
+                variant='ghost'
+                size='sm'
+                onClick={handleClearAll}
+                leftIcon={<Eraser />}
+              >
+                <span className='hidden md:inline'>Clear</span>
+              </ActionButton>
+            </div>
+          }
+        />
 
         {/* Editors + Diff drawer */}
         <div
@@ -432,15 +425,7 @@ export default function JsonDiffinityPage() {
                 onMount={(editor, monaco) =>
                   handleEditorMount(editor, monaco, 'original')
                 }
-                options={{
-                  minimap: { enabled: false },
-                  lineNumbers: 'on',
-                  automaticLayout: true,
-                  formatOnPaste: true,
-                  formatOnType: true,
-                  scrollBeyondLastLine: false,
-                  padding: { top: 12, bottom: 12 },
-                }}
+                options={BASE_EDITOR_OPTIONS}
               />
             </div>
 
@@ -455,15 +440,7 @@ export default function JsonDiffinityPage() {
                 onMount={(editor, monaco) =>
                   handleEditorMount(editor, monaco, 'modified')
                 }
-                options={{
-                  minimap: { enabled: false },
-                  lineNumbers: 'on',
-                  automaticLayout: true,
-                  formatOnPaste: true,
-                  formatOnType: true,
-                  scrollBeyondLastLine: false,
-                  padding: { top: 12, bottom: 12 },
-                }}
+                options={BASE_EDITOR_OPTIONS}
               />
             </div>
           </div>
