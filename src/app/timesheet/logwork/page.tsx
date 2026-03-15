@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -44,8 +44,7 @@ import type { LogWorkResult, WorkEntry } from '@/types/timesheet';
 
 import { LogWorkConfirmDialog } from './_components/confirm-dialog';
 import { MissingWorklogsCard } from './_components/missing-worklogs-card';
-import { ResultsSheet } from './_components/results-sheet';
-import { SubmissionProgress } from './_components/submission-progress';
+import { SubmissionModal } from './_components/submission-modal';
 import { WorkEntryRow } from './_components/work-entry-row';
 
 const SAVED_ENTRIES_KEY = 'timesheet_saved_entries';
@@ -131,11 +130,13 @@ export default function LogWorkPage() {
 
   const {
     isSubmitting,
-    progress,
-    progressText,
+    isCancelled,
     results,
+    requestStatuses,
+    elapsedSeconds,
     submitEntries,
     retryFailed,
+    cancelSubmission,
     resetResults,
   } = useLogWorkSubmission(settings);
 
@@ -143,7 +144,8 @@ export default function LogWorkPage() {
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [error, setError] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [submissionModalOpen, setSubmissionModalOpen] = useState(false);
+  const pendingResultsRef = useRef<LogWorkResult[]>([]);
 
   // Derive parsedDates (DD/Mon/YY strings) from selectedDates
   const parsedDates = useMemo(
@@ -282,6 +284,7 @@ export default function LogWorkPage() {
 
   const handleLogWork = useCallback(async () => {
     setShowConfirmDialog(false);
+    setSubmissionModalOpen(true);
 
     const validEntries = entries.filter(e => e.issueKey.trim());
     saveEntriesToStorage(validEntries, selectedProjectId);
@@ -294,15 +297,15 @@ export default function LogWorkPage() {
       endDate: '',
     });
 
-    processResults(logResults);
-  }, [entries, parsedDates, selectedProjectId, submitEntries, processResults]);
+    // Results are processed when modal closes
+    pendingResultsRef.current = logResults;
+  }, [entries, parsedDates, selectedProjectId, submitEntries]);
 
   const handleRetryFailed = useCallback(async () => {
-    const failedResults = results.filter(r => !r.success);
+    const failedResults = results.filter(
+      r => !r.success && r.error !== 'Cancelled'
+    );
     if (failedResults.length === 0) return;
-
-    setSheetOpen(false);
-    resetResults();
 
     const logResults = await retryFailed({
       failedResults,
@@ -311,8 +314,18 @@ export default function LogWorkPage() {
       endDate: '',
     });
 
-    processResults(logResults);
-  }, [results, retryFailed, resetResults, processResults]);
+    pendingResultsRef.current = logResults;
+  }, [results, retryFailed]);
+
+  const handleSubmissionModalClose = useCallback(() => {
+    setSubmissionModalOpen(false);
+    const logResults = pendingResultsRef.current;
+    pendingResultsRef.current = [];
+    if (logResults.length > 0) {
+      processResults(logResults);
+    }
+    resetResults();
+  }, [processResults, resetResults]);
 
   if (!isLoaded) {
     return (
@@ -471,15 +484,6 @@ export default function LogWorkPage() {
                 </Table>
               </div>
 
-              <SubmissionProgress
-                isSubmitting={isSubmitting}
-                progress={progress}
-                progressText={progressText}
-                results={results}
-                onRetryFailed={handleRetryFailed}
-                onViewDetails={() => setSheetOpen(true)}
-              />
-
               {/* Action Buttons */}
               <div className='flex flex-col sm:flex-row sm:justify-between gap-3 border-t pt-6'>
                 <ActionButton
@@ -511,10 +515,15 @@ export default function LogWorkPage() {
           </Card>
         </div>
 
-        <ResultsSheet
-          open={sheetOpen}
-          onOpenChange={setSheetOpen}
+        <SubmissionModal
+          open={submissionModalOpen}
+          onClose={handleSubmissionModalClose}
+          isSubmitting={isSubmitting}
+          isCancelled={isCancelled}
+          requestStatuses={requestStatuses}
           results={results}
+          elapsedSeconds={elapsedSeconds}
+          onCancel={cancelSubmission}
           onRetryFailed={handleRetryFailed}
         />
 

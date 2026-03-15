@@ -76,6 +76,21 @@ export interface LogWorkResult {
   failedDates?: string[];
 }
 
+export type RequestStatusState =
+  | 'pending'
+  | 'in-progress'
+  | 'success'
+  | 'failed'
+  | 'skipped';
+
+export interface RequestStatus {
+  entryId: string;
+  issueKey: string;
+  date: string;
+  status: RequestStatusState;
+  error?: string;
+}
+
 export interface JiraProject {
   id: string;
   key: string;

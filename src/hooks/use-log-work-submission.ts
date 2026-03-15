@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import {
   REQUEST_DELAY_MS,
@@ -11,6 +11,7 @@ import {
 } from '@/lib/timesheet';
 import type {
   LogWorkResult,
+  RequestStatus,
   TimesheetSettings,
   WorkEntry,
 } from '@/types/timesheet';
@@ -32,117 +33,93 @@ interface RetryParams {
 
 export function useLogWorkSubmission(settings: TimesheetSettings) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressText, setProgressText] = useState('');
   const [results, setResults] = useState<LogWorkResult[]>([]);
+  const [requestStatuses, setRequestStatuses] = useState<RequestStatus[]>([]);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
-  const submitSingleEntry = useCallback(
+  const abortRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startTimer = useCallback(() => {
+    setElapsedSeconds(0);
+    timerRef.current = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+  }, []);
+
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const updateRequestStatus = useCallback(
+    (
+      entryId: string,
+      date: string,
+      status: RequestStatus['status'],
+      error?: string
+    ) => {
+      setRequestStatuses((prev) =>
+        prev.map((rs) =>
+          rs.entryId === entryId && rs.date === date
+            ? { ...rs, status, error }
+            : rs
+        )
+      );
+    },
+    []
+  );
+
+  const cancelSubmission = useCallback(() => {
+    abortRef.current = true;
+    setIsCancelled(true);
+  }, []);
+
+  const submitSingleDate = useCallback(
     async (
       entry: WorkEntry,
-      dates: string[],
+      date: string,
+      endDate: string,
       isPeriod: boolean,
       headers: Record<string, string>,
       time: string
-    ): Promise<LogWorkResult> => {
-      if (isPeriod) {
-        // Range mode: single request
-        try {
-          const response = await fetch('/api/timesheet/logwork', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-              jiraInstance: settings.jiraInstance,
-              worklog: {
-                username: settings.username,
-                issueKey: entry.issueKey.trim(),
-                timeSpend: entry.hours * 3600,
-                startDate: dates[0],
-                endDate: dates[1],
-                typeOfWork: entry.typeOfWork,
-                description: entry.description,
-                time,
-                remainingTime: 0,
-                period: true,
-              },
-            }),
-          });
+    ): Promise<{ success: boolean; error?: string }> => {
+      try {
+        const response = await fetch('/api/timesheet/logwork', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            jiraInstance: settings.jiraInstance,
+            worklog: {
+              username: settings.username,
+              issueKey: entry.issueKey.trim(),
+              timeSpend: entry.hours * 3600,
+              startDate: date,
+              endDate: isPeriod ? endDate : date,
+              typeOfWork: entry.typeOfWork,
+              description: entry.description,
+              time,
+              remainingTime: 0,
+              period: isPeriod,
+            },
+          }),
+        });
 
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => null);
-            throw new Error(errorData?.error || `HTTP ${response.status}`);
-          }
-
-          return { entry, success: true };
-        } catch (err) {
-          return {
-            entry,
-            success: false,
-            error: err instanceof Error ? err.message : 'Unknown error',
-          };
-        }
-      }
-
-      // Specific dates mode: one request per date
-      const failedDates: string[] = [];
-      const entryErrors: string[] = [];
-      let successCount = 0;
-
-      for (let i = 0; i < dates.length; i++) {
-        const date = dates[i];
-        try {
-          const response = await fetch('/api/timesheet/logwork', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-              jiraInstance: settings.jiraInstance,
-              worklog: {
-                username: settings.username,
-                issueKey: entry.issueKey.trim(),
-                timeSpend: entry.hours * 3600,
-                startDate: date,
-                endDate: date,
-                typeOfWork: entry.typeOfWork,
-                description: entry.description,
-                time,
-                remainingTime: 0,
-                period: false,
-              },
-            }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => null);
-            throw new Error(errorData?.error || `HTTP ${response.status}`);
-          }
-
-          successCount++;
-        } catch (err) {
-          failedDates.push(date);
-          entryErrors.push(
-            `${date}: ${err instanceof Error ? err.message : 'Unknown error'}`
-          );
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData?.error || `HTTP ${response.status}`);
         }
 
-        if (i < dates.length - 1) {
-          await delay(REQUEST_DELAY_MS);
-        }
-      }
-
-      if (entryErrors.length === 0) {
-        return { entry, success: true };
-      } else if (successCount > 0) {
+        return { success: true };
+      } catch (err) {
         return {
-          entry,
           success: false,
-          error: `${successCount}/${dates.length} dates succeeded. Failures: ${entryErrors.join('; ')}`,
-          failedDates,
-        };
-      } else {
-        return {
-          entry,
-          success: false,
-          error: entryErrors.join('; '),
-          failedDates,
+          error: err instanceof Error ? err.message : 'Unknown error',
         };
       }
     },
@@ -157,46 +134,150 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       startDate,
       endDate,
     }: SubmitParams): Promise<LogWorkResult[]> => {
-      setIsSubmitting(true);
-      setProgress(0);
-      setResults([]);
-
-      const validEntries = entries.filter(e => e.issueKey.trim());
-      const logResults: LogWorkResult[] = [];
+      const validEntries = entries.filter((e) => e.issueKey.trim());
       const time = getCurrentTime();
       const headers = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${settings.token}`,
       };
 
-      const total = validEntries.length;
+      let dates: string[];
+      let isPeriod: boolean;
 
-      for (let i = 0; i < validEntries.length; i++) {
-        const entry = validEntries[i];
-        setProgressText(`Logging ${entry.issueKey} (${i + 1}/${total})...`);
-        setProgress(Math.round(((i + 1) / total) * 100));
+      if (dateMode === 'range') {
+        dates = [formatDateForApi(startDate)];
+        isPeriod = true;
+      } else {
+        dates = parseSpecificDates(datesText);
+        isPeriod = false;
+      }
 
-        let dates: string[];
-        let isPeriod: boolean;
+      const formattedEndDate =
+        dateMode === 'range' ? formatDateForApi(endDate) : '';
 
-        if (dateMode === 'range') {
-          dates = [formatDateForApi(startDate), formatDateForApi(endDate)];
-          isPeriod = true;
-        } else {
-          dates = parseSpecificDates(datesText);
-          isPeriod = false;
+      // Pre-build all request statuses
+      const initialStatuses: RequestStatus[] = validEntries.flatMap((entry) =>
+        (isPeriod ? [dates[0]] : dates).map((date) => ({
+          entryId: entry.id,
+          issueKey: entry.issueKey.trim(),
+          date,
+          status: 'pending' as const,
+        }))
+      );
+
+      setRequestStatuses(initialStatuses);
+      setIsSubmitting(true);
+      setIsCancelled(false);
+      setProgress(0);
+      setResults([]);
+      abortRef.current = false;
+      startTimer();
+
+      const totalRequests = initialStatuses.length;
+      let completedRequests = 0;
+      const logResults: LogWorkResult[] = [];
+
+      for (const entry of validEntries) {
+        const entryDates = isPeriod ? [dates[0]] : dates;
+        const failedDates: string[] = [];
+        const entryErrors: string[] = [];
+        let successCount = 0;
+
+        for (let i = 0; i < entryDates.length; i++) {
+          const date = entryDates[i];
+
+          if (abortRef.current) {
+            // Mark remaining as skipped
+            updateRequestStatus(entry.id, date, 'skipped');
+            for (let j = i + 1; j < entryDates.length; j++) {
+              updateRequestStatus(entry.id, entryDates[j], 'skipped');
+            }
+            // Also mark remaining entries
+            const entryIdx = validEntries.indexOf(entry);
+            for (let k = entryIdx + 1; k < validEntries.length; k++) {
+              for (const d of entryDates) {
+                updateRequestStatus(validEntries[k].id, d, 'skipped');
+              }
+            }
+            // Build result for current entry
+            if (successCount > 0 || failedDates.length > 0) {
+              logResults.push({
+                entry,
+                success: failedDates.length === 0 && successCount > 0,
+                error:
+                  failedDates.length > 0
+                    ? entryErrors.join('; ')
+                    : undefined,
+                failedDates:
+                  failedDates.length > 0 ? failedDates : undefined,
+              });
+            }
+            // Build skipped results for remaining entries
+            for (let k = entryIdx + 1; k < validEntries.length; k++) {
+              logResults.push({
+                entry: validEntries[k],
+                success: false,
+                error: 'Cancelled',
+              });
+            }
+            break;
+          }
+
+          updateRequestStatus(entry.id, date, 'in-progress');
+
+          const result = await submitSingleDate(
+            entry,
+            date,
+            formattedEndDate,
+            isPeriod,
+            headers,
+            time
+          );
+
+          completedRequests++;
+          setProgress(Math.round((completedRequests / totalRequests) * 100));
+
+          if (result.success) {
+            updateRequestStatus(entry.id, date, 'success');
+            successCount++;
+          } else {
+            updateRequestStatus(entry.id, date, 'failed', result.error);
+            failedDates.push(date);
+            entryErrors.push(
+              `${date}: ${result.error || 'Unknown error'}`
+            );
+          }
+
+          if (i < entryDates.length - 1) {
+            await delay(REQUEST_DELAY_MS);
+          }
         }
 
-        const result = await submitSingleEntry(
-          entry,
-          dates,
-          isPeriod,
-          headers,
-          time
-        );
-        logResults.push(result);
+        if (abortRef.current) break;
 
-        if (i < validEntries.length - 1) {
+        // Build entry-level result
+        if (entryErrors.length === 0) {
+          logResults.push({ entry, success: true });
+        } else if (successCount > 0) {
+          logResults.push({
+            entry,
+            success: false,
+            error: `${successCount}/${entryDates.length} dates succeeded. Failures: ${entryErrors.join('; ')}`,
+            failedDates,
+          });
+        } else {
+          logResults.push({
+            entry,
+            success: false,
+            error: entryErrors.join('; '),
+            failedDates,
+          });
+        }
+
+        if (
+          !abortRef.current &&
+          validEntries.indexOf(entry) < validEntries.length - 1
+        ) {
           await delay(REQUEST_DELAY_MS);
         }
       }
@@ -204,10 +285,17 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       setProgress(100);
       setResults(logResults);
       setIsSubmitting(false);
+      stopTimer();
 
       return logResults;
     },
-    [settings.token, submitSingleEntry]
+    [
+      settings.token,
+      submitSingleDate,
+      updateRequestStatus,
+      startTimer,
+      stopTimer,
+    ]
   );
 
   const retryFailed = useCallback(
@@ -217,34 +305,44 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       startDate,
       endDate,
     }: RetryParams): Promise<LogWorkResult[]> => {
-      setIsSubmitting(true);
-      setProgress(0);
-      setResults([]);
-
-      const logResults: LogWorkResult[] = [];
       const time = getCurrentTime();
       const headers = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${settings.token}`,
       };
 
+      const isPeriod = dateMode === 'range';
+      const formattedEndDate =
+        dateMode === 'range' ? formatDateForApi(endDate) : '';
+
+      // Reset failed statuses to pending
+      setRequestStatuses((prev) =>
+        prev.map((rs) =>
+          rs.status === 'failed' ? { ...rs, status: 'pending', error: undefined } : rs
+        )
+      );
+
+      setIsSubmitting(true);
+      setIsCancelled(false);
+      setProgress(0);
+      abortRef.current = false;
+      startTimer();
+
+      const logResults: LogWorkResult[] = [];
       const total = failedResults.length;
 
       for (let i = 0; i < failedResults.length; i++) {
         const { entry, failedDates } = failedResults[i];
+
         setProgressText(`Retrying ${entry.issueKey} (${i + 1}/${total})...`);
         setProgress(Math.round(((i + 1) / total) * 100));
 
         let dates: string[];
-        let isPeriod: boolean;
 
-        if (dateMode === 'range') {
-          dates = [formatDateForApi(startDate), formatDateForApi(endDate)];
-          isPeriod = true;
+        if (isPeriod) {
+          dates = [formatDateForApi(startDate)];
         } else {
-          // Only retry the dates that previously failed
           dates = failedDates && failedDates.length > 0 ? failedDates : [];
-          isPeriod = false;
         }
 
         if (dates.length === 0) {
@@ -256,14 +354,67 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
           continue;
         }
 
-        const result = await submitSingleEntry(
-          entry,
-          dates,
-          isPeriod,
-          headers,
-          time
-        );
-        logResults.push(result);
+        const entryFailedDates: string[] = [];
+        const entryErrors: string[] = [];
+        let successCount = 0;
+
+        for (let j = 0; j < dates.length; j++) {
+          const date = dates[j];
+
+          if (abortRef.current) {
+            updateRequestStatus(entry.id, date, 'skipped');
+            for (let k = j + 1; k < dates.length; k++) {
+              updateRequestStatus(entry.id, dates[k], 'skipped');
+            }
+            break;
+          }
+
+          updateRequestStatus(entry.id, date, 'in-progress');
+
+          const result = await submitSingleDate(
+            entry,
+            date,
+            formattedEndDate,
+            isPeriod,
+            headers,
+            time
+          );
+
+          if (result.success) {
+            updateRequestStatus(entry.id, date, 'success');
+            successCount++;
+          } else {
+            updateRequestStatus(entry.id, date, 'failed', result.error);
+            entryFailedDates.push(date);
+            entryErrors.push(
+              `${date}: ${result.error || 'Unknown error'}`
+            );
+          }
+
+          if (j < dates.length - 1) {
+            await delay(REQUEST_DELAY_MS);
+          }
+        }
+
+        if (entryErrors.length === 0) {
+          logResults.push({ entry, success: true });
+        } else if (successCount > 0) {
+          logResults.push({
+            entry,
+            success: false,
+            error: `${successCount}/${dates.length} succeeded. Failures: ${entryErrors.join('; ')}`,
+            failedDates: entryFailedDates,
+          });
+        } else {
+          logResults.push({
+            entry,
+            success: false,
+            error: entryErrors.join('; '),
+            failedDates: entryFailedDates,
+          });
+        }
+
+        if (abortRef.current) break;
 
         if (i < failedResults.length - 1) {
           await delay(REQUEST_DELAY_MS);
@@ -273,25 +424,39 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       setProgress(100);
       setResults(logResults);
       setIsSubmitting(false);
+      stopTimer();
 
       return logResults;
     },
-    [settings.token, submitSingleEntry]
+    [
+      settings.token,
+      submitSingleDate,
+      updateRequestStatus,
+      startTimer,
+      stopTimer,
+    ]
   );
 
   const resetResults = useCallback(() => {
     setResults([]);
+    setRequestStatuses([]);
     setProgress(0);
     setProgressText('');
+    setElapsedSeconds(0);
+    setIsCancelled(false);
   }, []);
 
   return {
     isSubmitting,
+    isCancelled,
     progress,
     progressText,
     results,
+    requestStatuses,
+    elapsedSeconds,
     submitEntries,
     retryFailed,
+    cancelSubmission,
     resetResults,
   };
 }
