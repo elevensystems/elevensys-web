@@ -284,10 +284,7 @@ export default function LogWorkPage() {
 
     const logResults = await submitEntries({
       entries,
-      dateMode: 'specific',
-      datesText: parsedDates.join(', '),
-      startDate: '',
-      endDate: '',
+      dates: parsedDates,
     });
 
     // Results are processed when modal closes
@@ -302,9 +299,6 @@ export default function LogWorkPage() {
 
     const logResults = await retryFailed({
       failedResults,
-      dateMode: 'specific',
-      startDate: '',
-      endDate: '',
     });
 
     pendingResultsRef.current = logResults;
