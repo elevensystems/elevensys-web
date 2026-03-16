@@ -30,19 +30,13 @@ export function EntryStatusList({ statuses }: EntryStatusListProps) {
   return (
     <TooltipProvider delayDuration={200}>
       <div className='max-h-[300px] overflow-y-auto rounded-lg border'>
-        {entries.map(([entryId, { issueKey, dateStatuses }]) => {
-          const isActive = dateStatuses.some(
-            (s) => s.status === 'in-progress'
-          );
-          return (
-            <EntryStatusRow
-              key={entryId}
-              issueKey={issueKey}
-              dateStatuses={dateStatuses}
-              isActive={isActive}
-            />
-          );
-        })}
+        {entries.map(([entryId, { issueKey, dateStatuses }]) => (
+          <EntryStatusRow
+            key={entryId}
+            issueKey={issueKey}
+            dateStatuses={dateStatuses}
+          />
+        ))}
       </div>
     </TooltipProvider>
   );

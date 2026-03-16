@@ -47,53 +47,18 @@ function StatusIcon({ status }: { status: RequestStatusState }) {
   }
 }
 
-function EntryOverallIcon({
-  dateStatuses,
-}: {
-  dateStatuses: RequestStatus[];
-}) {
-  const allDone = dateStatuses.every(
-    (s) =>
-      s.status === 'success' ||
-      s.status === 'failed' ||
-      s.status === 'skipped'
-  );
-  const hasInProgress = dateStatuses.some(
-    (s) => s.status === 'in-progress'
-  );
-  const allSuccess = dateStatuses.every((s) => s.status === 'success');
-  const hasFailed = dateStatuses.some((s) => s.status === 'failed');
-
-  if (hasInProgress) {
-    return <Loader2 className='h-4 w-4 animate-spin text-blue-500' />;
-  }
-  if (allDone && allSuccess) {
-    return (
-      <CheckCircle2 className='h-4 w-4 text-green-600 dark:text-green-400' />
-    );
-  }
-  if (allDone && hasFailed) {
-    return (
-      <XCircle className='h-4 w-4 text-red-600 dark:text-red-400' />
-    );
-  }
-  return <Clock className='h-4 w-4 text-muted-foreground' />;
-}
-
 interface EntryStatusRowProps {
   issueKey: string;
   dateStatuses: RequestStatus[];
-  isActive: boolean;
 }
 
 export function EntryStatusRow({
   issueKey,
   dateStatuses,
-  isActive,
 }: EntryStatusRowProps) {
   const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
-  const [prevIsActive, setPrevIsActive] = useState(isActive);
-  const hasFailed = dateStatuses.some((s) => s.status === 'failed');
+
+  const hasStarted = dateStatuses.some((s) => s.status !== 'pending');
   const allDone = dateStatuses.every(
     (s) =>
       s.status === 'success' ||
@@ -102,22 +67,27 @@ export function EntryStatusRow({
   );
 
   const completedCount = dateStatuses.filter(
-    (s) => s.status === 'success' || s.status === 'failed' || s.status === 'skipped'
+    (s) =>
+      s.status === 'success' ||
+      s.status === 'failed' ||
+      s.status === 'skipped'
   ).length;
 
-  // Track isActive transitions via setState-during-render pattern (allowed by React)
-  if (isActive !== prevIsActive) {
-    setPrevIsActive(isActive);
-    if (isActive && !prevIsActive) {
-      setManualExpanded(null);
-    }
-    if (!isActive && prevIsActive && allDone && !hasFailed) {
-      setManualExpanded(null);
-    }
+  // Reset manual override on phase transitions (setState-during-render, allowed by React)
+  const [prevHasStarted, setPrevHasStarted] = useState(hasStarted);
+  const [prevAllDone, setPrevAllDone] = useState(allDone);
+
+  if (hasStarted !== prevHasStarted) {
+    setPrevHasStarted(hasStarted);
+    setManualExpanded(null);
+  }
+  if (allDone !== prevAllDone) {
+    setPrevAllDone(allDone);
+    setManualExpanded(null);
   }
 
-  // Derive expanded: manual override takes precedence, otherwise auto-expand when active (and not all-done-success)
-  const autoExpanded = isActive && !(allDone && !hasFailed);
+  // Auto-expand while processing (started but not all done), collapse when complete
+  const autoExpanded = hasStarted && !allDone;
   const expanded = manualExpanded ?? autoExpanded;
 
   return (
@@ -133,14 +103,13 @@ export function EntryStatusRow({
             expanded && 'rotate-90'
           )}
         />
-        <EntryOverallIcon dateStatuses={dateStatuses} />
         <span className='font-mono font-medium'>{issueKey}</span>
         <div className='flex items-center gap-0.5 ml-2'>
           {dateStatuses.map((ds, i) => (
             <span
               key={`${ds.date}-${i}`}
               className={cn(
-                'inline-block h-1.5 w-1.5 rounded-full transition-colors duration-300',
+                'inline-block size-2 rounded-full transition-colors duration-300',
                 STATUS_DOT_COLORS[ds.status]
               )}
             />

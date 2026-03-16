@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarDays, Search, Trash2, X } from 'lucide-react';
+import { CalendarDays, Search, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { ActionButton } from '@/components/action-button';
@@ -69,7 +69,6 @@ interface MissingWorklogsCardProps {
   selectedDates: Date[];
   onSelectedDatesChange: (dates: Date[]) => void;
   parsedDates: string[];
-  onRemoveDate: (date: string) => void;
   onClearAllDates: () => void;
 }
 
@@ -87,7 +86,6 @@ export function MissingWorklogsCard({
   selectedDates,
   onSelectedDatesChange,
   parsedDates,
-  onRemoveDate,
   onClearAllDates,
 }: MissingWorklogsCardProps) {
   const handleSearchClick = async () => {
@@ -197,6 +195,15 @@ export function MissingWorklogsCard({
                 </Badge>
               )}
             </div>
+            <ActionButton
+              variant='ghost'
+              size='sm'
+              onClick={onClearAllDates}
+              className={`h-7 text-xs text-destructive hover:bg-destructive hover:text-white ${parsedDates.length > 0 ? 'visible' : 'invisible'}`}
+              leftIcon={<Trash2 />}
+            >
+              Clear all
+            </ActionButton>
           </div>
 
           <div className='rounded-lg border bg-card p-2 w-full'>
@@ -216,37 +223,6 @@ export function MissingWorklogsCard({
             Click days to select or deselect. Weekends are disabled. Use
             &quot;Find Dates&quot; above to auto-select missing worklog dates.
           </p>
-
-          {/* Date Chips */}
-          {parsedDates.length > 0 && (
-            <div className='flex flex-wrap gap-2'>
-              {parsedDates.map(date => (
-                <Badge
-                  key={date}
-                  variant='secondary'
-                  className='gap-1 pr-1 font-mono text-xs'
-                >
-                  {date}
-                  <button
-                    type='button'
-                    onClick={() => onRemoveDate(date)}
-                    className='ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors'
-                    aria-label={`Remove ${date}`}
-                  >
-                    <X className='h-3 w-3' />
-                  </button>
-                </Badge>
-              ))}
-              <ActionButton
-                variant='ghost'
-                onClick={onClearAllDates}
-                className='h-7 text-xs text-destructive hover:bg-destructive hover:text-white'
-                leftIcon={<Trash2 />}
-              >
-                Clear all
-              </ActionButton>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

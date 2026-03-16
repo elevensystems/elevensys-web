@@ -156,11 +156,6 @@ export default function LogWorkPage() {
     [selectedDates]
   );
 
-  const removeDate = useCallback((dateToRemove: string) => {
-    setSelectedDates(prev =>
-      prev.filter(d => dateToApiFormat(d) !== dateToRemove)
-    );
-  }, []);
 
   const clearAllDates = useCallback(() => setSelectedDates([]), []);
 
@@ -394,7 +389,6 @@ export default function LogWorkPage() {
               selectedDates={selectedDates}
               onSelectedDatesChange={setSelectedDates}
               parsedDates={parsedDates}
-              onRemoveDate={removeDate}
               onClearAllDates={clearAllDates}
             />
           )}
@@ -404,9 +398,6 @@ export default function LogWorkPage() {
             <CardHeader>
               <div className='flex flex-col gap-1'>
                 <CardTitle className='flex items-center gap-2'>
-                  <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
-                    3
-                  </span>
                   <Clock className='h-5 w-5' />
                   Work Entries
                 </CardTitle>
@@ -417,37 +408,24 @@ export default function LogWorkPage() {
               </div>
               <CardAction>
                 <div className='flex flex-col items-end gap-0.5 text-sm'>
-                  {parsedDates.length > 0 ? (
-                    <>
-                      <span className='text-muted-foreground text-xs'>
-                        {validEntryCount} entr
-                        {validEntryCount !== 1 ? 'ies' : 'y'} ×{' '}
-                        {parsedDates.length} date
-                        {parsedDates.length !== 1 ? 's' : ''}
-                      </span>
-                      <span className={`font-semibold ${hoursColor}`}>
-                        {formatHours(totalHours)}h/day ×{' '}
-                        {parsedDates.length}{' '}
-                        {parsedDates.length !== 1 ? 'days' : 'day'} ={' '}
-                        {formatHours(totalHours * parsedDates.length)}h total
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className='text-muted-foreground text-xs'>
-                        Daily target
-                      </span>
-                      <span className={`font-semibold ${hoursColor}`}>
-                        {formatHours(totalHours)}h /{' '}
-                        {formatHours(STANDARD_HOURS)}h
-                      </span>
-                    </>
-                  )}
+                  <span className='text-muted-foreground text-xs'>
+                    Daily target
+                  </span>
+                  <span className={`font-semibold ${hoursColor}`}>
+                    {formatHours(totalHours)}h /{' '}
+                    {formatHours(STANDARD_HOURS)}h
+                  </span>
                 </div>
               </CardAction>
             </CardHeader>
             <CardContent className='space-y-6'>
               {/* Entries Table */}
+              <div className='flex mb-3 items-center gap-2 text-sm font-medium text-muted-foreground'>
+                <span className='flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
+                  3
+                </span>
+                Add work entries
+              </div>
               <div className='overflow-hidden rounded-lg border'>
                 <Table>
                   <TableHeader className='bg-muted/50 top-0 z-10'>

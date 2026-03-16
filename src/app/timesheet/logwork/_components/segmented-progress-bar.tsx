@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { RequestStatus, RequestStatusState } from '@/types/timesheet';
 
@@ -96,22 +97,22 @@ export function SegmentedProgressBar({
         <span>
           {completed}/{statuses.length} requests
         </span>
-        <div className='flex items-center gap-3'>
-          <span className='flex items-center gap-1'>
-            <span className='inline-block h-2 w-2 rounded-full bg-green-500' />
+        <div className='flex items-center gap-1.5'>
+          <Badge className='gap-1 bg-transparent text-green-600 dark:text-green-400 border-green-500/20'>
+            <span className='inline-block h-1.5 w-1.5 rounded-full bg-green-500' />
             {statuses.filter((s) => s.status === 'success').length}
-          </span>
+          </Badge>
           {statuses.some((s) => s.status === 'failed') && (
-            <span className='flex items-center gap-1'>
-              <span className='inline-block h-2 w-2 rounded-full bg-red-500' />
+            <Badge className='gap-1 bg-transparent text-red-600 dark:text-red-400 border-red-500/20'>
+              <span className='inline-block h-1.5 w-1.5 rounded-full bg-red-500' />
               {statuses.filter((s) => s.status === 'failed').length}
-            </span>
+            </Badge>
           )}
           {statuses.some((s) => s.status === 'skipped') && (
-            <span className='flex items-center gap-1'>
-              <span className='inline-block h-2 w-2 rounded-full bg-muted' />
+            <Badge className='gap-1 bg-transparent text-muted-foreground border-muted-foreground/20'>
+              <span className='inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50' />
               {statuses.filter((s) => s.status === 'skipped').length}
-            </span>
+            </Badge>
           )}
         </div>
       </div>

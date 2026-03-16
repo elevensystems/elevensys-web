@@ -103,10 +103,13 @@ export function SubmissionModal({
 
   const summaryColor = useMemo(() => {
     if (!isDone) return '';
-    if (isCancelled) return 'text-muted-foreground';
-    if (failedCount === 0) return 'text-green-600 dark:text-green-400';
-    if (successCount === 0) return 'text-red-600 dark:text-red-400';
-    return 'text-amber-600 dark:text-amber-400';
+    if (isCancelled)
+      return 'bg-muted text-muted-foreground border-border';
+    if (failedCount === 0)
+      return 'bg-green-50 text-green-800 border-green-200 [&>svg]:text-green-800 dark:bg-green-950/50 dark:text-green-200 dark:border-green-800 dark:[&>svg]:text-green-200';
+    if (successCount === 0)
+      return 'bg-red-50 text-red-800 border-red-200 [&>svg]:text-red-800 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800 dark:[&>svg]:text-red-200';
+    return 'bg-muted text-muted-foreground border-border';
   }, [isDone, isCancelled, failedCount, successCount]);
 
   const SummaryIcon = useMemo(() => {
