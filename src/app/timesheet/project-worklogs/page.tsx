@@ -2,14 +2,12 @@
 
 import * as React from 'react';
 
-import Link from 'next/link';
+import { ClipboardList, Search } from 'lucide-react';
 
-import { AlertCircle, ClipboardList, Search } from 'lucide-react';
-
+import { ActionButton } from '@/components/action-button';
+import { NotConfiguredAlert } from '@/components/features/timesheet/not-configured-alert';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ActionButton } from '@/components/action-button';
 import {
   Card,
   CardContent,
@@ -125,23 +123,7 @@ export default function ProjectWorklogsPage() {
             error={error || undefined}
           />
 
-          {!isConfigured && (
-            <Alert className='border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/50 dark:text-yellow-200'>
-              <AlertCircle className='h-4 w-4' />
-              <AlertDescription>
-                <span>
-                  Jira settings not configured.{' '}
-                  <Link
-                    href='/timesheet/config'
-                    className='font-medium underline underline-offset-4 hover:text-yellow-900 dark:hover:text-yellow-100'
-                  >
-                    Go to Configs
-                  </Link>{' '}
-                  to connect your Jira account.
-                </span>
-              </AlertDescription>
-            </Alert>
-          )}
+          <NotConfiguredAlert isConfigured={isConfigured} />
 
           {/* Filters */}
           <Card className='mb-6'>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { toast } from 'sonner';
 
@@ -12,13 +12,14 @@ import {
   getMonthStart,
 } from '@/lib/timesheet';
 import type {
-  JiraProject,
   MyWorklogsData,
   MyWorklogsRow,
   TimesheetSettings,
   UpdateWorklogRequest,
   WorklogEntry,
 } from '@/types/timesheet';
+
+import { useProjects } from './use-projects';
 
 export function getWorklogKey(worklog: WorklogEntry | MyWorklogsRow): string {
   return `${worklog.id}_${worklog.issueId}`;
@@ -40,14 +41,14 @@ interface CommittedFilters {
 }
 
 export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
-  // Projects list
-  const [projects, setProjects] = useState<JiraProject[]>([]);
-  const [projectsLoading, setProjectsLoading] = useState(false);
+  const {
+    projects,
+    isLoading: projectsLoading,
+    selectedProject,
+    setSelectedProject,
+  } = useProjects({ settings, isConfigured });
 
   // Filter form state
-  const [selectedProject, setSelectedProject] = useState<JiraProject | null>(
-    null
-  );
   const [statusWorklog, setStatusWorklog] = useState('All');
   const [fromDate, setFromDate] = useState(getMonthStart());
   const [toDate, setToDate] = useState(getMonthEnd());
@@ -98,38 +99,6 @@ export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
     () => worklogs.reduce((sum, w) => sum + (Number(w.worked) || 0), 0),
     [worklogs]
   );
-
-  // Fetch projects list
-  const fetchProjects = useCallback(async () => {
-    if (!isConfigured) return;
-    setProjectsLoading(true);
-    try {
-      const response = await fetch(
-        `/api/timesheet/projects?jiraInstance=${settings.jiraInstance}`,
-        {
-          headers: { Authorization: `Bearer ${settings.token}` },
-        }
-      );
-      if (!response.ok) {
-        toast.error('Failed to fetch projects');
-        return;
-      }
-      const data = await response.json();
-      if (data.success && Array.isArray(data.data)) {
-        setProjects(data.data as JiraProject[]);
-      } else {
-        toast.error(data.error || 'Failed to fetch projects');
-      }
-    } catch {
-      toast.error('Failed to fetch projects');
-    } finally {
-      setProjectsLoading(false);
-    }
-  }, [isConfigured, settings.jiraInstance, settings.token]);
-
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
 
   const toggleSelectAll = useCallback(() => {
     if (allSelected) {

@@ -7,12 +7,13 @@ import { toast } from 'sonner';
 import { formatDateForApi, getMonthEnd, getMonthStart } from '@/lib/timesheet';
 import type {
   JiraIssue,
-  JiraProject,
   TimesheetSettings,
   WorkType,
   WorklogsWarningEntry,
 } from '@/types/timesheet';
 import { WORK_TYPES } from '@/types/timesheet';
+
+import { useProjects } from './use-projects';
 
 interface UseMissingWorklogsParams {
   settings: TimesheetSettings;
@@ -23,44 +24,29 @@ export function useMissingWorklogs({
   settings,
   isConfigured,
 }: UseMissingWorklogsParams) {
-  const [projects, setProjects] = useState<JiraProject[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const {
+    projects,
+    isLoading: isLoadingProjects,
+    selectedProject,
+    setSelectedProject,
+  } = useProjects({ settings, isConfigured });
+
+  const selectedProjectId = selectedProject?.id ?? '';
+
+  const setSelectedProjectId = useCallback(
+    (id: string) => {
+      const project = projects.find(p => p.id === id) ?? null;
+      setSelectedProject(project);
+    },
+    [projects, setSelectedProject]
+  );
+
   const [warningFromDate, setWarningFromDate] = useState(getMonthStart());
   const [warningToDate, setWarningToDate] = useState(getMonthEnd());
-  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [isSearchingWarnings, setIsSearchingWarnings] = useState(false);
 
   const [issues, setIssues] = useState<JiraIssue[]>([]);
   const [isLoadingIssues, setIsLoadingIssues] = useState(false);
-
-  // Fetch projects on mount when configured
-  useEffect(() => {
-    if (!isConfigured) return;
-
-    const controller = new AbortController();
-    setIsLoadingProjects(true);
-
-    fetch(`/api/timesheet/projects?jiraInstance=${settings.jiraInstance}`, {
-      headers: { Authorization: `Bearer ${settings.token}` },
-      signal: controller.signal,
-    })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && Array.isArray(result.data)) {
-          setProjects(result.data);
-        } else {
-          toast.error(result.error || 'Failed to fetch projects');
-        }
-      })
-      .catch(err => {
-        if (err.name !== 'AbortError') {
-          toast.error('Failed to fetch projects');
-        }
-      })
-      .finally(() => setIsLoadingProjects(false));
-
-    return () => controller.abort();
-  }, [isConfigured, settings.jiraInstance, settings.token]);
 
   // Fetch issues when a project is selected
   useEffect(() => {
@@ -225,11 +211,6 @@ export function useMissingWorklogs({
       }
     },
     [issues, settings.token, settings.jiraInstance]
-  );
-
-  const selectedProject = useMemo(
-    () => projects.find(p => p.id === selectedProjectId),
-    [projects, selectedProjectId]
   );
 
   const issuesByKey = useMemo(

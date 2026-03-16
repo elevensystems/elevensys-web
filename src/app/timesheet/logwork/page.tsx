@@ -2,16 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { AlertCircle, Clock, Plus, Send } from 'lucide-react';
+import { Clock, Plus, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { ActionButton } from '@/components/action-button';
+import { NotConfiguredAlert } from '@/components/features/timesheet/not-configured-alert';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ActionButton } from '@/components/action-button';
 import {
   Card,
   CardAction,
@@ -155,7 +154,6 @@ export default function LogWorkPage() {
         .map(dateToApiFormat),
     [selectedDates]
   );
-
 
   const clearAllDates = useCallback(() => setSelectedDates([]), []);
 
@@ -356,23 +354,7 @@ export default function LogWorkPage() {
             }
           />
 
-          {!isConfigured && (
-            <Alert className='border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/50 dark:text-yellow-200'>
-              <AlertCircle className='h-4 w-4' />
-              <AlertDescription>
-                <span>
-                  Jira settings not configured.{' '}
-                  <Link
-                    href='/timesheet/config'
-                    className='font-medium underline underline-offset-4 hover:text-yellow-900 dark:hover:text-yellow-100'
-                  >
-                    Go to Configs
-                  </Link>{' '}
-                  to connect your Jira account.
-                </span>
-              </AlertDescription>
-            </Alert>
-          )}
+          <NotConfiguredAlert isConfigured={isConfigured} />
 
           {isConfigured && (
             <MissingWorklogsCard
@@ -412,8 +394,7 @@ export default function LogWorkPage() {
                     Daily target
                   </span>
                   <span className={`font-semibold ${hoursColor}`}>
-                    {formatHours(totalHours)}h /{' '}
-                    {formatHours(STANDARD_HOURS)}h
+                    {formatHours(totalHours)}h / {formatHours(STANDARD_HOURS)}h
                   </span>
                 </div>
               </CardAction>
@@ -511,7 +492,7 @@ export default function LogWorkPage() {
           onConfirm={handleLogWork}
           entries={entries}
           parsedDates={parsedDates}
-          selectedProject={selectedProject}
+          selectedProject={selectedProject ?? undefined}
           totalHours={totalHours}
         />
       </section>

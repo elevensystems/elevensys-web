@@ -1,16 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { toast } from 'sonner';
 
 import { formatDateForApi, getMonthEnd, getMonthStart } from '@/lib/timesheet';
 import type {
-  JiraProject,
   ProjectWorklogRow,
   ProjectWorklogsData,
   TimesheetSettings,
 } from '@/types/timesheet';
+
+import { useProjects } from './use-projects';
 
 interface UseProjectWorklogsParams {
   settings: TimesheetSettings;
@@ -32,14 +33,14 @@ export function useProjectWorklogs({
   settings,
   isConfigured,
 }: UseProjectWorklogsParams) {
-  // Projects list
-  const [projects, setProjects] = useState<JiraProject[]>([]);
-  const [projectsLoading, setProjectsLoading] = useState(false);
+  const {
+    projects,
+    isLoading: projectsLoading,
+    selectedProject,
+    setSelectedProject,
+  } = useProjects({ settings, isConfigured });
 
   // Filter form state
-  const [selectedProject, setSelectedProject] = useState<JiraProject | null>(
-    null
-  );
   const [username, setUsername] = useState('');
   const [typeOfWork, setTypeOfWork] = useState('All');
   const [filStatus, setFilStatus] = useState<string[]>([]);
@@ -62,37 +63,6 @@ export function useProjectWorklogs({
 
   // Store last committed filters for pagination
   const lastFiltersRef = useRef<CommittedFilters | null>(null);
-
-  const fetchProjects = useCallback(async () => {
-    if (!isConfigured) return;
-    setProjectsLoading(true);
-    try {
-      const response = await fetch(
-        `/api/timesheet/projects?jiraInstance=${settings.jiraInstance}`,
-        {
-          headers: { Authorization: `Bearer ${settings.token}` },
-        }
-      );
-      if (!response.ok) {
-        toast.error('Failed to fetch projects');
-        return;
-      }
-      const data = await response.json();
-      if (data.success && Array.isArray(data.data)) {
-        setProjects(data.data as JiraProject[]);
-      } else {
-        toast.error(data.error || 'Failed to fetch projects');
-      }
-    } catch {
-      toast.error('Failed to fetch projects');
-    } finally {
-      setProjectsLoading(false);
-    }
-  }, [isConfigured, settings.jiraInstance, settings.token]);
-
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
 
   const fetchPage = useCallback(
     async (filters: CommittedFilters, page: number) => {
