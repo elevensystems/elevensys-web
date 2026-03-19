@@ -141,6 +141,7 @@ export default function LogWorkPage() {
 
   const [entries, setEntries] = useState<WorkEntry[]>([createDefaultEntry()]);
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [includeWeekends, setIncludeWeekends] = useState(false);
   const [error, setError] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [submissionModalOpen, setSubmissionModalOpen] = useState(false);
@@ -366,6 +367,8 @@ export default function LogWorkPage() {
               onSelectedDatesChange={setSelectedDates}
               parsedDates={parsedDates}
               onClearAllDates={clearAllDates}
+              includeWeekends={includeWeekends}
+              onIncludeWeekendsChange={setIncludeWeekends}
             />
           )}
 
