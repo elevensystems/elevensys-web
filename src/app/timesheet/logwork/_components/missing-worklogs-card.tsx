@@ -1,6 +1,11 @@
 'use client';
 
-import { CalendarDays, Search, Trash2 } from 'lucide-react';
+import {
+  CalendarDays,
+  CalendarPlus,
+  Search,
+  Trash2,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 import { ActionButton } from '@/components/action-button';
@@ -13,24 +18,22 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import type { JiraProject } from '@/types/timesheet';
 
+import { DateChipList } from './date-chip-list';
+
 const MONTH_ABBRS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 
 /** Parse "D/Mon/YY" or "DD/Mon/YY" → Date (local time) */
@@ -49,7 +52,6 @@ function parseApiDate(dateStr: string): Date | null {
   );
 }
 
-/** Weekend matcher for react-day-picker disabled prop */
 const isWeekend = (date: Date) => {
   const day = date.getDay();
   return day === 0 || day === 6;
@@ -70,6 +72,8 @@ interface MissingWorklogsCardProps {
   onSelectedDatesChange: (dates: Date[]) => void;
   parsedDates: string[];
   onClearAllDates: () => void;
+  includeWeekends: boolean;
+  onIncludeWeekendsChange: (value: boolean) => void;
 }
 
 export function MissingWorklogsCard({
@@ -87,7 +91,15 @@ export function MissingWorklogsCard({
   onSelectedDatesChange,
   parsedDates,
   onClearAllDates,
+  includeWeekends,
+  onIncludeWeekendsChange,
 }: MissingWorklogsCardProps) {
+  const handleRemoveDate = (date: Date) => {
+    onSelectedDatesChange(
+      selectedDates.filter(d => d.getTime() !== date.getTime())
+    );
+  };
+
   const handleSearchClick = async () => {
     const result = await onSearchWarnings();
     if (result) {
@@ -96,7 +108,11 @@ export function MissingWorklogsCard({
         .map(s => s.trim())
         .filter(Boolean)
         .map(parseApiDate)
-        .filter((d): d is Date => d !== null && !isWeekend(d));
+        .filter((d): d is Date => {
+          if (d === null) return false;
+          if (!includeWeekends && isWeekend(d)) return false;
+          return true;
+        });
       onSelectedDatesChange(dates);
       toast.success(`Found missing dates for ${result.count} user(s)`);
     }
@@ -130,23 +146,21 @@ export function MissingWorklogsCard({
             <Label htmlFor='project-select'>
               Project <span className='text-destructive'>*</span>
             </Label>
-              <NativeSelect
-                id='project-select'
-                value={selectedProjectId}
-                onChange={e => onProjectChange(e.target.value)}
-                disabled={isLoadingProjects}
-              >
-                <option value=''>
-                  {isLoadingProjects
-                    ? 'Loading projects...'
-                    : 'Select a project'}
+            <NativeSelect
+              id='project-select'
+              value={selectedProjectId}
+              onChange={e => onProjectChange(e.target.value)}
+              disabled={isLoadingProjects}
+            >
+              <option value=''>
+                {isLoadingProjects ? 'Loading projects...' : 'Select a project'}
+              </option>
+              {projects.map(project => (
+                <option key={project.id} value={project.id}>
+                  {project.key} — {project.name}
                 </option>
-                {projects.map(project => (
-                  <option key={project.id} value={project.id}>
-                    {project.key} — {project.name}
-                  </option>
-                ))}
-              </NativeSelect>
+              ))}
+            </NativeSelect>
           </div>
           <div className='space-y-2 sm:col-span-2'>
             <Label>Date Range</Label>
@@ -177,9 +191,10 @@ export function MissingWorklogsCard({
           </div>
         </div>
 
-        {/* Step 2 — Calendar Date Picker */}
+        {/* Step 2 — Date Selection */}
         <div className='space-y-3'>
-          <div className='flex items-center justify-between'>
+          {/* Header row */}
+          <div className='flex items-center justify-between gap-2 flex-wrap'>
             <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
               <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
                 2
@@ -195,34 +210,62 @@ export function MissingWorklogsCard({
                 </Badge>
               )}
             </div>
-            <ActionButton
-              variant='ghost'
-              size='sm'
-              onClick={onClearAllDates}
-              className={`h-7 text-xs text-destructive hover:bg-destructive hover:text-white ${parsedDates.length > 0 ? 'visible' : 'invisible'}`}
-              leftIcon={<Trash2 />}
-            >
-              Clear all
-            </ActionButton>
+
+            <div className='flex items-center gap-2 ml-auto'>
+              {/* Clear all */}
+              <ActionButton
+                variant='ghost'
+                size='sm'
+                onClick={onClearAllDates}
+                className={`h-7 text-xs text-destructive hover:bg-destructive hover:text-white ${parsedDates.length > 0 ? 'visible' : 'invisible'}`}
+                leftIcon={<Trash2 />}
+              >
+                Clear all
+              </ActionButton>
+
+              {/* Add dates manually — Popover trigger */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <ActionButton
+                    variant='outline'
+                    size='sm'
+                    className='h-7 text-xs'
+                    leftIcon={<CalendarPlus />}
+                  >
+                    Add manually
+                  </ActionButton>
+                </PopoverTrigger>
+                <PopoverContent
+                  className='w-auto p-0'
+                  align='end'
+                  sideOffset={8}
+                >
+                  <div className='p-3 border-b'>
+                    <label className='flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none'>
+                      <Checkbox
+                        checked={includeWeekends}
+                        onCheckedChange={checked =>
+                          onIncludeWeekendsChange(checked === true)
+                        }
+                      />
+                      Include weekends
+                    </label>
+                  </div>
+                  <Calendar
+                    mode='multiple'
+                    selected={selectedDates}
+                    onSelect={dates => onSelectedDatesChange(dates ?? [])}
+                    disabled={includeWeekends ? undefined : isWeekend}
+                    numberOfMonths={3}
+                    showOutsideDays={false}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
-          <div className='rounded-lg border bg-card p-2 w-full'>
-            <Calendar
-              mode='multiple'
-              selected={selectedDates}
-              onSelect={dates => onSelectedDatesChange(dates ?? [])}
-              disabled={isWeekend}
-              numberOfMonths={6}
-              showOutsideDays={false}
-              className='w-full'
-              classNames={{ root: 'w-full' }}
-            />
-          </div>
-
-          <p className='text-xs text-muted-foreground'>
-            Click days to select or deselect. Weekends are disabled. Use
-            &quot;Find Dates&quot; above to auto-select missing worklog dates.
-          </p>
+          {/* Chip list */}
+          <DateChipList dates={selectedDates} onRemove={handleRemoveDate} />
         </div>
       </CardContent>
     </Card>
