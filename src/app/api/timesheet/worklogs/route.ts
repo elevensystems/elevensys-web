@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { TIMESHEET_URLS } from '@/lib/api-urls';
 import { sanitizeErrorText } from '@/lib/fetch-utils';
 import type { FetchWorklogsRequest } from '@/types/timesheet';
-
-const WORKLOGS_API_URL = 'https://api.elevensys.dev/timesheet/worklogs';
-const PROJECT_WORKLOGS_API_URL =
-  'https://api.elevensys.dev/timesheet/project-worklogs';
-const PROJECT_WORKLOGS_PAGINATION_API_URL =
-  'https://api.elevensys.dev/timesheet/project-worklogs/pagination';
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,8 +42,8 @@ export async function GET(request: NextRequest) {
     const headers = { Authorization: authHeader };
 
     const [worklogsResponse, paginationResponse] = await Promise.all([
-      fetch(`${PROJECT_WORKLOGS_API_URL}?${queryString}`, { headers }),
-      fetch(`${PROJECT_WORKLOGS_PAGINATION_API_URL}?${queryString}`, {
+      fetch(`${TIMESHEET_URLS.PROJECT_WORKLOGS}?${queryString}`, { headers }),
+      fetch(`${TIMESHEET_URLS.PROJECT_WORKLOGS_PAGINATION}?${queryString}`, {
         headers,
       }),
     ]);
@@ -118,7 +113,7 @@ export async function POST(request: NextRequest) {
       jiraInstance,
     });
 
-    const response = await fetch(`${WORKLOGS_API_URL}?${params.toString()}`, {
+    const response = await fetch(`${TIMESHEET_URLS.WORKLOGS}?${params.toString()}`, {
       method: 'GET',
       headers: {
         Authorization: authHeader,

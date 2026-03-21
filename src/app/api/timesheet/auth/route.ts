@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { TIMESHEET_URLS } from '@/lib/api-urls';
 import { sanitizeErrorText } from '@/lib/fetch-utils';
-
-const AUTH_API_URL = 'https://api.elevensys.dev/timesheet/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     const params = new URLSearchParams({ jiraInstance });
 
-    const response = await fetch(`${AUTH_API_URL}?${params.toString()}`, {
+    const response = await fetch(`${TIMESHEET_URLS.AUTH}?${params.toString()}`, {
       method: 'GET',
       headers: {
         Authorization: authHeader,

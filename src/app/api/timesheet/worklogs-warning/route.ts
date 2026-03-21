@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { TIMESHEET_URLS } from '@/lib/api-urls';
 import { sanitizeErrorText } from '@/lib/fetch-utils';
-
-const WORKLOGS_WARNING_API_URL =
-  'https://api.elevensys.dev/timesheet/project-worklogs-warning';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +24,7 @@ export async function POST(request: NextRequest) {
     });
 
     const response = await fetch(
-      `${WORKLOGS_WARNING_API_URL}?${params.toString()}`,
+      `${TIMESHEET_URLS.WORKLOGS_WARNING}?${params.toString()}`,
       {
         method: 'POST',
         headers: {

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { env } from '@/env';
 import { AUTH_COOKIES } from '@/lib/auth';
 import { authCookie, deletedCookie } from '@/lib/auth-cookies';
-import { requireEnv } from '@/lib/utils';
 
 type TokenResponse = {
   access_token?: string;
@@ -13,9 +13,9 @@ type TokenResponse = {
 };
 
 export const GET = async (request: NextRequest) => {
-  const cognitoDomain = requireEnv('COGNITO_DOMAIN');
-  const clientId = requireEnv('COGNITO_CLIENT_ID');
-  const appUrl = requireEnv('NEXT_PUBLIC_APP_URL').replace(/\/$/, '');
+  const cognitoDomain = env.COGNITO_DOMAIN;
+  const clientId = env.COGNITO_CLIENT_ID;
+  const appUrl = env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
 
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');

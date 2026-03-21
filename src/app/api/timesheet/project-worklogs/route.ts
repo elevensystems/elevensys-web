@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { TIMESHEET_URLS } from '@/lib/api-urls';
 import { sanitizeErrorText } from '@/lib/fetch-utils';
-
-const PROJECT_WORKLOGS_API_URL =
-  'https://api.elevensys.dev/timesheet/project-worklogs-report/get-all';
 
 interface ProjectWorklogsRequestBody {
   pid: number;
@@ -60,7 +58,7 @@ export async function POST(request: NextRequest) {
     });
 
     const response = await fetch(
-      `${PROJECT_WORKLOGS_API_URL}?${params.toString()}`,
+      `${TIMESHEET_URLS.PROJECT_WORKLOGS_REPORT}?${params.toString()}`,
       {
         method: 'POST',
         headers: {

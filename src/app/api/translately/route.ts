@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromSession } from '@/lib/auth';
 import { MAX_TRANSLATE_INPUT_LENGTH, validateModel } from '@/lib/constants';
 import { fetchWithTimeout } from '@/lib/fetch-utils';
-import { requireEnv } from '@/lib/utils';
+import { OPENAI_URL } from '@/lib/api-urls';
 import type { TranslateRequestBody } from '@/types/translate';
 
 const buildPrompt = (
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       'You are an expert bilingual translator specializing in high-quality Vietnamese-English and English-Vietnamese translations.';
     const userMessage = buildPrompt(input, directionLabel, tonesLabel);
 
-    const lambdaBase = `${requireEnv('API_BASE_URL')}/openai`;
+    const lambdaBase = OPENAI_URL;
 
     try {
       const response = await fetchWithTimeout(lambdaBase, {

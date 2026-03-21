@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { TIMESHEET_URLS } from '@/lib/api-urls';
 import { sanitizeErrorText } from '@/lib/fetch-utils';
 import type { UpdateWorklogRequest } from '@/types/timesheet';
-
-const API_BASE_URL = 'https://api.elevensys.dev/timesheet/project-worklogs';
 
 export async function PUT(
   request: NextRequest,
@@ -28,7 +27,7 @@ export async function PUT(
     const queryParams = new URLSearchParams({ jiraInstance });
 
     const response = await fetch(
-      `${API_BASE_URL}/${timesheetId}?${queryParams.toString()}`,
+      `${TIMESHEET_URLS.PROJECT_WORKLOGS}/${timesheetId}?${queryParams.toString()}`,
       {
         method: 'PUT',
         headers: {
@@ -82,7 +81,7 @@ export async function DELETE(
     const queryParams = new URLSearchParams({ jiraInstance });
 
     const response = await fetch(
-      `${API_BASE_URL}/${issueId}/${timesheetId}?${queryParams.toString()}`,
+      `${TIMESHEET_URLS.PROJECT_WORKLOGS}/${issueId}/${timesheetId}?${queryParams.toString()}`,
       {
         method: 'DELETE',
         headers: {
