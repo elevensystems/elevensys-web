@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { requireEnv } from '@/lib/utils';
+import { URLIFY_URLS } from '@/lib/api-urls';
 
 export async function GET(request: NextRequest) {
   try {
-    const baseUrl = requireEnv('API_BASE_URL');
     const { searchParams } = request.nextUrl;
     const limit = searchParams.get('limit') || '20';
     const lastKey = searchParams.get('lastKey');
@@ -13,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (lastKey) params.set('lastKey', lastKey);
 
     const response = await fetch(
-      `${baseUrl}/urlify/urls?${params.toString()}`,
+      `${URLIFY_URLS.URLS}?${params.toString()}`,
       {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },

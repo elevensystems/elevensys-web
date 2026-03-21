@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { TIMESHEET_URLS } from '@/lib/api-urls';
 import { sanitizeErrorText } from '@/lib/fetch-utils';
-
-const BASE_API_URL = 'https://api.elevensys.dev/timesheet/projects';
 
 interface JiraIssueRaw {
   id: number;
@@ -33,7 +32,7 @@ export async function GET(
     });
 
     const response = await fetch(
-      `${BASE_API_URL}/${projectId}/issues?${queryParams.toString()}`,
+      `${TIMESHEET_URLS.PROJECTS}/${projectId}/issues?${queryParams.toString()}`,
       {
         method: 'GET',
         headers: {

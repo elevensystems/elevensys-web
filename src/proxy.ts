@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { AUTH_COOKIES, decodeJwt, isTokenExpired } from '@/lib/auth';
 import { authCookie, deletedCookie } from '@/lib/auth-cookies';
+import { env } from '@/env';
 import {
   getTenantConfig,
   resolveTenantFromHostname,
@@ -18,10 +19,8 @@ async function refreshTokens(refreshToken: string): Promise<{
   refresh_token?: string;
   expires_in: number;
 } | null> {
-  const cognitoDomain = process.env.COGNITO_DOMAIN;
-  const clientId = process.env.COGNITO_CLIENT_ID;
-
-  if (!cognitoDomain || !clientId) return null;
+  const cognitoDomain = env.COGNITO_DOMAIN;
+  const clientId = env.COGNITO_CLIENT_ID;
 
   try {
     const params = new URLSearchParams({

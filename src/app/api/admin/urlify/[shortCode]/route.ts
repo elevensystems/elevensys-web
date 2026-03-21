@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { requireEnv } from '@/lib/utils';
+import { URLIFY_URLS } from '@/lib/api-urls';
 
 export async function DELETE(
   _request: NextRequest,
@@ -8,9 +8,8 @@ export async function DELETE(
 ) {
   try {
     const { shortCode } = await params;
-    const baseUrl = requireEnv('API_BASE_URL');
 
-    const response = await fetch(`${baseUrl}/urlify/url/${shortCode}`, {
+    const response = await fetch(`${URLIFY_URLS.URL}/${shortCode}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     });

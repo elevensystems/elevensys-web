@@ -1,3 +1,5 @@
+import { env } from '@/env';
+
 const isSecure = process.env.NODE_ENV === 'production';
 
 const BASE_OPTIONS = {
@@ -5,7 +7,7 @@ const BASE_OPTIONS = {
   secure: isSecure,
   sameSite: 'lax' as const,
   path: '/',
-  domain: process.env.COOKIE_DOMAIN,
+  domain: env.COOKIE_DOMAIN,
 };
 
 export const authCookie = (maxAge: number) => ({

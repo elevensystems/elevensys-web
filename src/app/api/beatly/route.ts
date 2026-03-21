@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { validateModel } from '@/lib/constants';
 import { fetchWithTimeout } from '@/lib/fetch-utils';
-import { requireEnv } from '@/lib/utils';
+import { OPENAI_URL } from '@/lib/api-urls';
 import type { ChatMessage, MoodRequest } from '@/types/beatly';
 
 export async function POST(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const body: MoodRequest = await request.json();
     const { mood, language, genres, excludedSongs } = body;
 
-    const lambdaBase = `${requireEnv('API_BASE_URL')}/openai`;
+    const lambdaBase = OPENAI_URL;
     const model = validateModel(body.model);
 
     if (!mood) {

@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 
+import { env } from '@/env';
 import { AUTH_COOKIES } from '@/lib/auth';
 import { deletedCookie } from '@/lib/auth-cookies';
-import { requireEnv } from '@/lib/utils';
 
 export const GET = async () => {
-  const cognitoDomain = requireEnv('COGNITO_DOMAIN');
-  const clientId = requireEnv('COGNITO_CLIENT_ID');
-  const appUrl = requireEnv('NEXT_PUBLIC_APP_URL').replace(/\/$/, '');
+  const cognitoDomain = env.COGNITO_DOMAIN;
+  const clientId = env.COGNITO_CLIENT_ID;
+  const appUrl = env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
 
   const logoutUrl = new URL(`${cognitoDomain}/logout`);
   logoutUrl.searchParams.set('client_id', clientId);

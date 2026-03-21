@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { requireEnv } from '@/lib/utils';
+import { URLIFY_URLS } from '@/lib/api-urls';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { originalUrl, createdBy, autoDelete, ttlDays } = body;
-    const apiUrl = `${requireEnv('API_BASE_URL')}/urlify/shorten`;
+    const apiUrl = URLIFY_URLS.SHORTEN;
 
     // Validate input
     if (!originalUrl || typeof originalUrl !== 'string') {

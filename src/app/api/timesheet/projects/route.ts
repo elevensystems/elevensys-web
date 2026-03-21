@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { TIMESHEET_URLS } from '@/lib/api-urls';
 import { sanitizeErrorText } from '@/lib/fetch-utils';
-
-const PROJECTS_API_URL = 'https://api.elevensys.dev/timesheet/projects';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +11,7 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('Authorization') || '';
     const params = new URLSearchParams({ jiraInstance });
 
-    const response = await fetch(`${PROJECTS_API_URL}?${params.toString()}`, {
+    const response = await fetch(`${TIMESHEET_URLS.PROJECTS}?${params.toString()}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -86,7 +85,7 @@ export async function POST(request: NextRequest) {
     const jiraInstance = payload.jiraInstance || 'jiradc';
     const authHeader = request.headers.get('Authorization') || '';
 
-    const response = await fetch(PROJECTS_API_URL, {
+    const response = await fetch(TIMESHEET_URLS.PROJECTS, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

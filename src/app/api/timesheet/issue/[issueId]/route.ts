@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { TIMESHEET_URLS } from '@/lib/api-urls';
 import { sanitizeErrorText } from '@/lib/fetch-utils';
-
-const ISSUE_API_URL = 'https://api.elevensys.dev/timesheet/issue';
 
 export async function POST(
   request: NextRequest,
@@ -26,7 +25,7 @@ export async function POST(
     const queryParams = new URLSearchParams({ jiraInstance });
 
     const response = await fetch(
-      `${ISSUE_API_URL}/${issueId}?${queryParams.toString()}`,
+      `${TIMESHEET_URLS.ISSUE}/${issueId}?${queryParams.toString()}`,
       {
         method: 'GET',
         headers: {

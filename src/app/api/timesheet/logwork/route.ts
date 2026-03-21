@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { TIMESHEET_URLS } from '@/lib/api-urls';
 import { sanitizeErrorText } from '@/lib/fetch-utils';
 import type { LogWorkRequest } from '@/types/timesheet';
-
-const LOG_WORK_API_URL = 'https://api.elevensys.dev/timesheet/logwork';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const params = new URLSearchParams({ jiraInstance });
 
-    const response = await fetch(`${LOG_WORK_API_URL}?${params.toString()}`, {
+    const response = await fetch(`${TIMESHEET_URLS.LOGWORK}?${params.toString()}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
