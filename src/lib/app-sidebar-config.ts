@@ -11,6 +11,7 @@ import {
   Link as LinkIcon,
   Music4,
   Package,
+  RefreshCw,
   ScanSearch,
   ScrollText,
   Send,
@@ -55,6 +56,12 @@ export const appSidebarData = {
           url: '/timesheet/config',
         },
       ],
+    },
+    {
+      title: 'Auto Logwork',
+      url: '/auto-logwork',
+      icon: RefreshCw,
+      isActive: false,
     },
     {
       title: 'QA/SM Check (Soon)',
