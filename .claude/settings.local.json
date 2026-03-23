@@ -27,10 +27,16 @@
       "Bash(gh repo:*)",
       "Bash(git checkout:*)",
       "Bash(gh pr:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "mcp__shadcn__get_audit_checklist"
     ]
   },
-  "enabledMcpjsonServers": ["next-devtools", "shadcn", "sentry", "context7"],
+  "enabledMcpjsonServers": [
+    "next-devtools",
+    "shadcn",
+    "sentry",
+    "context7"
+  ],
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh",
