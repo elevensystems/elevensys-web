@@ -1,8 +1,8 @@
 import {
-  BadgeCheck,
   Braces,
   CaseSensitive,
   Clock,
+  CogIcon,
   Home,
   Key,
   Languages,
@@ -27,12 +27,12 @@ import type { AuthUser } from '@/types/auth';
  */
 export const appSidebarData = {
   user: null as AuthUser | null,
+  navHome: {
+    title: 'Home',
+    url: '/',
+    icon: Home,
+  },
   navMain: [
-    {
-      title: 'Home',
-      url: '/',
-      icon: Home,
-    },
     {
       title: 'Timesheet',
       url: '/timesheet',
@@ -51,22 +51,18 @@ export const appSidebarData = {
           title: 'Project Worklogs',
           url: '/timesheet/project-worklogs',
         },
-        {
-          title: 'Configs',
-          url: '/timesheet/config',
-        },
       ],
     },
     {
-      title: 'Auto Logwork',
-      url: '/auto-logwork',
+      title: 'Autolog',
+      url: '/timesheet/autolog',
       icon: RefreshCw,
       isActive: false,
     },
     {
-      title: 'QA/SM Check (Soon)',
-      url: '#',
-      icon: BadgeCheck,
+      title: 'Configs',
+      icon: CogIcon,
+      url: '/timesheet/config',
       isActive: false,
     },
   ],

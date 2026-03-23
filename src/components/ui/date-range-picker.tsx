@@ -25,6 +25,7 @@ interface DateRangePickerProps {
   id?: string;
   className?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 function DateRangePicker({
@@ -34,6 +35,7 @@ function DateRangePicker({
   id,
   className,
   placeholder = 'Pick a date range',
+  disabled,
 }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -60,6 +62,7 @@ function DateRangePicker({
           <Button
             id={id}
             variant='outline'
+            disabled={disabled}
             className={cn(
               'w-full justify-start text-left font-normal',
               !from && !to && 'text-muted-foreground'

@@ -16,8 +16,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
 import { HOUR_STEP, MIN_HOURS } from '@/lib/timesheet';
+import { cn } from '@/lib/utils';
 import {
   type JiraIssue,
   WORK_TYPES,
@@ -37,6 +37,7 @@ interface WorkEntryRowProps {
   ) => void;
   onRemove: (id: string) => void;
   onFetchTypeOfWork: (issueId: number) => Promise<WorkType | null>;
+  disabled?: boolean;
 }
 
 export const WorkEntryRow = memo(function WorkEntryRow({
@@ -47,6 +48,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
   onUpdate,
   onRemove,
   onFetchTypeOfWork,
+  disabled,
 }: WorkEntryRowProps) {
   const [isFetchingTypeOfWork, setIsFetchingTypeOfWork] = useState(false);
 
@@ -126,7 +128,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           <ComboboxInput
             placeholder={isLoadingIssues ? 'Loading...' : 'Select ticket'}
             className='h-8'
-            disabled={isLoadingIssues}
+            disabled={disabled || isLoadingIssues}
             showClear
           />
           <ComboboxContent>
@@ -146,6 +148,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           placeholder='Description of work done'
           value={entry.description}
           onChange={handleDescriptionChange}
+          disabled={disabled}
           maxLength={500}
           className='h-8'
         />
@@ -162,6 +165,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
             className='h-8'
             value={entry.typeOfWork}
             onChange={handleTypeChange}
+            disabled={disabled}
           >
             {WORK_TYPES.map(type => (
               <option key={type} value={type}>
@@ -178,6 +182,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           step={HOUR_STEP}
           value={entry.hours || ''}
           onChange={handleHoursChange}
+          disabled={disabled}
           className='h-8 w-20'
         />
       </TableCell>
@@ -188,6 +193,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           size='icon'
           className='h-8 w-8 text-destructive hover:bg-destructive hover:text-white'
           onClick={handleRemove}
+          disabled={disabled}
           leftIcon={<Trash2 />}
         />
       </TableCell>

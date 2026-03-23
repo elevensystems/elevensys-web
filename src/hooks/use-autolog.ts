@@ -5,23 +5,23 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import type {
-  AutoLogworkConfig,
-  CreateAutoLogworkConfigPayload,
-  UpdateAutoLogworkConfigPayload,
-} from '@/types/auto-logwork';
+  AutologConfig,
+  CreateAutologConfigPayload,
+  UpdateAutologConfigPayload,
+} from '@/types/autolog';
 
-interface UseAutoLogworkParams {
+interface UseAutologParams {
   username: string;
   token: string;
   isConfigured: boolean;
 }
 
-export function useAutoLogwork({
+export function useAutolog({
   username,
   token,
   isConfigured,
-}: UseAutoLogworkParams) {
-  const [configs, setConfigs] = useState<AutoLogworkConfig[]>([]);
+}: UseAutologParams) {
+  const [configs, setConfigs] = useState<AutologConfig[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const authHeaders = {
@@ -34,14 +34,14 @@ export function useAutoLogwork({
     setIsLoading(true);
     try {
       const res = await fetch(
-        `/api/auto-logwork?username=${encodeURIComponent(username)}`,
+        `/api/timesheet/autolog?username=${encodeURIComponent(username)}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setConfigs(Array.isArray(data) ? data : []);
     } catch (err) {
-      toast.error('Failed to load auto-logwork configurations');
+      toast.error('Failed to load autolog configurations');
     } finally {
       setIsLoading(false);
     }
@@ -52,9 +52,9 @@ export function useAutoLogwork({
   }, [fetchConfigs]);
 
   const createConfig = useCallback(
-    async (payload: CreateAutoLogworkConfigPayload): Promise<boolean> => {
+    async (payload: CreateAutologConfigPayload): Promise<boolean> => {
       try {
-        const res = await fetch('/api/auto-logwork', {
+        const res = await fetch('/api/timesheet/autolog', {
           method: 'POST',
           headers: authHeaders,
           body: JSON.stringify(payload),
@@ -63,9 +63,9 @@ export function useAutoLogwork({
           const err = await res.json().catch(() => null);
           throw new Error(err?.error || `HTTP ${res.status}`);
         }
-        const newConfig: AutoLogworkConfig = await res.json();
+        const newConfig: AutologConfig = await res.json();
         setConfigs((prev) => [...prev, newConfig]);
-        toast.success('Auto-logwork configuration created');
+        toast.success('Autolog configuration created');
         return true;
       } catch (err) {
         toast.error(
@@ -80,10 +80,10 @@ export function useAutoLogwork({
   const updateConfig = useCallback(
     async (
       configId: string,
-      payload: UpdateAutoLogworkConfigPayload
+      payload: UpdateAutologConfigPayload
     ): Promise<boolean> => {
       try {
-        const res = await fetch(`/api/auto-logwork/${configId}`, {
+        const res = await fetch(`/api/timesheet/autolog/${configId}`, {
           method: 'PUT',
           headers: authHeaders,
           body: JSON.stringify(payload),
@@ -92,7 +92,7 @@ export function useAutoLogwork({
           const err = await res.json().catch(() => null);
           throw new Error(err?.error || `HTTP ${res.status}`);
         }
-        const updated: AutoLogworkConfig = await res.json();
+        const updated: AutologConfig = await res.json();
         setConfigs((prev) =>
           prev.map((c) => (c.configId === configId ? updated : c))
         );
@@ -112,7 +112,7 @@ export function useAutoLogwork({
     async (configId: string): Promise<boolean> => {
       try {
         const res = await fetch(
-          `/api/auto-logwork/${configId}?username=${encodeURIComponent(username)}`,
+          `/api/timesheet/autolog/${configId}?username=${encodeURIComponent(username)}`,
           { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) {
@@ -135,7 +135,7 @@ export function useAutoLogwork({
   const runConfig = useCallback(
     async (configId: string): Promise<boolean> => {
       try {
-        const res = await fetch(`/api/auto-logwork/${configId}/run`, {
+        const res = await fetch(`/api/timesheet/autolog/${configId}/run`, {
           method: 'POST',
           headers: authHeaders,
           body: JSON.stringify({ username }),

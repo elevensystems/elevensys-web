@@ -2,17 +2,7 @@
 
 import { EraserIcon, Trash2 } from 'lucide-react';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { DeleteConfirmDialog } from '@/components/delete-confirm-dialog';
 import { ActionButton } from '@/components/action-button';
 import { CardAction } from '@/components/ui/card';
 
@@ -39,8 +29,19 @@ export function BulkDeleteAction({
         <span className='text-sm text-muted-foreground'>
           {selectedCount} selected
         </span>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
+        <DeleteConfirmDialog
+          title={`Delete ${selectedCount} Worklog${selectedCount !== 1 ? 's' : ''}`}
+          description={
+            <>
+              Are you sure you want to delete{' '}
+              <span className='font-semibold'>{selectedCount}</span> selected
+              worklog
+              {selectedCount !== 1 ? 's' : ''}? This action cannot be undone.
+            </>
+          }
+          confirmLabel={`Delete ${selectedCount} Worklog${selectedCount !== 1 ? 's' : ''}`}
+          onConfirm={onBulkDelete}
+          trigger={
             <ActionButton
               variant='destructive'
               size='sm'
@@ -50,29 +51,8 @@ export function BulkDeleteAction({
             >
               Delete
             </ActionButton>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                Delete {selectedCount} Worklog
-                {selectedCount !== 1 ? 's' : ''}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete{' '}
-                <span className='font-semibold'>{selectedCount}</span> selected
-                worklog
-                {selectedCount !== 1 ? 's' : ''}? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction variant='destructive' onClick={onBulkDelete}>
-                Delete {selectedCount} Worklog
-                {selectedCount !== 1 ? 's' : ''}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          }
+        />
         <ActionButton variant='ghost' size='sm' onClick={onClearSelection} leftIcon={<EraserIcon />}>
           Clear
         </ActionButton>

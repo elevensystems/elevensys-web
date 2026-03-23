@@ -351,8 +351,7 @@ export default function LogWorkPage() {
 
           <NotConfiguredAlert isConfigured={isConfigured} />
 
-          {isConfigured && (
-            <MissingWorklogsCard
+          <MissingWorklogsCard
               projects={projects}
               selectedProjectId={selectedProjectId}
               onProjectChange={handleProjectChange}
@@ -369,8 +368,8 @@ export default function LogWorkPage() {
               onClearAllDates={clearAllDates}
               includeWeekends={includeWeekends}
               onIncludeWeekendsChange={setIncludeWeekends}
+              isConfigured={isConfigured}
             />
-          )}
 
           {/* Work Entries Card */}
           <Card>
@@ -434,6 +433,7 @@ export default function LogWorkPage() {
                         onUpdate={updateEntry}
                         onRemove={removeEntry}
                         onFetchTypeOfWork={fetchIssueTypeOfWork}
+                        disabled={!isConfigured}
                       />
                     ))}
                   </TableBody>

@@ -22,8 +22,8 @@ export const URLIFY_URLS = {
 
 export const OPENAI_URL = `${BASE_URL}/openai`;
 
-export const AUTO_LOGWORK_URLS = {
-  CONFIGS: `${BASE_URL}/auto-logwork`,
-  CONFIG: (id: string) => `${BASE_URL}/auto-logwork/${id}`,
-  RUN: (id: string) => `${BASE_URL}/auto-logwork/${id}/run`,
+export const AUTOLOG_URLS = {
+  CONFIGS: `${BASE_URL}/timesheet/autolog`,
+  CONFIG: (id: string) => `${BASE_URL}/timesheet/autolog/${id}`,
+  RUN: (id: string) => `${BASE_URL}/timesheet/autolog/${id}/run`,
 };

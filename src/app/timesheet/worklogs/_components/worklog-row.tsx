@@ -4,17 +4,7 @@ import { memo, useCallback } from 'react';
 
 import { SquarePenIcon, Trash2Icon } from 'lucide-react';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { DeleteConfirmDialog } from '@/components/delete-confirm-dialog';
 import { Badge } from '@/components/ui/badge';
 import { ActionButton } from '@/components/action-button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -143,11 +133,23 @@ export const WorklogRow = memo(function WorklogRow({
                   <TooltipContent>Edit</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <AlertDialog>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <AlertDialogTrigger asChild>
+              <TooltipProvider>
+                <Tooltip>
+                  <DeleteConfirmDialog
+                    title='Delete Worklog'
+                    description={
+                      <>
+                        Are you sure you want to delete this worklog for{' '}
+                        <span className='font-semibold'>
+                          {worklog.issueKey}
+                        </span>{' '}
+                        ({parseFloat(String(worklog.worked))}h on {displayDate}
+                        )? This action cannot be undone.
+                      </>
+                    }
+                    onConfirm={handleDelete}
+                    trigger={
+                      <TooltipTrigger asChild>
                         <ActionButton
                           variant='ghost'
                           size='icon'
@@ -156,32 +158,12 @@ export const WorklogRow = memo(function WorklogRow({
                           leftIcon={<Trash2Icon />}
                           aria-label='Delete'
                         />
-                      </AlertDialogTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>Delete</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Worklog</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this worklog for{' '}
-                      <span className='font-semibold'>{worklog.issueKey}</span>{' '}
-                      ({parseFloat(String(worklog.worked))}h on {displayDate}
-                      )? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      variant='destructive'
-                      onClick={handleDelete}
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                      </TooltipTrigger>
+                    }
+                  />
+                  <TooltipContent>Delete</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </>
           )}
         </div>

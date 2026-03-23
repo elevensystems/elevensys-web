@@ -74,6 +74,7 @@ interface MissingWorklogsCardProps {
   onClearAllDates: () => void;
   includeWeekends: boolean;
   onIncludeWeekendsChange: (value: boolean) => void;
+  isConfigured?: boolean;
 }
 
 export function MissingWorklogsCard({
@@ -93,7 +94,9 @@ export function MissingWorklogsCard({
   onClearAllDates,
   includeWeekends,
   onIncludeWeekendsChange,
+  isConfigured = true,
 }: MissingWorklogsCardProps) {
+  const disabled = !isConfigured;
   const handleRemoveDate = (date: Date) => {
     onSelectedDatesChange(
       selectedDates.filter(d => d.getTime() !== date.getTime())
@@ -150,7 +153,7 @@ export function MissingWorklogsCard({
               id='project-select'
               value={selectedProjectId}
               onChange={e => onProjectChange(e.target.value)}
-              disabled={isLoadingProjects}
+              disabled={disabled || isLoadingProjects}
             >
               <option value=''>
                 {isLoadingProjects ? 'Loading projects...' : 'Select a project'}
@@ -174,11 +177,12 @@ export function MissingWorklogsCard({
                   onWarningToDateChange(to);
                 }}
                 className='flex-1 w-full'
+                disabled={disabled}
               />
               <ActionButton
                 onClick={handleSearchClick}
                 disabled={
-                  !selectedProjectId || !warningFromDate || !warningToDate
+                  disabled || !selectedProjectId || !warningFromDate || !warningToDate
                 }
                 className='w-full sm:w-auto'
                 leftIcon={<Search />}
@@ -217,6 +221,7 @@ export function MissingWorklogsCard({
                 variant='ghost'
                 size='sm'
                 onClick={onClearAllDates}
+                disabled={disabled}
                 className={`h-7 text-xs text-destructive hover:bg-destructive hover:text-white ${parsedDates.length > 0 ? 'visible' : 'invisible'}`}
                 leftIcon={<Trash2 />}
               >
@@ -231,6 +236,7 @@ export function MissingWorklogsCard({
                     size='sm'
                     className='h-7 text-xs'
                     leftIcon={<CalendarPlus />}
+                    disabled={disabled}
                   >
                     Add manually
                   </ActionButton>

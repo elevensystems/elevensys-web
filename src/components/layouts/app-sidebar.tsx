@@ -15,6 +15,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -80,6 +81,18 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           {user?.role === 'admin' && hasData(appSidebarData.navAdmin) && (
             <NavAdmin items={appSidebarData.navAdmin} />
           )}
+          <SidebarGroup>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={appSidebarData.navHome.title}>
+                  <Link href={appSidebarData.navHome.url}>
+                    <appSidebarData.navHome.icon />
+                    <span>{appSidebarData.navHome.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
           {hasData(appSidebarData.navMain) && (
             <NavMain
               items={appSidebarData.navMain}

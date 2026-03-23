@@ -1,23 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { AUTO_LOGWORK_URLS } from '@/lib/api-urls';
+import { AUTOLOG_URLS } from '@/lib/api-urls';
 
-export async function GET(request: NextRequest) {
+interface RouteParams {
+  params: Promise<{ configId: string }>;
+}
+
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    const { configId } = await params;
     const authHeader = request.headers.get('Authorization') || '';
-    const username = request.nextUrl.searchParams.get('username');
+    const body = await request.json();
 
-    if (!authHeader || !username) {
+    if (!authHeader || !body.username) {
       return NextResponse.json(
         { error: 'Missing Authorization header or username' },
         { status: 400 }
       );
     }
 
-    const response = await fetch(
-      `${AUTO_LOGWORK_URLS.CONFIGS}?username=${encodeURIComponent(username)}`,
-      { headers: { Authorization: authHeader } }
-    );
+    const response = await fetch(AUTOLOG_URLS.CONFIG(configId), {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: authHeader,
+      },
+      body: JSON.stringify(body),
+    });
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
@@ -29,26 +38,26 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    const { configId } = await params;
     const authHeader = request.headers.get('Authorization') || '';
-    const body = await request.json();
+    const username = request.nextUrl.searchParams.get('username');
 
-    if (!authHeader || !body.username) {
+    if (!authHeader || !username) {
       return NextResponse.json(
         { error: 'Missing Authorization header or username' },
         { status: 400 }
       );
     }
 
-    const response = await fetch(AUTO_LOGWORK_URLS.CONFIGS, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: authHeader,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await fetch(
+      `${AUTOLOG_URLS.CONFIG(configId)}?username=${encodeURIComponent(username)}`,
+      {
+        method: 'DELETE',
+        headers: { Authorization: authHeader },
+      }
+    );
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });

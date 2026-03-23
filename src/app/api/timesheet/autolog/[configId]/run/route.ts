@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { AUTO_LOGWORK_URLS } from '@/lib/api-urls';
+import { AUTOLOG_URLS } from '@/lib/api-urls';
 
 interface RouteParams {
   params: Promise<{ configId: string }>;
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const response = await fetch(AUTO_LOGWORK_URLS.RUN(configId), {
+    const response = await fetch(AUTOLOG_URLS.RUN(configId), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
