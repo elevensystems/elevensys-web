@@ -10,14 +10,17 @@ import {
   Check,
   Clock,
   Loader2,
+  Minus,
   Pencil,
   Play,
   Trash2,
+  X,
 } from 'lucide-react';
 
 import { DeleteConfirmDialog } from '@/components/delete-confirm-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import {
   Sheet,
   SheetContent,
@@ -27,8 +30,14 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
-import type { AutologConfig } from '@/types/autolog';
-import { DAY_NAMES } from '@/types/autolog';
+import { cn } from '@/lib/utils';
+import type {
+  AutologConfig,
+  AutologRunResult,
+  AutologTicket,
+} from '@/types/autolog';
+
+import { formatSchedule, RUN_STATUS_CONFIG, STATUS_LABELS } from './config-card';
 
 interface ConfigDetailSheetProps {
   config: AutologConfig | null;
@@ -38,40 +47,44 @@ interface ConfigDetailSheetProps {
   onRun: (configId: string) => Promise<boolean>;
 }
 
-const STATUS_LABELS: Record<AutologConfig['status'], string> = {
-  active: 'Active',
-  paused_auth: 'Paused — Re-auth required',
-};
 
-const RUN_STATUS_LABELS: Record<
-  NonNullable<AutologConfig['lastRunStatus']>,
-  string
-> = {
-  success: 'Success',
-  partial: 'Partial',
-  nothing_to_log: 'Nothing to log',
-  failed: 'Failed',
-};
+function TicketRow({
+  ticket,
+  result,
+}: {
+  ticket: AutologTicket;
+  result?: AutologRunResult;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const hasMessage = result && result.status !== 'logged' && result.message;
 
-const RUN_STATUS_VARIANTS: Record<
-  NonNullable<AutologConfig['lastRunStatus']>,
-  'default' | 'secondary' | 'destructive' | 'outline'
-> = {
-  success: 'default',
-  partial: 'secondary',
-  nothing_to_log: 'outline',
-  failed: 'destructive',
-};
-
-function formatSchedule(config: AutologConfig): string {
-  const { schedule } = config;
-  const hourStr = `${String(schedule.hour).padStart(2, '0')}:00 UTC`;
-  if (schedule.type === 'weekly') {
-    return `Every ${DAY_NAMES[schedule.dayOfWeek ?? 5]} at ${hourStr}`;
-  }
-  const day = schedule.dayOfMonth ?? 1;
-  const suffix = day === 1 ? 'st' : day === 2 ? 'nd' : day === 3 ? 'rd' : 'th';
-  return `Monthly on the ${day}${suffix} at ${hourStr}`;
+  return (
+    <div>
+      <div
+        className={cn(
+          'flex items-center justify-between py-1 text-sm',
+          hasMessage && 'cursor-pointer'
+        )}
+        onClick={() => hasMessage && setExpanded(e => !e)}
+      >
+        <span className='font-mono text-xs'>{ticket.issueKey}</span>
+        <div className='flex items-center gap-2'>
+          {result &&
+            (result.status === 'logged' ? (
+              <Check className='h-3.5 w-3.5 text-green-500' />
+            ) : result.status === 'skipped' ? (
+              <Minus className='h-3.5 w-3.5 text-muted-foreground' />
+            ) : (
+              <X className='h-3.5 w-3.5 text-destructive' />
+            ))}
+          <span className='text-muted-foreground'>{ticket.hours}h</span>
+        </div>
+      </div>
+      {expanded && hasMessage && (
+        <p className='pb-1 text-xs text-muted-foreground'>{result.message}</p>
+      )}
+    </div>
+  );
 }
 
 export function ConfigDetailSheet({
@@ -117,16 +130,23 @@ export function ConfigDetailSheet({
   };
 
   const totalHours = config.tickets.reduce((sum, t) => sum + t.hours, 0);
+  const resultsMap = new Map(
+    config.lastRunResults?.map(r => [r.issueKey, r]) ?? []
+  );
+  const loggedCount = config.lastRunResults?.filter(
+    r => r.status === 'logged'
+  ).length;
 
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side={isMobile ? 'bottom' : 'right'}
+          hideCloseButton
           className={
             isMobile
               ? 'max-h-[70vh] overflow-y-auto rounded-t-2xl'
-              : 'sm:max-w-md overflow-y-auto'
+              : 'overflow-y-auto sm:max-w-lg'
           }
         >
           <SheetHeader>
@@ -143,46 +163,67 @@ export function ConfigDetailSheet({
             </div>
           </SheetHeader>
 
-          <div className='space-y-4 px-4 py-2'>
-            {/* Schedule */}
-            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-              <Calendar className='h-4 w-4 shrink-0' />
-              <span>{formatSchedule(config)}</span>
+          <div className='space-y-5 px-4 py-4'>
+            {/* Schedule section */}
+            <div className='space-y-1.5'>
+              <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                <Calendar className='h-4 w-4 shrink-0' />
+                <span>{formatSchedule(config)}</span>
+              </div>
+              <p className='pl-6 text-xs text-muted-foreground'>
+                Covers {config.coveragePeriod.start} –{' '}
+                {config.coveragePeriod.end}
+              </p>
             </div>
 
-            {/* Tickets */}
-            <div className='space-y-1.5'>
+            <Separator />
+
+            {/* Tickets section */}
+            <div className='space-y-2'>
               <p className='text-xs font-medium text-muted-foreground'>
                 Tickets ({config.tickets.length}) &middot; {totalHours}h total
               </p>
-              <div className='rounded-md border p-2 space-y-1'>
+              <div className='divide-y rounded-md border px-3'>
                 {config.tickets.map(t => (
-                  <div
+                  <TicketRow
                     key={t.issueKey}
-                    className='flex items-center justify-between text-sm'
-                  >
-                    <span className='font-mono text-xs'>{t.issueKey}</span>
-                    <span className='text-muted-foreground'>{t.hours}h</span>
-                  </div>
+                    ticket={t}
+                    result={resultsMap.get(t.issueKey)}
+                  />
                 ))}
               </div>
             </div>
 
-            {/* Last run */}
-            {config.lastRunAt && (
+            <Separator />
+
+            {/* Last run section */}
+            {config.lastRunAt ? (
+              <div className='space-y-1'>
+                <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+                  <Clock className='h-3.5 w-3.5 shrink-0' />
+                  <span>
+                    Last run: {new Date(config.lastRunAt).toLocaleString()}
+                  </span>
+                  {config.lastRunStatus && (
+                    <Badge
+                      variant={RUN_STATUS_CONFIG[config.lastRunStatus].variant}
+                      className='ml-auto py-0'
+                    >
+                      {RUN_STATUS_CONFIG[config.lastRunStatus].label}
+                    </Badge>
+                  )}
+                </div>
+                {config.lastRunStatus === 'partial' &&
+                  loggedCount !== undefined && (
+                    <p className='pl-[1.375rem] text-xs text-muted-foreground'>
+                      {loggedCount}/{config.tickets.length} tickets logged
+                    </p>
+                  )}
+              </div>
+            ) : (
               <div className='flex items-center gap-2 text-xs text-muted-foreground'>
                 <Clock className='h-3.5 w-3.5 shrink-0' />
-                <span>
-                  Last run: {new Date(config.lastRunAt).toLocaleString()}
-                </span>
-                {config.lastRunStatus && (
-                  <Badge
-                    variant={RUN_STATUS_VARIANTS[config.lastRunStatus]}
-                    className='text-xs py-0'
-                  >
-                    {RUN_STATUS_LABELS[config.lastRunStatus]}
-                  </Badge>
-                )}
+                <span>No runs yet</span>
               </div>
             )}
 
@@ -197,7 +238,6 @@ export function ConfigDetailSheet({
             )}
           </div>
 
-          {/* Actions */}
           <SheetFooter className='flex-row gap-2 border-t px-4 pt-4'>
             {config.status === 'paused_auth' ? (
               <Button className='flex-1' onClick={handleEdit}>
@@ -205,7 +245,7 @@ export function ConfigDetailSheet({
               </Button>
             ) : (
               <Button
-                variant='outline'
+                variant='default'
                 onClick={handleRun}
                 disabled={isRunning || runSuccess}
               >
@@ -224,11 +264,11 @@ export function ConfigDetailSheet({
               Edit
             </Button>
             <Button
-              variant='ghost'
-              size='icon'
+              variant='destructive'
               onClick={() => setShowDeleteDialog(true)}
             >
-              <Trash2 className='h-4 w-4 text-destructive' />
+              <Trash2 className='mr-1.5 h-3.5 w-3.5' />
+              Delete
             </Button>
           </SheetFooter>
         </SheetContent>

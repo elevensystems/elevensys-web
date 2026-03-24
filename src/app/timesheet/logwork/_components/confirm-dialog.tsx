@@ -2,10 +2,16 @@
 
 import { useState } from 'react';
 
-import { CheckCheckIcon, ChevronDown, ChevronRight, LayoutList } from 'lucide-react';
+import {
+  CheckCheckIcon,
+  ChevronDown,
+  ChevronRight,
+  LayoutList,
+} from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
 import { ActionButton } from '@/components/action-button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sheet,
   SheetContent,
@@ -14,14 +20,23 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
 import { formatHours, getWorkTypeBadgeClass } from '@/lib/timesheet';
+import { cn } from '@/lib/utils';
 import type { JiraProject, WorkEntry } from '@/types/timesheet';
 
 const MONTH_ABBRS = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 function parseApiDate(dateStr: string): Date | null {
@@ -32,7 +47,11 @@ function parseApiDate(dateStr: string): Date | null {
     m => m.toLowerCase() === monthAbbr.toLowerCase()
   );
   if (monthIndex === -1) return null;
-  return new Date(2000 + parseInt(yearShort, 10), monthIndex, parseInt(day, 10));
+  return new Date(
+    2000 + parseInt(yearShort, 10),
+    monthIndex,
+    parseInt(day, 10)
+  );
 }
 
 function formatLongDate(date: Date): string {
@@ -101,7 +120,8 @@ export function LogWorkConfirmDialog({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side='right'
-        className='rounded-t-2xl flex flex-col gap-0 p-0 sm:max-w-lg'
+        className='flex flex-col gap-0 p-0 sm:max-w-lg'
+        hideCloseButton
       >
         {/* Fixed header */}
         <SheetHeader className='px-6 pt-6 pb-4 border-b shrink-0'>
@@ -125,7 +145,9 @@ export function LogWorkConfirmDialog({
                 </span>
               </span>
               <span>
-                <span className='font-semibold'>{formatHours(totalHoursAll)}h</span>{' '}
+                <span className='font-semibold'>
+                  {formatHours(totalHoursAll)}h
+                </span>{' '}
                 <span className='text-muted-foreground'>total</span>
               </span>
               {selectedProject && (
