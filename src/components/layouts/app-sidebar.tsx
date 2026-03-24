@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import Link from 'next/link';
+import { Check, ChevronsUpDown } from 'lucide-react';
 
 import { FeedbackModal } from '@/components/layouts/feedback-modal';
 import { NavAdmin } from '@/components/layouts/nav-admin';
@@ -11,6 +11,12 @@ import { NavSecondary } from '@/components/layouts/nav-secondary';
 import { NavTools } from '@/components/layouts/nav-tools';
 import { NavUser } from '@/components/layouts/nav-user';
 import { SupportModal } from '@/components/layouts/support-modal';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
@@ -56,23 +62,50 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size='lg' asChild>
-                <Link href='/'>
-                  <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-sm'>
-                    {tenant === 'fhmhub' ? (
-                      <SolidDinosaurIcon className='size-4 fill-current' />
-                    ) : (
-                      <DiasporaIcon className='size-4 fill-current' />
-                    )}
-                  </div>
-                  <div className='grid flex-1 text-left text-sm leading-tight'>
-                    <span className='truncate font-medium'>
-                      {domainConfig.appName}
-                    </span>
-                    <span className='truncate text-xs'>Version 5.3.2</span>
-                  </div>
-                </Link>
-              </SidebarMenuButton>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton size='lg'>
+                    <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-sm'>
+                      {tenant === 'fhmhub' ? (
+                        <SolidDinosaurIcon className='size-4 fill-current' />
+                      ) : (
+                        <DiasporaIcon className='size-4 fill-current' />
+                      )}
+                    </div>
+                    <div className='grid flex-1 text-left text-sm leading-tight'>
+                      <span className='truncate font-medium'>
+                        {domainConfig.appName}
+                      </span>
+                      <span className='truncate text-xs'>Version 5.3.2</span>
+                    </div>
+                    <ChevronsUpDown className='ml-auto size-4' />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
+                  align='start'
+                  sideOffset={4}
+                >
+                  <DropdownMenuItem asChild>
+                    <a href='https://logwork.fhmhub.com' className='cursor-pointer'>
+                      <div className='flex size-6 items-center justify-center rounded-sm border'>
+                        <SolidDinosaurIcon className='size-3.5 fill-current shrink-0' />
+                      </div>
+                      Jirassic World
+                      {tenant === 'fhmhub' && <Check className='ml-auto' />}
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <a href='https://www.elevensystems.dev/' className='cursor-pointer'>
+                      <div className='flex size-6 items-center justify-center rounded-sm border'>
+                        <DiasporaIcon className='size-3.5 fill-current shrink-0' />
+                      </div>
+                      Eleven Systems
+                      {tenant === 'elevensys' && <Check className='ml-auto' />}
+                    </a>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
