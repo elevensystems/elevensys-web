@@ -6,6 +6,7 @@ import {
   Search,
   Trash2,
 } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { ActionButton } from '@/components/action-button';
@@ -57,6 +58,10 @@ const isWeekend = (date: Date) => {
   return day === 0 || day === 6;
 };
 
+function toDateKey(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
 interface MissingWorklogsCardProps {
   projects: JiraProject[];
   selectedProjectId: string;
@@ -94,10 +99,38 @@ export function MissingWorklogsCard({
   includeWeekends,
   onIncludeWeekendsChange,
 }: MissingWorklogsCardProps) {
+  const [manualDateKeys, setManualDateKeys] = useState<Set<string>>(new Set());
+
   const handleRemoveDate = (date: Date) => {
     onSelectedDatesChange(
       selectedDates.filter(d => d.getTime() !== date.getTime())
     );
+    setManualDateKeys(prev => {
+      const next = new Set(prev);
+      next.delete(toDateKey(date));
+      return next;
+    });
+  };
+
+  const handleClearAll = () => {
+    onClearAllDates();
+    setManualDateKeys(new Set());
+  };
+
+  const handleCalendarSelect = (newDates: Date[] | undefined) => {
+    const next = newDates ?? [];
+    const prevKeys = new Set(selectedDates.map(toDateKey));
+    const addedKeys = next.filter(d => !prevKeys.has(toDateKey(d))).map(toDateKey);
+    const removedKeys = selectedDates
+      .filter(d => !next.some(n => n.getTime() === d.getTime()))
+      .map(toDateKey);
+    setManualDateKeys(prev => {
+      const updated = new Set(prev);
+      addedKeys.forEach(k => updated.add(k));
+      removedKeys.forEach(k => updated.delete(k));
+      return updated;
+    });
+    onSelectedDatesChange(next);
   };
 
   const handleSearchClick = async () => {
@@ -114,6 +147,7 @@ export function MissingWorklogsCard({
           return true;
         });
       onSelectedDatesChange(dates);
+      setManualDateKeys(new Set());
       toast.success(`Found missing dates for ${result.count} user(s)`);
     }
   };
@@ -216,7 +250,7 @@ export function MissingWorklogsCard({
               <ActionButton
                 variant='ghost'
                 size='sm'
-                onClick={onClearAllDates}
+                onClick={handleClearAll}
                 className={`h-7 text-xs text-destructive hover:bg-destructive hover:text-white ${parsedDates.length > 0 ? 'visible' : 'invisible'}`}
                 leftIcon={<Trash2 />}
               >
@@ -254,7 +288,7 @@ export function MissingWorklogsCard({
                   <Calendar
                     mode='multiple'
                     selected={selectedDates}
-                    onSelect={dates => onSelectedDatesChange(dates ?? [])}
+                    onSelect={handleCalendarSelect}
                     disabled={includeWeekends ? undefined : isWeekend}
                     numberOfMonths={3}
                     showOutsideDays={false}
@@ -264,8 +298,20 @@ export function MissingWorklogsCard({
             </div>
           </div>
 
-          {/* Chip list */}
-          <DateChipList dates={selectedDates} onRemove={handleRemoveDate} />
+          {/* Chip list — bordered box only when dates exist */}
+          {selectedDates.length > 0 ? (
+            <div className='rounded-md border border-border bg-muted/30 p-2'>
+              <DateChipList
+                dates={selectedDates}
+                manualDateKeys={manualDateKeys}
+                onRemove={handleRemoveDate}
+              />
+            </div>
+          ) : (
+            <span className='text-xs text-muted-foreground italic'>
+              No dates selected. Use &quot;Find Dates&quot; or add manually below.
+            </span>
+          )}
         </div>
       </CardContent>
     </Card>

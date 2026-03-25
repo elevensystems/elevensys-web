@@ -1,66 +1,89 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { X } from 'lucide-react';
 
-const COLLAPSE_LIMIT = 11;
-
 interface DateChipListProps {
   dates: Date[];
+  manualDateKeys: Set<string>;
   onRemove: (date: Date) => void;
 }
 
 function formatChip(date: Date): string {
-  return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+  return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
 }
 
-export function DateChipList({ dates, onRemove }: DateChipListProps) {
-  const [expanded, setExpanded] = useState(false);
+export function DateChipList({
+  dates,
+  manualDateKeys,
+  onRemove,
+}: DateChipListProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showTopFade, setShowTopFade] = useState(false);
+  const [showBottomFade, setShowBottomFade] = useState(false);
 
   const sorted = [...dates].sort((a, b) => a.getTime() - b.getTime());
-  const collapsed = !expanded && sorted.length > COLLAPSE_LIMIT;
-  const visible = collapsed ? sorted.slice(0, COLLAPSE_LIMIT) : sorted;
-  const hiddenCount = sorted.length - COLLAPSE_LIMIT;
+
+  const updateFades = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setShowTopFade(el.scrollTop > 0);
+    setShowBottomFade(el.scrollTop + el.clientHeight < el.scrollHeight - 1);
+  };
+
+  // Scroll to end and update fades whenever dates change
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    // Update fades after scroll settles
+    const timer = setTimeout(updateFades, 300);
+    return () => clearTimeout(timer);
+  }, [dates.length]);
+
+  // Update fades on initial render
+  useEffect(() => {
+    updateFades();
+  });
+
+  if (dates.length === 0) {
+    return (
+      <span className='text-xs text-muted-foreground italic'>
+        No dates selected. Use &quot;Find Dates&quot; or add manually below.
+      </span>
+    );
+  }
 
   return (
-    <div className='flex flex-wrap gap-1.5 min-h-[26px] items-center'>
-      {dates.length === 0 && (
-        <span className='text-xs text-muted-foreground italic'>
-          No dates selected. Use &quot;Find Dates&quot; or add manually below.
-        </span>
+    <div className='relative'>
+      {showTopFade && (
+        <div className='pointer-events-none absolute inset-x-0 top-0 h-6 z-10 rounded-t-sm bg-gradient-to-b from-muted/60 to-transparent' />
       )}
-      {visible.map(date => (
-        <button
-          key={date.toISOString()}
-          type='button'
-          onClick={() => onRemove(date)}
-          className='inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-0.5 text-xs font-medium hover:bg-destructive hover:text-white hover:border-destructive transition-colors'
-          title={`Remove ${formatChip(date)}`}
-        >
-          {formatChip(date)}
-          <X className='size-3' />
-        </button>
-      ))}
-
-      {collapsed && (
-        <button
-          type='button'
-          onClick={() => setExpanded(true)}
-          className='inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors'
-        >
-          +{hiddenCount} more
-        </button>
-      )}
-
-      {expanded && sorted.length > COLLAPSE_LIMIT && (
-        <button
-          type='button'
-          onClick={() => setExpanded(false)}
-          className='inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:bg-accent transition-colors'
-        >
-          Show less
-        </button>
+      <div
+        ref={scrollRef}
+        onScroll={updateFades}
+        className='overflow-y-auto max-h-[154px] flex flex-wrap gap-1.5 content-start p-0.5'
+      >
+        {sorted.map(date => {
+          const key = date.toISOString().split('T')[0];
+          const isManual = manualDateKeys.has(key);
+          return (
+            <button
+              key={date.toISOString()}
+              type='button'
+              onClick={() => onRemove(date)}
+              className={`inline-flex items-center gap-1 rounded-full border bg-secondary px-2.5 py-0.5 text-xs font-medium hover:bg-destructive hover:text-white hover:border-destructive transition-colors ${isManual ? 'border-blue-400' : 'border-border'}`}
+              title={`Remove ${formatChip(date)}`}
+            >
+              {formatChip(date)}
+              <X className='size-3' />
+            </button>
+          );
+        })}
+      </div>
+      {showBottomFade && (
+        <div className='pointer-events-none absolute inset-x-0 bottom-0 h-6 z-10 rounded-b-sm bg-gradient-to-t from-muted/60 to-transparent' />
       )}
     </div>
   );
