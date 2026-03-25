@@ -63,7 +63,7 @@ export function DateChipList({
       <div
         ref={scrollRef}
         onScroll={updateFades}
-        className='overflow-y-auto max-h-[154px] flex flex-wrap gap-1.5 content-start p-0.5'
+        className='overflow-y-auto max-h-[122px] flex flex-wrap gap-1.5 content-start p-0.5'
       >
         {sorted.map(date => {
           const key = date.toISOString().split('T')[0];
