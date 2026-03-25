@@ -24,24 +24,7 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
   const [isCancelled, setIsCancelled] = useState(false);
   const [results, setResults] = useState<LogWorkResult[]>([]);
   const [requestStatuses, setRequestStatuses] = useState<RequestStatus[]>([]);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-
   const abortRef = useRef(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startTimer = useCallback(() => {
-    setElapsedSeconds(0);
-    timerRef.current = setInterval(() => {
-      setElapsedSeconds(prev => prev + 1);
-    }, 1000);
-  }, []);
-
-  const stopTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
 
   const updateRequestStatus = useCallback(
     (
@@ -134,7 +117,7 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       setIsCancelled(false);
       setResults([]);
       abortRef.current = false;
-      startTimer();
+
 
       const logResults: LogWorkResult[] = [];
 
@@ -229,7 +212,7 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
 
       setResults(logResults);
       setIsSubmitting(false);
-      stopTimer();
+
 
       return logResults;
     },
@@ -237,8 +220,6 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       settings.token,
       submitSingleDate,
       updateRequestStatus,
-      startTimer,
-      stopTimer,
     ]
   );
 
@@ -262,7 +243,7 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       setIsSubmitting(true);
       setIsCancelled(false);
       abortRef.current = false;
-      startTimer();
+
 
       const logResults: LogWorkResult[] = [];
 
@@ -340,7 +321,7 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
 
       setResults(logResults);
       setIsSubmitting(false);
-      stopTimer();
+
 
       return logResults;
     },
@@ -348,15 +329,12 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       settings.token,
       submitSingleDate,
       updateRequestStatus,
-      startTimer,
-      stopTimer,
     ]
   );
 
   const resetResults = useCallback(() => {
     setResults([]);
     setRequestStatuses([]);
-    setElapsedSeconds(0);
     setIsCancelled(false);
   }, []);
 
@@ -365,7 +343,6 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
     isCancelled,
     results,
     requestStatuses,
-    elapsedSeconds,
     submitEntries,
     retryFailed,
     cancelSubmission,

@@ -132,7 +132,6 @@ export default function LogWorkPage() {
     isCancelled,
     results,
     requestStatuses,
-    elapsedSeconds,
     submitEntries,
     retryFailed,
     cancelSubmission,
@@ -478,7 +477,6 @@ export default function LogWorkPage() {
           isCancelled={isCancelled}
           requestStatuses={requestStatuses}
           results={results}
-          elapsedSeconds={elapsedSeconds}
           onCancel={cancelSubmission}
           onRetryFailed={handleRetryFailed}
         />

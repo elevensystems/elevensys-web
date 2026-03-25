@@ -19,12 +19,6 @@ import { CancelConfirmDialog } from './cancel-confirm-dialog';
 import { EntryStatusList } from './entry-status-list';
 import { SegmentedProgressBar } from './segmented-progress-bar';
 
-function formatElapsed(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${String(s).padStart(2, '0')}`;
-}
-
 interface SubmissionModalProps {
   open: boolean;
   onClose: () => void;
@@ -32,7 +26,6 @@ interface SubmissionModalProps {
   isCancelled: boolean;
   requestStatuses: RequestStatus[];
   results: LogWorkResult[];
-  elapsedSeconds: number;
   onCancel: () => void;
   onRetryFailed: () => void;
 }
@@ -44,7 +37,6 @@ export function SubmissionModal({
   isCancelled,
   requestStatuses,
   results,
-  elapsedSeconds,
   onCancel,
   onRetryFailed,
 }: SubmissionModalProps) {
@@ -155,9 +147,6 @@ export function SubmissionModal({
             <div className='flex items-center justify-between'>
               <DialogTitle>{title}</DialogTitle>
               <div className='flex items-center gap-3'>
-                <span className='text-sm tabular-nums text-muted-foreground'>
-                  {formatElapsed(elapsedSeconds)}
-                </span>
                 {isSubmitting ? (
                   <ActionButton
                     variant='ghost'
