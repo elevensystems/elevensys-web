@@ -46,7 +46,7 @@ const timesheetActions = [
     title: 'My Worklogs',
     description:
       'View logged hours, check approval status, and delete entries if needed.',
-    href: '/timesheet/worklogs',
+    href: '/timesheet/my-worklogs',
     icon: ClipboardList,
     primary: false,
   },

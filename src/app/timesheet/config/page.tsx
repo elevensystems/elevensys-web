@@ -239,7 +239,7 @@ export default function TimesheetConfigPage() {
                       </Link>
                     </Button>
                     <Button variant='outline' asChild>
-                      <Link href='/timesheet/worklogs'>
+                      <Link href='/timesheet/my-worklogs'>
                         <ArrowLeft className='h-4 w-4' />
                         Go to My Worklogs
                       </Link>

@@ -304,7 +304,7 @@ describe('TimesheetConfigPage', () => {
     );
     expect(screen.getByText('Go to My Worklogs').closest('a')).toHaveAttribute(
       'href',
-      '/timesheet/worklogs'
+      '/timesheet/my-worklogs'
     );
   });
 
