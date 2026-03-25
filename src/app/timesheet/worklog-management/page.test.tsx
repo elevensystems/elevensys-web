@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 
 import type { MyWorklogsRow } from '@/types/timesheet';
 
-import MyWorklogsPage from './page';
+import WorklogManagementPage from './page';
 
 // --- Mock hooks ---
 
@@ -394,7 +394,7 @@ const sampleWorklogs: MyWorklogsRow[] = [
 
 // --- Tests ---
 
-describe('MyWorklogsPage', () => {
+describe('WorklogManagementPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseTimesheetSettings.mockReturnValue(configuredSettings);
@@ -408,7 +408,7 @@ describe('MyWorklogsPage', () => {
       ...configuredSettings,
       isLoaded: false,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByTestId('icon-loader')).toBeInTheDocument();
   });
 
@@ -417,17 +417,17 @@ describe('MyWorklogsPage', () => {
       ...configuredSettings,
       isLoaded: false,
     });
-    render(<MyWorklogsPage />);
-    expect(screen.queryByText('My Worklogs')).not.toBeInTheDocument();
+    render(<WorklogManagementPage />);
+    expect(screen.queryByText('Worklog Management')).not.toBeInTheDocument();
   });
 
   // --- Page header ---
 
   it('renders page header with title and description', () => {
-    render(<MyWorklogsPage />);
-    expect(screen.getByText('My Worklogs')).toBeInTheDocument();
+    render(<WorklogManagementPage />);
+    expect(screen.getByText('Worklog Management')).toBeInTheDocument();
     expect(
-      screen.getByText(/View your logged timesheets from Jira/)
+      screen.getByText(/Search and manage logged timesheets from Jira/)
     ).toBeInTheDocument();
   });
 
@@ -436,7 +436,7 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       error: 'Something went wrong',
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByTestId('header-error')).toHaveTextContent(
       'Something went wrong'
     );
@@ -449,7 +449,7 @@ describe('MyWorklogsPage', () => {
       ...configuredSettings,
       isConfigured: false,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(
       screen.getByText(/Jira settings not configured/)
     ).toBeInTheDocument();
@@ -460,13 +460,13 @@ describe('MyWorklogsPage', () => {
       ...configuredSettings,
       isConfigured: false,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     const link = screen.getByText('Go to Configs');
     expect(link.closest('a')).toHaveAttribute('href', '/timesheet/config');
   });
 
   it('hides configuration warning when Jira is configured', () => {
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(
       screen.queryByText(/Jira settings not configured/)
     ).not.toBeInTheDocument();
@@ -475,13 +475,13 @@ describe('MyWorklogsPage', () => {
   // --- Search card ---
 
   it('renders search card with title and date range picker', () => {
-    render(<MyWorklogsPage />);
-    expect(screen.getByText('Search My Worklogs')).toBeInTheDocument();
+    render(<WorklogManagementPage />);
+    expect(screen.getByText('Search Worklogs')).toBeInTheDocument();
     expect(screen.getByTestId('date-range-picker')).toBeInTheDocument();
   });
 
   it('renders project select with options', () => {
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     const projectSelect = screen.getByLabelText(/Project/);
     expect(projectSelect).toBeInTheDocument();
     expect(screen.getByText('Project One (PROJ)')).toBeInTheDocument();
@@ -489,7 +489,7 @@ describe('MyWorklogsPage', () => {
   });
 
   it('renders status select with options', () => {
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     const statusSelect = screen.getByLabelText('Status');
     expect(statusSelect).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'All' })).toBeInTheDocument();
@@ -506,7 +506,7 @@ describe('MyWorklogsPage', () => {
   });
 
   it('renders search button', () => {
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByRole('button', { name: /Search/i })).toBeInTheDocument();
   });
 
@@ -515,7 +515,7 @@ describe('MyWorklogsPage', () => {
       ...configuredSettings,
       isConfigured: false,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByRole('button', { name: /Search/i })).toBeDisabled();
   });
 
@@ -524,7 +524,7 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       selectedProject: null,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByRole('button', { name: /Search/i })).toBeDisabled();
   });
 
@@ -533,7 +533,7 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       isLoading: true,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByRole('button', { name: /Searching/i })).toBeDisabled();
   });
 
@@ -542,20 +542,20 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       isLoading: true,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(
       screen.getByText(content => content.includes('Searching'))
     ).toBeInTheDocument();
   });
 
   it('calls handleSearch when search button is clicked', async () => {
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     await userEvent.click(screen.getByRole('button', { name: /Search/i }));
     expect(mockHandleSearch).toHaveBeenCalledTimes(1);
   });
 
   it('calls setFromDate and setToDate when date range changes', async () => {
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     await userEvent.click(screen.getByTestId('change-date-range'));
     expect(mockSetFromDate).toHaveBeenCalledWith('2025-02-01');
     expect(mockSetToDate).toHaveBeenCalledWith('2025-02-28');
@@ -564,7 +564,7 @@ describe('MyWorklogsPage', () => {
   // --- Empty states ---
 
   it('renders initial prompt before search', () => {
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(
       screen.getByText(/Select a project and date range/)
     ).toBeInTheDocument();
@@ -575,19 +575,19 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       hasSearched: true,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(
       screen.getByText(/No worklogs found for the selected filters/)
     ).toBeInTheDocument();
   });
 
   it('hides worklogs table when no entries exist', () => {
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('hides results description when worklogs are empty', () => {
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     const descriptions = screen.getAllByTestId('card-description');
     const resultsDescription = descriptions.find(el =>
       el.textContent?.includes('records')
@@ -596,7 +596,7 @@ describe('MyWorklogsPage', () => {
   });
 
   it('hides BulkDeleteAction when worklogs are empty', () => {
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.queryByTestId('bulk-delete-action')).not.toBeInTheDocument();
   });
 
@@ -607,7 +607,7 @@ describe('MyWorklogsPage', () => {
       ...defaultWorklogsReturn,
       isLoading: true,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
   });
 
@@ -625,7 +625,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByRole('table')).toBeInTheDocument();
   });
 
@@ -641,7 +641,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     const descriptions = screen.getAllByTestId('card-description');
     const resultsDescription = descriptions.find(el =>
       el.textContent?.includes('records')
@@ -662,7 +662,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByTestId('worklog-row-1')).toBeInTheDocument();
     expect(screen.getByTestId('worklog-row-2')).toBeInTheDocument();
   });
@@ -679,7 +679,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByText('Key')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
     expect(screen.getByText('Hours')).toBeInTheDocument();
@@ -701,7 +701,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(
       screen.getByRole('checkbox', { name: 'Select all' })
     ).toBeInTheDocument();
@@ -720,7 +720,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByRole('checkbox', { name: 'Select all' })).toBeChecked();
   });
 
@@ -738,7 +738,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(
       screen.getByRole('checkbox', { name: 'Select all' })
     ).not.toBeChecked();
@@ -756,7 +756,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     await userEvent.click(screen.getByRole('checkbox', { name: 'Select all' }));
     expect(mockToggleSelectAll).toHaveBeenCalledTimes(1);
   });
@@ -775,7 +775,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByTestId('bulk-delete-action')).toBeInTheDocument();
   });
 
@@ -792,7 +792,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByText('2 selected')).toBeInTheDocument();
   });
 
@@ -809,7 +809,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     await userEvent.click(screen.getByText('Bulk Delete'));
     expect(mockHandleBulkDelete).toHaveBeenCalledTimes(1);
   });
@@ -827,7 +827,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     await userEvent.click(screen.getByText('Clear Selection'));
     expect(mockClearSelection).toHaveBeenCalledTimes(1);
   });
@@ -846,7 +846,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 20,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.getByTestId('pagination')).toBeInTheDocument();
   });
 
@@ -862,7 +862,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 2,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     expect(screen.queryByTestId('pagination')).not.toBeInTheDocument();
   });
 
@@ -878,7 +878,7 @@ describe('MyWorklogsPage', () => {
       pageStart: 1,
       pageEnd: 20,
     });
-    render(<MyWorklogsPage />);
+    render(<WorklogManagementPage />);
     await userEvent.click(screen.getByTestId('pagination-next'));
     expect(mockGoToPage).toHaveBeenCalledWith(2);
   });

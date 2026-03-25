@@ -44,7 +44,7 @@ export const appSidebarData = {
         },
         {
           title: 'My Worklogs',
-          url: '/timesheet/worklogs',
+          url: '/timesheet/my-worklogs',
         },
         {
           title: 'Project Worklogs',

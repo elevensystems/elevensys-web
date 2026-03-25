@@ -42,7 +42,7 @@ const features = [
     title: 'My Worklogs',
     description:
       'View all your logged timesheets from Jira. Search by date range to see your work entries, track approval status and delete entries if needed.',
-    href: '/timesheet/worklogs',
+    href: '/timesheet/my-worklogs',
     icon: ClipboardList,
     highlights: [
       'Search by date range',

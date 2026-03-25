@@ -44,7 +44,7 @@ import { WorklogRow } from './_components/worklog-row';
 
 const STATUS_OPTIONS = ['All', 'Pending', 'Reopened', 'Approved', 'Rejected'];
 
-export default function MyWorklogsPage() {
+export default function WorklogManagementPage() {
   const { settings, isConfigured, isLoaded } = useTimesheetSettings();
 
   const {
@@ -108,8 +108,8 @@ export default function MyWorklogsPage() {
       <section className='container mx-auto px-4 py-12'>
         <div className='max-w-full mx-auto space-y-8'>
           <ToolPageHeader
-            title='My Worklogs'
-            description='View your logged timesheets from Jira. Search by project, date range, and status to see your work entries.'
+            title='Worklog Management'
+            description='Search and manage logged timesheets from Jira by project. View, edit, and delete work entries with pagination support.'
             error={error || undefined}
           />
 
@@ -120,7 +120,7 @@ export default function MyWorklogsPage() {
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
                 <Search className='h-5 w-5' />
-                Search My Worklogs
+                Search Worklogs
               </CardTitle>
               <CardDescription>
                 Select a project, date range, and status, then click
