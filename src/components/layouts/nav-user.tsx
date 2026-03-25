@@ -5,18 +5,12 @@ import Link from 'next/link';
 import clsx from 'clsx';
 import {
   BadgeCheck,
-  Check,
   ChevronsUpDown,
   LogIn,
   LogOut,
-  Moon,
-  Settings,
   Sparkles,
-  Sun,
-  SunMoon,
   UserPlus,
 } from 'lucide-react';
-import { useTheme } from 'next-themes';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -24,11 +18,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -39,36 +29,6 @@ import {
 } from '@/components/ui/sidebar';
 import { AuthUser } from '@/types/auth';
 
-function ThemeSubmenu() {
-  const { theme, setTheme } = useTheme();
-  return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>
-        <SunMoon />
-        Theme
-      </DropdownMenuSubTrigger>
-      <DropdownMenuPortal>
-        <DropdownMenuSubContent>
-          <DropdownMenuItem onClick={() => setTheme('light')}>
-            <Sun />
-            <span>Light</span>
-            {theme === 'light' && <Check className='ml-auto' />}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('dark')}>
-            <Moon />
-            <span>Dark</span>
-            {theme === 'dark' && <Check className='ml-auto' />}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme('system')}>
-            <Settings />
-            <span>System</span>
-            {theme === 'system' && <Check className='ml-auto' />}
-          </DropdownMenuItem>
-        </DropdownMenuSubContent>
-      </DropdownMenuPortal>
-    </DropdownMenuSub>
-  );
-}
 
 export function NavUser({ user }: { user?: AuthUser | null }) {
   const { isMobile } = useSidebar();
@@ -125,10 +85,6 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
                     Sign up
                   </Link>
                 </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <ThemeSubmenu />
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -187,10 +143,6 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
                   Account
                 </Link>
               </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <ThemeSubmenu />
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

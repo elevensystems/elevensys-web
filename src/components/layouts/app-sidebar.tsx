@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, Moon, Settings, Sun, SunMoon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 import { FeedbackModal } from '@/components/layouts/feedback-modal';
 import { NavAdmin } from '@/components/layouts/nav-admin';
@@ -11,6 +12,7 @@ import { NavSecondary } from '@/components/layouts/nav-secondary';
 import { NavTools } from '@/components/layouts/nav-tools';
 import { NavUser } from '@/components/layouts/nav-user';
 import { SupportModal } from '@/components/layouts/support-modal';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +23,8 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -44,6 +48,7 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
+  const { theme, setTheme } = useTheme();
   const domainConfig = useDomain();
   const tenant = domainConfig.tenant;
   const tools = appSidebarData.tools;
@@ -130,6 +135,39 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
             onItemClick={handleNavAction}
           />
         )}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton size='sm'>
+                      <SunMoon />
+                      <span>Theme</span>
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side='right' align='end'>
+                    <DropdownMenuItem onClick={() => setTheme('light')}>
+                      <Sun />
+                      <span>Light</span>
+                      {theme === 'light' && <Check className='ml-auto' />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('dark')}>
+                      <Moon />
+                      <span>Dark</span>
+                      {theme === 'dark' && <Check className='ml-auto' />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('system')}>
+                      <Settings />
+                      <span>System</span>
+                      {theme === 'system' && <Check className='ml-auto' />}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
         <SidebarFooter>
           {(tenant !== 'fhmhub' || user) && <NavUser user={user} />}
         </SidebarFooter>
