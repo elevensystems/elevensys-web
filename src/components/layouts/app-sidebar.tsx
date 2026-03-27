@@ -2,8 +2,7 @@
 
 import * as React from 'react';
 
-import { Check, ChevronsUpDown, Moon, Settings, Sun, SunMoon } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import Link from 'next/link';
 
 import { FeedbackModal } from '@/components/layouts/feedback-modal';
 import { NavAdmin } from '@/components/layouts/nav-admin';
@@ -12,19 +11,11 @@ import { NavSecondary } from '@/components/layouts/nav-secondary';
 import { NavTools } from '@/components/layouts/nav-tools';
 import { NavUser } from '@/components/layouts/nav-user';
 import { SupportModal } from '@/components/layouts/support-modal';
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -48,7 +39,6 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
-  const { theme, setTheme } = useTheme();
   const domainConfig = useDomain();
   const tenant = domainConfig.tenant;
   const tools = appSidebarData.tools;
@@ -67,50 +57,23 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton size='lg'>
-                    <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-sm'>
-                      {tenant === 'fhmhub' ? (
-                        <SolidDinosaurIcon className='size-4 fill-current' />
-                      ) : (
-                        <DiasporaIcon className='size-4 fill-current' />
-                      )}
-                    </div>
-                    <div className='grid flex-1 text-left text-sm leading-tight'>
-                      <span className='truncate font-medium'>
-                        {domainConfig.appName}
-                      </span>
-                      <span className='truncate text-xs'>Version 5.3.2</span>
-                    </div>
-                    <ChevronsUpDown className='ml-auto size-4' />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
-                  align='start'
-                  sideOffset={4}
-                >
-                  <DropdownMenuItem asChild>
-                    <a href='https://logwork.fhmhub.com' className='cursor-pointer'>
-                      <div className='flex size-6 items-center justify-center rounded-sm border'>
-                        <SolidDinosaurIcon className='size-3.5 fill-current shrink-0' />
-                      </div>
-                      Jirassic World
-                      {tenant === 'fhmhub' && <Check className='ml-auto' />}
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <a href='https://www.elevensystems.dev/' className='cursor-pointer'>
-                      <div className='flex size-6 items-center justify-center rounded-sm border'>
-                        <DiasporaIcon className='size-3.5 fill-current shrink-0' />
-                      </div>
-                      Eleven Systems
-                      {tenant === 'elevensys' && <Check className='ml-auto' />}
-                    </a>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <SidebarMenuButton size='lg' asChild>
+                <Link href='/'>
+                  <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-sm'>
+                    {tenant === 'fhmhub' ? (
+                      <SolidDinosaurIcon className='size-4 fill-current' />
+                    ) : (
+                      <DiasporaIcon className='size-4 fill-current' />
+                    )}
+                  </div>
+                  <div className='grid flex-1 text-left text-sm leading-tight'>
+                    <span className='truncate font-medium'>
+                      {domainConfig.appName}
+                    </span>
+                    <span className='truncate text-xs'>Version 5.3.2</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
@@ -118,6 +81,18 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           {user?.role === 'admin' && hasData(appSidebarData.navAdmin) && (
             <NavAdmin items={appSidebarData.navAdmin} />
           )}
+          <SidebarGroup>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={appSidebarData.navHome.title}>
+                  <Link href={appSidebarData.navHome.url}>
+                    <appSidebarData.navHome.icon />
+                    <span>{appSidebarData.navHome.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
           {hasData(appSidebarData.navMain) && (
             <NavMain
               items={appSidebarData.navMain}
@@ -135,41 +110,8 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
             onItemClick={handleNavAction}
           />
         )}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton size='sm'>
-                      <SunMoon />
-                      <span>Theme</span>
-                    </SidebarMenuButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side='right' align='end'>
-                    <DropdownMenuItem onClick={() => setTheme('light')}>
-                      <Sun />
-                      <span>Light</span>
-                      {theme === 'light' && <Check className='ml-auto' />}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme('dark')}>
-                      <Moon />
-                      <span>Dark</span>
-                      {theme === 'dark' && <Check className='ml-auto' />}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme('system')}>
-                      <Settings />
-                      <span>System</span>
-                      {theme === 'system' && <Check className='ml-auto' />}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
         <SidebarFooter>
-          {(tenant !== 'fhmhub' || user) && <NavUser user={user} />}
+          <NavUser user={user} />
         </SidebarFooter>
       </Sidebar>
       <SupportModal

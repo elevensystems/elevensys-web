@@ -1,5 +1,4 @@
 import {
-  BadgeCheck,
   Braces,
   CaseSensitive,
   Clock,
@@ -11,9 +10,11 @@ import {
   Link as LinkIcon,
   Music4,
   Package,
+  RefreshCw,
   ScanSearch,
   ScrollText,
   Send,
+  Settings,
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
@@ -26,12 +27,12 @@ import type { AuthUser } from '@/types/auth';
  */
 export const appSidebarData = {
   user: null as AuthUser | null,
+  navHome: {
+    title: 'Home',
+    url: '/',
+    icon: Home,
+  },
   navMain: [
-    {
-      title: 'Home',
-      url: '/',
-      icon: Home,
-    },
     {
       title: 'Timesheet',
       url: '/timesheet',
@@ -50,16 +51,18 @@ export const appSidebarData = {
           title: 'Project Worklogs',
           url: '/timesheet/project-worklogs',
         },
-        {
-          title: 'Configs',
-          url: '/timesheet/config',
-        },
       ],
     },
     {
-      title: 'QA/SM Check (Soon)',
-      url: '#',
-      icon: BadgeCheck,
+      title: 'Autolog',
+      url: '/timesheet/autolog',
+      icon: RefreshCw,
+      isActive: false,
+    },
+    {
+      title: 'Configs',
+      url: '/timesheet/config',
+      icon: Settings,
       isActive: false,
     },
   ],
