@@ -17,15 +17,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import {
@@ -38,6 +29,7 @@ import {
 import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 import { getWorklogKey, useWorklogs } from '@/hooks/use-worklogs';
 
+import { TimesheetPagination } from '../_components/timesheet-pagination';
 import { BulkDeleteAction } from './_components/bulk-delete-action';
 import { EditWorklogModal } from './_components/edit-worklog-modal';
 import { WorklogRow } from './_components/worklog-row';
@@ -100,8 +92,6 @@ export default function WorklogManagementPage() {
     );
   }
 
-  const hasPrevPage = currentPage > 1;
-  const hasNextPage = currentPage < totalPages;
 
   return (
     <MainLayout>
@@ -338,80 +328,12 @@ export default function WorklogManagementPage() {
                     </Table>
                   </div>
 
-                  {totalPages > 1 && (
-                    <div className='flex justify-end mt-4'>
-                      <Pagination className='mx-0 w-auto'>
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious
-                              onClick={
-                                hasPrevPage && !isLoading
-                                  ? () => goToPage(currentPage - 1)
-                                  : undefined
-                              }
-                              aria-disabled={!hasPrevPage || isLoading}
-                              className={
-                                !hasPrevPage || isLoading
-                                  ? 'pointer-events-none opacity-50'
-                                  : 'cursor-pointer'
-                              }
-                            />
-                          </PaginationItem>
-                          {Array.from({ length: totalPages }).map((_, i) => {
-                            const pageNum = i + 1;
-                            const isFirst = i === 0;
-                            const isLast = i === totalPages - 1;
-                            const isNearCurrent =
-                              Math.abs(pageNum - currentPage) <= 1;
-
-                            if (!isFirst && !isLast && !isNearCurrent) {
-                              const prevShown =
-                                i === 1
-                                  ? true
-                                  : i - 1 === 0 ||
-                                    i - 1 === totalPages - 1 ||
-                                    Math.abs(i - currentPage) <= 1;
-                              if (prevShown) {
-                                return (
-                                  <PaginationItem key={i}>
-                                    <PaginationEllipsis />
-                                  </PaginationItem>
-                                );
-                              }
-                              return null;
-                            }
-
-                            return (
-                              <PaginationItem key={i}>
-                                <PaginationLink
-                                  isActive={pageNum === currentPage}
-                                  onClick={() => goToPage(pageNum)}
-                                  className='cursor-pointer'
-                                >
-                                  {pageNum}
-                                </PaginationLink>
-                              </PaginationItem>
-                            );
-                          })}
-                          <PaginationItem>
-                            <PaginationNext
-                              onClick={
-                                hasNextPage && !isLoading
-                                  ? () => goToPage(currentPage + 1)
-                                  : undefined
-                              }
-                              aria-disabled={!hasNextPage || isLoading}
-                              className={
-                                !hasNextPage || isLoading
-                                  ? 'pointer-events-none opacity-50'
-                                  : 'cursor-pointer'
-                              }
-                            />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                    </div>
-                  )}
+                  <TimesheetPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    isLoading={isLoading}
+                    onPageChange={goToPage}
+                  />
                 </>
               )}
             </CardContent>

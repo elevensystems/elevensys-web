@@ -20,39 +20,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { formatHours, getWorkTypeBadgeClass } from '@/lib/timesheet';
+import {
+  formatHours,
+  getWorkTypeBadgeClass,
+  parseApiDate,
+} from '@/lib/timesheet';
 import { cn } from '@/lib/utils';
 import type { JiraProject, WorkEntry } from '@/types/timesheet';
-
-const MONTH_ABBRS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-
-function parseApiDate(dateStr: string): Date | null {
-  const match = dateStr.match(/^(\d{1,2})\/([A-Za-z]{3})\/(\d{2})$/);
-  if (!match) return null;
-  const [, day, monthAbbr, yearShort] = match;
-  const monthIndex = MONTH_ABBRS.findIndex(
-    m => m.toLowerCase() === monthAbbr.toLowerCase()
-  );
-  if (monthIndex === -1) return null;
-  return new Date(
-    2000 + parseInt(yearShort, 10),
-    monthIndex,
-    parseInt(day, 10)
-  );
-}
 
 function formatLongDate(date: Date): string {
   return date.toLocaleDateString('en-GB', {
@@ -65,7 +39,7 @@ function formatLongDate(date: Date): string {
 
 const COLLAPSE_THRESHOLD = 3;
 
-interface LogWorkConfirmDialogProps {
+interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
@@ -75,7 +49,7 @@ interface LogWorkConfirmDialogProps {
   totalHours: number;
 }
 
-export function LogWorkConfirmDialog({
+export function ConfirmDialog({
   open,
   onOpenChange,
   onConfirm,
@@ -83,7 +57,7 @@ export function LogWorkConfirmDialog({
   parsedDates,
   selectedProject,
   totalHours,
-}: LogWorkConfirmDialogProps) {
+}: ConfirmDialogProps) {
   const validEntries = entries.filter(e => e.issueKey.trim());
   const totalWorklogs = validEntries.length * parsedDates.length;
   const totalHoursAll = totalHours * parsedDates.length;
@@ -120,7 +94,7 @@ export function LogWorkConfirmDialog({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side='right'
-        className='flex flex-col gap-0 p-0 sm:max-w-lg'
+        className='flex flex-col gap-0 p-0 sm:max-w-md'
         hideCloseButton
       >
         {/* Fixed header */}
@@ -131,31 +105,27 @@ export function LogWorkConfirmDialog({
           </SheetDescription>
 
           {/* Summary Banner */}
-          <div className='flex items-center gap-3 rounded-lg border bg-muted/50 px-4 py-3 mt-2'>
-            <LayoutList className='h-4 w-4 shrink-0 text-primary' />
-            <div className='flex flex-wrap gap-x-4 gap-y-1 text-sm'>
-              <span>
-                <span className='font-semibold'>{totalWorklogs}</span>{' '}
-                <span className='text-muted-foreground'>worklogs</span>
-              </span>
-              <span>
-                <span className='font-semibold'>{parsedDates.length}</span>{' '}
-                <span className='text-muted-foreground'>
-                  {parsedDates.length !== 1 ? 'dates' : 'date'}
-                </span>
-              </span>
-              <span>
-                <span className='font-semibold'>
-                  {formatHours(totalHoursAll)}h
-                </span>{' '}
-                <span className='text-muted-foreground'>total</span>
-              </span>
-              {selectedProject && (
-                <span className='text-muted-foreground'>
-                  · {selectedProject.key}
-                </span>
-              )}
+          <div className='mt-2 rounded-lg border bg-muted/30 overflow-hidden'>
+            <div className='grid grid-cols-3 divide-x'>
+              <div className='flex flex-col items-center py-3 gap-0.5'>
+                <span className='text-lg font-bold tabular-nums leading-none'>{totalWorklogs}</span>
+                <span className='text-xs text-muted-foreground'>worklogs</span>
+              </div>
+              <div className='flex flex-col items-center py-3 gap-0.5'>
+                <span className='text-lg font-bold tabular-nums leading-none'>{parsedDates.length}</span>
+                <span className='text-xs text-muted-foreground'>{parsedDates.length !== 1 ? 'dates' : 'date'}</span>
+              </div>
+              <div className='flex flex-col items-center py-3 gap-0.5'>
+                <span className='text-lg font-bold tabular-nums leading-none'>{formatHours(totalHoursAll)}h</span>
+                <span className='text-xs text-muted-foreground'>total</span>
+              </div>
             </div>
+            {selectedProject && (
+              <div className='flex items-center gap-1.5 border-t px-3 py-2'>
+                <LayoutList className='h-3 w-3 shrink-0 text-muted-foreground' />
+                <span className='text-xs text-muted-foreground font-mono'>{selectedProject.key}</span>
+              </div>
+            )}
           </div>
         </SheetHeader>
 
@@ -226,7 +196,7 @@ export function LogWorkConfirmDialog({
                             </div>
                           </div>
                           {entry.description && (
-                            <p className='text-xs text-muted-foreground truncate'>
+                            <p className='w-90 text-xs text-muted-foreground truncate'>
                               {entry.description}
                             </p>
                           )}
@@ -241,10 +211,7 @@ export function LogWorkConfirmDialog({
         </ScrollArea>
 
         {/* Fixed footer */}
-        <SheetFooter className='px-6 py-4 border-t shrink-0 flex-row justify-end gap-2'>
-          <ActionButton variant='outline' onClick={() => onOpenChange(false)}>
-            Cancel
-          </ActionButton>
+        <SheetFooter className='px-6 py-4 border-t shrink-0 flex-row justify-start gap-2'>
           <ActionButton onClick={onConfirm} leftIcon={<CheckCheckIcon />}>
             Confirm &amp; Submit
           </ActionButton>

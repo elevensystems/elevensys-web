@@ -56,7 +56,11 @@ export function EntryStatusRow({
   issueKey,
   dateStatuses,
 }: EntryStatusRowProps) {
-  const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
+  // Encode phase into override so it auto-invalidates on phase transitions
+  const [expandOverride, setExpandOverride] = useState<{
+    phase: string;
+    value: boolean;
+  } | null>(null);
 
   const hasStarted = dateStatuses.some((s) => s.status !== 'pending');
   const allDone = dateStatuses.every(
@@ -73,18 +77,9 @@ export function EntryStatusRow({
       s.status === 'skipped'
   ).length;
 
-  // Reset manual override on phase transitions (setState-during-render, allowed by React)
-  const [prevHasStarted, setPrevHasStarted] = useState(hasStarted);
-  const [prevAllDone, setPrevAllDone] = useState(allDone);
-
-  if (hasStarted !== prevHasStarted) {
-    setPrevHasStarted(hasStarted);
-    setManualExpanded(null);
-  }
-  if (allDone !== prevAllDone) {
-    setPrevAllDone(allDone);
-    setManualExpanded(null);
-  }
+  const phase = `${hasStarted}-${allDone}`;
+  const manualExpanded =
+    expandOverride?.phase === phase ? expandOverride.value : null;
 
   // Auto-expand while processing (started but not all done), collapse when complete
   const autoExpanded = hasStarted && !allDone;
@@ -94,7 +89,7 @@ export function EntryStatusRow({
     <div className='border-b last:border-b-0'>
       <button
         type='button'
-        onClick={() => setManualExpanded(!expanded)}
+        onClick={() => setExpandOverride({ phase, value: !expanded })}
         className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-muted/50 transition-colors'
       >
         <ChevronRight

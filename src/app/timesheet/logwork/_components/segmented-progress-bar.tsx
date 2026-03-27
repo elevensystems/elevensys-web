@@ -21,8 +21,19 @@ function SegmentedBar({
 }: {
   statuses: RequestStatus[];
 }) {
+  const completed = statuses.filter(
+    s => s.status === 'success' || s.status === 'failed' || s.status === 'skipped'
+  ).length;
+  const pct = statuses.length > 0 ? Math.round((completed / statuses.length) * 100) : 0;
+
   return (
-    <div className='flex h-2.5 w-full gap-px overflow-hidden rounded-full'>
+    <div
+      className='flex h-2.5 w-full gap-px overflow-hidden rounded-full'
+      role='progressbar'
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
       {statuses.map((rs, i) => (
         <div
           key={`${rs.entryId}-${rs.date}-${i}`}
@@ -50,7 +61,13 @@ function SmoothBar({
   const hasFailed = statuses.some((s) => s.status === 'failed');
 
   return (
-    <div className='h-2.5 w-full overflow-hidden rounded-full bg-muted'>
+    <div
+      className='h-2.5 w-full overflow-hidden rounded-full bg-muted'
+      role='progressbar'
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
       <div
         className={cn(
           'h-full rounded-full transition-all duration-500 ease-out',

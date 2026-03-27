@@ -37,7 +37,11 @@ import type {
   AutologTicket,
 } from '@/types/autolog';
 
-import { formatSchedule, RUN_STATUS_CONFIG, STATUS_LABELS } from './config-card';
+import {
+  RUN_STATUS_CONFIG,
+  STATUS_LABELS,
+  formatSchedule,
+} from './config-card';
 
 interface ConfigDetailSheetProps {
   config: AutologConfig | null;
@@ -46,7 +50,6 @@ interface ConfigDetailSheetProps {
   onDelete: (configId: string) => Promise<boolean>;
   onRun: (configId: string) => Promise<boolean>;
 }
-
 
 function TicketRow({
   ticket,
@@ -146,7 +149,7 @@ export function ConfigDetailSheet({
           className={
             isMobile
               ? 'max-h-[70vh] overflow-y-auto rounded-t-2xl'
-              : 'overflow-y-auto sm:max-w-lg'
+              : 'overflow-y-auto sm:max-w-md'
           }
         >
           <SheetHeader>
@@ -259,17 +262,19 @@ export function ConfigDetailSheet({
                 {isRunning ? 'Running...' : runSuccess ? 'Done' : 'Run Now'}
               </Button>
             )}
-            <Button variant='outline' onClick={handleEdit}>
-              <Pencil className='mr-1.5 h-3.5 w-3.5' />
-              Edit
-            </Button>
-            <Button
-              variant='destructive'
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              <Trash2 className='mr-1.5 h-3.5 w-3.5' />
-              Delete
-            </Button>
+            <div className='ml-auto flex gap-2'>
+              <Button variant='outline' onClick={handleEdit}>
+                <Pencil className='mr-1.5 h-3.5 w-3.5' />
+                Edit
+              </Button>
+              <Button
+                variant='destructive'
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className='mr-1.5 h-3.5 w-3.5' />
+                Delete
+              </Button>
+            </div>
           </SheetFooter>
         </SheetContent>
       </Sheet>

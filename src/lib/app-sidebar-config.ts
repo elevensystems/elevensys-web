@@ -51,6 +51,10 @@ export const appSidebarData = {
           title: 'Project Worklogs',
           url: '/timesheet/project-worklogs',
         },
+        {
+          title: 'Worklog Management',
+          url: '/timesheet/worklog-management',
+        },
       ],
     },
     {

@@ -41,7 +41,7 @@ import {
 } from '@/lib/timesheet';
 import type { LogWorkResult, WorkEntry } from '@/types/timesheet';
 
-import { LogWorkConfirmDialog } from './_components/confirm-dialog';
+import { ConfirmDialog } from './_components/confirm-dialog';
 import { MissingWorklogsCard } from './_components/missing-worklogs-card';
 import { SubmissionModal } from './_components/submission-modal';
 import { WorkEntryRow } from './_components/work-entry-row';
@@ -481,7 +481,7 @@ export default function LogWorkPage() {
           onRetryFailed={handleRetryFailed}
         />
 
-        <LogWorkConfirmDialog
+        <ConfirmDialog
           open={showConfirmDialog}
           onOpenChange={setShowConfirmDialog}
           onConfirm={handleLogWork}

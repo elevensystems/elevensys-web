@@ -27,7 +27,10 @@ export const STATUS_LABELS: Record<AutologConfig['status'], string> = {
 
 export const RUN_STATUS_CONFIG: Record<
   NonNullable<AutologConfig['lastRunStatus']>,
-  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+  {
+    label: string;
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
+  }
 > = {
   success: { label: 'Success', variant: 'default' },
   partial: { label: 'Partial', variant: 'secondary' },
@@ -53,7 +56,7 @@ export function ConfigCard({ config, onClick }: ConfigCardProps) {
   return (
     <Card
       className={cn(
-        'cursor-pointer transition-colors hover:bg-muted/50 py-0',
+        'cursor-pointer transition-colors hover:bg-muted/50 py-0 gap-2',
         isPaused && 'border-destructive/30'
       )}
       onClick={() => onClick(config)}

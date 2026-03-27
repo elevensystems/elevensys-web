@@ -14,13 +14,13 @@ import {
   getStatusVariant,
   getWorkTypeBadgeClass,
 } from '@/lib/timesheet';
-import type { ProjectWorklogRow } from '@/types/timesheet';
+import type { ProjectWorklogRow as ProjectWorklogRowData } from '@/types/timesheet';
 
 interface ProjectWorklogRowProps {
-  row: ProjectWorklogRow;
+  row: ProjectWorklogRowData;
 }
 
-export const ProjectWorklogRowItem = memo(function ProjectWorklogRowItem({
+export const ProjectWorklogRow = memo(function ProjectWorklogRow({
   row,
 }: ProjectWorklogRowProps) {
   const displayDate = formatDisplayDate(row.date);
