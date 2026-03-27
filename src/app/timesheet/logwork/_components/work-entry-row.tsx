@@ -37,6 +37,7 @@ interface WorkEntryRowProps {
   ) => void;
   onRemove: (id: string) => void;
   onFetchTypeOfWork: (issueId: number) => Promise<WorkType | null>;
+  disabled?: boolean;
 }
 
 export const WorkEntryRow = memo(function WorkEntryRow({
@@ -47,6 +48,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
   onUpdate,
   onRemove,
   onFetchTypeOfWork,
+  disabled = false,
 }: WorkEntryRowProps) {
   const [isFetchingTypeOfWork, setIsFetchingTypeOfWork] = useState(false);
 
@@ -126,7 +128,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           <ComboboxInput
             placeholder={isLoadingIssues ? 'Loading...' : 'Select ticket'}
             className='h-8'
-            disabled={isLoadingIssues}
+            disabled={isLoadingIssues || disabled}
             showClear
           />
           <ComboboxContent>

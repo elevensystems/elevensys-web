@@ -28,30 +28,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { parseApiDate } from '@/lib/timesheet';
 import type { JiraProject } from '@/types/timesheet';
 
 import { DateChipList } from './date-chip-list';
 
-const MONTH_ABBRS = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
-
-/** Parse "D/Mon/YY" or "DD/Mon/YY" → Date (local time) */
-function parseApiDate(dateStr: string): Date | null {
-  const match = dateStr.match(/^(\d{1,2})\/([A-Za-z]{3})\/(\d{2})$/);
-  if (!match) return null;
-  const [, day, monthAbbr, yearShort] = match;
-  const monthIndex = MONTH_ABBRS.findIndex(
-    m => m.toLowerCase() === monthAbbr.toLowerCase()
-  );
-  if (monthIndex === -1) return null;
-  return new Date(
-    2000 + parseInt(yearShort, 10),
-    monthIndex,
-    parseInt(day, 10)
-  );
-}
 
 const isWeekend = (date: Date) => {
   const day = date.getDay();

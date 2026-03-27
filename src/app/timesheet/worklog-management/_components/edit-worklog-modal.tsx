@@ -19,6 +19,7 @@ import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
+import { formatDateForApi, jiraDateToISO, MAX_HOURS, MIN_HOURS } from '@/lib/timesheet';
 import { WORK_TYPES } from '@/types/timesheet';
 import type { MyWorklogsRow, UpdateWorklogRequest } from '@/types/timesheet';
 
@@ -27,11 +28,11 @@ const editWorklogSchema = z.object({
   worked: z
     .string()
     .min(1, 'Hours is required')
-    .refine(val => !Number.isNaN(Number(val)) && Number(val) >= 0.1, {
-      message: 'Minimum is 0.1 hours',
+    .refine(val => !Number.isNaN(Number(val)) && Number(val) >= MIN_HOURS, {
+      message: `Minimum is ${MIN_HOURS} hours`,
     })
-    .refine(val => !Number.isNaN(Number(val)) && Number(val) <= 8, {
-      message: 'Maximum is 8 hours',
+    .refine(val => !Number.isNaN(Number(val)) && Number(val) <= MAX_HOURS, {
+      message: `Maximum is ${MAX_HOURS} hours`,
     }),
   typeOfWork: z.string().min(1, 'Type of work is required'),
   description: z.string().min(1, 'Description is required'),
@@ -47,58 +48,6 @@ interface EditWorklogModalProps {
   ) => void;
 }
 
-/**
- * Convert Jira date format "DD/Mon/YY" to ISO "YYYY-MM-DD" for the date input.
- * Falls back to the raw string if parsing fails.
- */
-function jiraDateToISO(dateStr: string): string {
-  const match = dateStr.match(/^(\d{1,2})\/([A-Za-z]{3})\/(\d{2})$/);
-  if (!match) return dateStr;
-  const [, day, monthAbbr, yearShort] = match;
-  const months: Record<string, string> = {
-    jan: '01',
-    feb: '02',
-    mar: '03',
-    apr: '04',
-    may: '05',
-    jun: '06',
-    jul: '07',
-    aug: '08',
-    sep: '09',
-    oct: '10',
-    nov: '11',
-    dec: '12',
-  };
-  const mm = months[monthAbbr.toLowerCase()];
-  if (!mm) return dateStr;
-  const yyyy = `20${yearShort}`;
-  return `${yyyy}-${mm}-${day.padStart(2, '0')}`;
-}
-
-/**
- * Convert ISO "YYYY-MM-DD" back to Jira format "D/Mon/YY".
- */
-function isoToJiraDate(isoStr: string): string {
-  const date = new Date(isoStr + 'T00:00:00');
-  const day = date.getDate();
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  const month = months[date.getMonth()];
-  const year = String(date.getFullYear()).slice(-2);
-  return `${day}/${month}/${year}`;
-}
 
 function getDefaultValues(worklog: MyWorklogsRow) {
   return {
@@ -147,7 +96,7 @@ export function EditWorklogModal({
 
       const originalDate = worklog.startDateEdit || worklog.startDate || '';
       const newJiraDate = value.startDateEdit
-        ? isoToJiraDate(value.startDateEdit)
+        ? formatDateForApi(value.startDateEdit)
         : '';
       if (newJiraDate !== originalDate) {
         changes.startDateEdit = newJiraDate;
@@ -203,9 +152,9 @@ export function EditWorklogModal({
                   <Input
                     id='edit-hours'
                     type='number'
-                    min='0.1'
-                    max='24'
-                    step='0.1'
+                    min={String(MIN_HOURS)}
+                    max={String(MAX_HOURS)}
+                    step={String(MIN_HOURS)}
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={e => field.handleChange(e.target.value)}

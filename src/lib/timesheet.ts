@@ -21,6 +21,34 @@ export const REQUEST_DELAY_MS = 1500;
 export const SETTINGS_STORAGE_KEY = 'timesheet_settings';
 
 /**
+ * Parse Jira date format "D/Mon/YY" or "DD/Mon/YY" to a Date object (local time).
+ * Returns null if the format doesn't match.
+ */
+export function parseApiDate(dateStr: string): Date | null {
+  const match = dateStr.match(/^(\d{1,2})\/([A-Za-z]{3})\/(\d{2})$/);
+  if (!match) return null;
+  const [, day, monthAbbr, yearShort] = match;
+  const monthIndex = MONTH_ABBRS.findIndex(
+    m => m.toLowerCase() === monthAbbr.toLowerCase()
+  );
+  if (monthIndex === -1) return null;
+  return new Date(2000 + parseInt(yearShort, 10), monthIndex, parseInt(day, 10));
+}
+
+/**
+ * Convert Jira date format "D/Mon/YY" to ISO "YYYY-MM-DD".
+ * Falls back to the raw string if parsing fails.
+ */
+export function jiraDateToISO(dateStr: string): string {
+  const date = parseApiDate(dateStr);
+  if (!date) return dateStr;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
  * Convert YYYY-MM-DD to Jira API format D/Mon/YY
  * e.g. "2025-01-15" → "15/Jan/25"
  */

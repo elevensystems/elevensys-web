@@ -41,7 +41,7 @@ export function NavMain({
   const filteredItems = items.filter(item => !item.adminOnly || isAdmin);
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Jira</SidebarGroupLabel>
       <SidebarMenu>
         {filteredItems.map(item => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>

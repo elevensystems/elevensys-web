@@ -42,10 +42,13 @@ export function DateChipList({
     return () => clearTimeout(timer);
   }, [dates.length]);
 
-  // Update fades on initial render
+  // Update fades when dates change
   useEffect(() => {
-    updateFades();
-  });
+    const el = scrollRef.current;
+    if (!el) return;
+    setShowTopFade(el.scrollTop > 0);
+    setShowBottomFade(el.scrollTop + el.clientHeight < el.scrollHeight - 1);
+  }, [dates]);
 
   if (dates.length === 0) {
     return (

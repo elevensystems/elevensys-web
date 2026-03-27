@@ -25,7 +25,7 @@ interface CommittedFilters {
   endDate: string;
   username: string;
   typeOfWork: string;
-  filStatus: string;
+  filterStatus: string;
   desc: boolean;
 }
 
@@ -43,7 +43,7 @@ export function useProjectWorklogs({
   // Filter form state
   const [username, setUsername] = useState('');
   const [typeOfWork, setTypeOfWork] = useState('All');
-  const [filStatus, setFilStatus] = useState<string[]>([]);
+  const [filterStatus, setFilterStatus] = useState<string[]>([]);
   const [fromDate, setFromDate] = useState(getMonthStart());
   const [toDate, setToDate] = useState(getMonthEnd());
   const [desc, setDesc] = useState(false);
@@ -82,7 +82,7 @@ export function useProjectWorklogs({
             endDate: filters.endDate,
             username: filters.username,
             typeOfWork: filters.typeOfWork,
-            filStatus: filters.filStatus,
+            filStatus: filters.filterStatus,
             filConflict: '',
             components: '',
             products: '',
@@ -158,7 +158,7 @@ export function useProjectWorklogs({
       endDate: formatDateForApi(toDate),
       username,
       typeOfWork: typeOfWork === 'All' ? '' : typeOfWork,
-      filStatus: filStatus.join(','),
+      filterStatus: filterStatus.join(','),
       desc,
     };
 
@@ -171,7 +171,7 @@ export function useProjectWorklogs({
     toDate,
     username,
     typeOfWork,
-    filStatus,
+    filterStatus,
     desc,
     fetchPage,
   ]);
@@ -195,8 +195,8 @@ export function useProjectWorklogs({
     setUsername,
     typeOfWork,
     setTypeOfWork,
-    filStatus,
-    setFilStatus,
+    filterStatus,
+    setFilterStatus,
     fromDate,
     setFromDate,
     toDate,

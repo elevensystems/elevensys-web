@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -46,12 +46,14 @@ export default function TimesheetConfigPage() {
 
   // Sync local form state with loaded settings
   const [initialized, setInitialized] = useState(false);
-  if (isLoaded && !initialized) {
-    setUsername(settings.username);
-    setToken(settings.token);
-    setJiraInstance(settings.jiraInstance || 'jiradc');
-    setInitialized(true);
-  }
+  useEffect(() => {
+    if (isLoaded && !initialized) {
+      setUsername(settings.username);
+      setToken(settings.token);
+      setJiraInstance(settings.jiraInstance || 'jiradc');
+      setInitialized(true);
+    }
+  }, [isLoaded, initialized, settings]);
 
   const [isSaving, setIsSaving] = useState(false);
 
