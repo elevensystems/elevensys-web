@@ -38,6 +38,7 @@ interface WorkEntryRowProps {
   onRemove: (id: string) => void;
   onFetchTypeOfWork: (issueId: number) => Promise<WorkType | null>;
   disabled?: boolean;
+  isLastRow?: boolean;
 }
 
 export const WorkEntryRow = memo(function WorkEntryRow({
@@ -49,6 +50,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
   onRemove,
   onFetchTypeOfWork,
   disabled = false,
+  isLastRow = false,
 }: WorkEntryRowProps) {
   const [isFetchingTypeOfWork, setIsFetchingTypeOfWork] = useState(false);
 
@@ -190,6 +192,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           size='icon'
           className='h-8 w-8 text-destructive hover:bg-destructive hover:text-white'
           onClick={handleRemove}
+          disabled={isLastRow}
           leftIcon={<Trash2 />}
         />
       </TableCell>
