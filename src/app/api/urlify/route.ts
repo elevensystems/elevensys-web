@@ -37,12 +37,11 @@ export async function POST(request: NextRequest) {
     const result = await response.json();
 
     return NextResponse.json({
-      shortUrl: result.data.shortUrl,
-      shortCode:
-        result.data.shortCode || result.data.shortUrl?.split('/').pop(),
-      originalUrl: result.data.originalUrl,
-      createdAt: result.data.createdAt,
-      expiresAt: result.data.expiresAt,
+      shortUrl: result.shortUrl,
+      shortCode: result.shortCode || result.shortUrl?.split('/').pop(),
+      originalUrl: result.originalUrl,
+      createdAt: result.createdAt,
+      expiresAt: result.expiresAt,
     });
   } catch (error) {
     console.error('Error in URL shortener API:', error);
