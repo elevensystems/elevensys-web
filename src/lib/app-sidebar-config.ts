@@ -1,3 +1,5 @@
+import type React from 'react';
+
 import {
   Braces,
   CaseSensitive,
@@ -22,6 +24,15 @@ import {
 import type { ToolConfig } from '@/lib/tools-config';
 import type { AuthUser } from '@/types/auth';
 
+export interface NavMainItem {
+  title: string;
+  url: string;
+  icon: React.ComponentType;
+  isActive: boolean;
+  flagKey?: string;
+  items?: { title: string; url: string }[];
+}
+
 /**
  * Sidebar navigation and tools configuration
  */
@@ -33,6 +44,7 @@ export const appSidebarData = {
     icon: Home,
   },
   navMain: [
+    // Items with a `flagKey` are hidden when that flag is disabled.
     {
       title: 'Timesheet',
       url: '/timesheet',
@@ -62,6 +74,7 @@ export const appSidebarData = {
       url: '/timesheet/autolog',
       icon: RefreshCw,
       isActive: false,
+      flagKey: 'enable-autolog',
     },
     {
       title: 'Configs',
@@ -69,7 +82,7 @@ export const appSidebarData = {
       icon: Settings,
       isActive: false,
     },
-  ],
+  ] satisfies NavMainItem[],
   navAdmin: [
     {
       title: 'Dashboard',

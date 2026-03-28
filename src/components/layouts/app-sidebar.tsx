@@ -30,6 +30,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useDomain } from '@/contexts/domain-context';
+import { isFlagEnabled, useFlags } from '@/contexts/flags-context';
 import { appSidebarData } from '@/lib/app-sidebar-config';
 import type { AuthUser } from '@/types/auth';
 
@@ -50,6 +51,11 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const domainConfig = useDomain();
   const tenant = domainConfig.tenant;
   const tools = appSidebarData.tools;
+  const flags = useFlags();
+  const navMain = React.useMemo(
+    () => appSidebarData.navMain.filter(item => isFlagEnabled(flags, item.flagKey)),
+    [flags]
+  );
 
   const handleNavAction = (action?: string) => {
     if (action === 'support') {
@@ -131,9 +137,9 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
-          {hasData(appSidebarData.navMain) && (
+          {hasData(navMain) && (
             <NavMain
-              items={appSidebarData.navMain}
+              items={navMain}
               isAdmin={user?.role === 'admin'}
             />
           )}

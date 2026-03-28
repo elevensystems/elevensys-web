@@ -6,6 +6,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/auth-context';
 import { DomainProvider } from '@/contexts/domain-context';
+import { FlagsProvider } from '@/contexts/flags-context';
+import { enableAutologFlag } from '@/flags';
 import { getUserFromSession } from '@/lib/auth';
 import {
   DEFAULT_TENANT,
@@ -61,6 +63,9 @@ export default async function RootLayout({
   const headersList = await headers();
   const domainConfig = resolveDomainConfig(headersList);
   const user = await getUserFromSession();
+  const flags = {
+    'enable-autolog': Boolean(await enableAutologFlag()),
+  };
 
   return (
     <html lang='en' suppressHydrationWarning>
@@ -73,8 +78,10 @@ export default async function RootLayout({
         >
           <DomainProvider config={domainConfig}>
             <AuthProvider user={user}>
-              {children}
-              <Toaster position='top-right' />
+              <FlagsProvider flags={flags}>
+                {children}
+                <Toaster position='top-right' />
+              </FlagsProvider>
             </AuthProvider>
           </DomainProvider>
         </ThemeProvider>
