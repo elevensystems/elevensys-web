@@ -2,6 +2,7 @@
 
 import { createContext, useContext } from 'react';
 
+import type { TenantKey } from '@/lib/domain-config';
 import { getVisibleToolPaths as parseVisibleToolPaths } from '@/lib/flags-utils';
 
 type FlagsRecord = Record<string, boolean | string>;
@@ -30,10 +31,13 @@ export function isFlagEnabled(flags: FlagsRecord, flagKey?: string): boolean {
 
 /**
  * Parses the `visible-tools` flag from the flags record into an allowlist of
- * tool URL paths. Returns `null` when all tools should be shown.
+ * tool URL paths for the given tenant. Returns `null` when all tools should be shown.
  */
-export function getVisibleToolPaths(flags: FlagsRecord): string[] | null {
+export function getVisibleToolPaths(
+  flags: FlagsRecord,
+  tenant: TenantKey
+): string[] | null {
   const value = flags['visible-tools'];
   if (typeof value !== 'string') return null;
-  return parseVisibleToolPaths(value);
+  return parseVisibleToolPaths(value, tenant);
 }

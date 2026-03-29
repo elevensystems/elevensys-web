@@ -1,11 +1,20 @@
+import type { TenantKey } from '@/lib/domain-config';
+
 /**
- * Parses the `visible-tools` flag value into an allowlist of tool URL paths.
+ * Parses the `visible-tools` flag value into an allowlist of tool URL paths
+ * for the given tenant.
  *
- * Returns `null` when all tools should be shown (empty string or unparseable value).
- * Returns `string[]` when only specific tools should be shown.
- * Returns `[]` when no tools should be shown.
+ * Flag value must be a JSON object keyed by TenantKey:
+ *   { "elevensys": ["/tools/passly"], "fhmhub": [] }
+ *
+ * - Key absent or flag empty → `null` (show all tools for that tenant)
+ * - Key maps to `[]`         → `[]`   (hide all tools)
+ * - Key maps to `["/tools/passly", ...]` → show only those tools
  */
-export function getVisibleToolPaths(visibleTools: string): string[] | null {
+export function getVisibleToolPaths(
+  visibleTools: string,
+  tenant: TenantKey
+): string[] | null {
   if (!visibleTools) return null;
 
   let parsed: unknown;
@@ -19,18 +28,37 @@ export function getVisibleToolPaths(visibleTools: string): string[] | null {
     return null;
   }
 
+  // `""` is the Vercel "All tools" variant — treat as unset.
   if (parsed === '') return null;
 
   if (
-    !Array.isArray(parsed) ||
-    !parsed.every(item => typeof item === 'string')
+    typeof parsed !== 'object' ||
+    parsed === null ||
+    Array.isArray(parsed)
   ) {
     console.error(
-      '[flags] visible-tools: expected a JSON string array, got %s — showing all tools',
+      '[flags] visible-tools: expected a JSON object keyed by tenant, got %s — showing all tools',
       JSON.stringify(parsed)
     );
     return null;
   }
 
-  return parsed;
+  const tenantValue = (parsed as Record<string, unknown>)[tenant];
+
+  // Key absent → no restriction for this tenant.
+  if (tenantValue === undefined) return null;
+
+  if (
+    !Array.isArray(tenantValue) ||
+    !tenantValue.every(item => typeof item === 'string')
+  ) {
+    console.error(
+      '[flags] visible-tools: value for tenant "%s" must be a string array, got %s — showing all tools',
+      tenant,
+      JSON.stringify(tenantValue)
+    );
+    return null;
+  }
+
+  return tenantValue;
 }

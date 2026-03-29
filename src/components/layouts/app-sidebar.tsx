@@ -56,10 +56,10 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
     [flags]
   );
   const tools = React.useMemo(() => {
-    const visiblePaths = getVisibleToolPaths(flags);
+    const visiblePaths = getVisibleToolPaths(flags, tenant);
     if (visiblePaths === null) return appSidebarData.tools;
     return appSidebarData.tools.filter(tool => visiblePaths.includes(tool.url));
-  }, [flags]);
+  }, [flags, tenant]);
 
   const handleNavAction = (action?: string) => {
     if (action === 'support') {
