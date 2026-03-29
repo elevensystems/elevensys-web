@@ -367,11 +367,6 @@ export default function LogWorkPage() {
           <ToolPageHeader
             title='Log Work'
             description='Log your work entries to Jira timesheet. Select dates, add work entries, and submit them in bulk.'
-            infoMessage={
-              isConfigured
-                ? 'Your Jira settings are configured. You can start logging work entries.'
-                : undefined
-            }
           />
 
           <NotConfiguredAlert isConfigured={isConfigured} />
