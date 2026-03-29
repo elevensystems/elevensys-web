@@ -29,7 +29,9 @@
       "Bash(gh pr:*)",
       "Bash(python3:*)",
       "Bash(git show:*)",
-      "mcp__next-devtools__nextjs_index"
+      "mcp__next-devtools__nextjs_index",
+      "Bash(vercel flags:*)",
+      "Bash(npx vercel:*)"
     ]
   },
   "enabledMcpjsonServers": [

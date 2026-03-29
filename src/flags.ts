@@ -11,3 +11,15 @@ export const enableAutologFlag = flag({
   ],
   adapter: vercelAdapter(),
 });
+
+export const visibleToolsFlag = flag<string>({
+  key: 'visible-tools',
+  description:
+    'Controls which tools are shown in the sidebar. JSON array of tool URL paths. Empty string means show all.',
+  defaultValue: '',
+  options: [
+    { value: '', label: 'All tools' },
+    { value: '[]', label: 'No tools' },
+  ],
+  adapter: vercelAdapter(),
+});

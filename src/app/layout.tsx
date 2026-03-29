@@ -7,7 +7,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/auth-context';
 import { DomainProvider } from '@/contexts/domain-context';
 import { FlagsProvider } from '@/contexts/flags-context';
-import { enableAutologFlag } from '@/flags';
+import { enableAutologFlag, visibleToolsFlag } from '@/flags';
 import { getUserFromSession } from '@/lib/auth';
 import {
   DEFAULT_TENANT,
@@ -65,6 +65,7 @@ export default async function RootLayout({
   const user = await getUserFromSession();
   const flags = {
     'enable-autolog': Boolean(await enableAutologFlag()),
+    'visible-tools': String((await visibleToolsFlag()) ?? ''),
   };
 
   return (

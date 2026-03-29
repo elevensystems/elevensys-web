@@ -2,7 +2,9 @@
 
 import { createContext, useContext } from 'react';
 
-type FlagsRecord = Record<string, boolean>;
+import { getVisibleToolPaths as parseVisibleToolPaths } from '@/lib/flags-utils';
+
+type FlagsRecord = Record<string, boolean | string>;
 
 const FlagsContext = createContext<FlagsRecord>({});
 
@@ -24,4 +26,14 @@ export function useFlags() {
 export function isFlagEnabled(flags: FlagsRecord, flagKey?: string): boolean {
   if (!flagKey) return true;
   return flags[flagKey] === true;
+}
+
+/**
+ * Parses the `visible-tools` flag from the flags record into an allowlist of
+ * tool URL paths. Returns `null` when all tools should be shown.
+ */
+export function getVisibleToolPaths(flags: FlagsRecord): string[] | null {
+  const value = flags['visible-tools'];
+  if (typeof value !== 'string') return null;
+  return parseVisibleToolPaths(value);
 }

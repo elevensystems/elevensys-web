@@ -30,7 +30,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useDomain } from '@/contexts/domain-context';
-import { isFlagEnabled, useFlags } from '@/contexts/flags-context';
+import { getVisibleToolPaths, isFlagEnabled, useFlags } from '@/contexts/flags-context';
 import { appSidebarData } from '@/lib/app-sidebar-config';
 import type { AuthUser } from '@/types/auth';
 
@@ -50,12 +50,16 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
   const domainConfig = useDomain();
   const tenant = domainConfig.tenant;
-  const tools = appSidebarData.tools;
   const flags = useFlags();
   const navMain = React.useMemo(
     () => appSidebarData.navMain.filter(item => isFlagEnabled(flags, item.flagKey)),
     [flags]
   );
+  const tools = React.useMemo(() => {
+    const visiblePaths = getVisibleToolPaths(flags);
+    if (visiblePaths === null) return appSidebarData.tools;
+    return appSidebarData.tools.filter(tool => visiblePaths.includes(tool.url));
+  }, [flags]);
 
   const handleNavAction = (action?: string) => {
     if (action === 'support') {
