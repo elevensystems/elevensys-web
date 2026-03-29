@@ -1,3 +1,17 @@
+export interface RowErrors {
+  issueKey?: string;
+  description?: string;
+}
+
+export interface ValidationErrors {
+  global: {
+    dates?: string;
+    config?: string;
+    entries?: string;
+  };
+  rows: Map<string, RowErrors>;
+}
+
 export const WORK_TYPES = [
   'Create',
   'Review',

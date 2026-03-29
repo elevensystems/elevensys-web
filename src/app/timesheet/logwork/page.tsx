@@ -20,26 +20,22 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { useLogWorkSubmission } from '@/hooks/use-log-work-submission';
 import { useMissingWorklogs } from '@/hooks/use-missing-worklogs';
 import { useTimesheetSettings } from '@/hooks/use-timesheet-settings';
 import {
-  MAX_HOURS,
-  MIN_HOURS,
   STANDARD_HOURS,
   formatDateForApi,
   formatHours,
   generateEntryId,
   isValidIssueKey,
 } from '@/lib/timesheet';
-import type { LogWorkResult, WorkEntry } from '@/types/timesheet';
+import type {
+  LogWorkResult,
+  RowErrors,
+  ValidationErrors,
+  WorkEntry,
+} from '@/types/timesheet';
 
 import { ConfirmDialog } from './_components/confirm-dialog';
 import { MissingWorklogsCard } from './_components/missing-worklogs-card';
@@ -53,7 +49,7 @@ const createDefaultEntry = (): WorkEntry => ({
   issueKey: '',
   typeOfWork: 'Create',
   description: '',
-  hours: 0,
+  hours: 1,
 });
 
 function getSavedEntriesKey(projectId?: string): string {
@@ -141,7 +137,10 @@ export default function LogWorkPage() {
   const [entries, setEntries] = useState<WorkEntry[]>([createDefaultEntry()]);
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [includeWeekends, setIncludeWeekends] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<ValidationErrors>({
+    global: {},
+    rows: new Map(),
+  });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [submissionModalOpen, setSubmissionModalOpen] = useState(false);
   const pendingResultsRef = useRef<LogWorkResult[]>([]);
@@ -156,6 +155,25 @@ export default function LogWorkPage() {
   );
 
   const clearAllDates = useCallback(() => setSelectedDates([]), []);
+
+  const clearRowError = useCallback(
+    (entryId: string, field: keyof RowErrors) => {
+      setErrors(prev => {
+        const rowErrors = prev.rows.get(entryId);
+        if (!rowErrors) return prev;
+        const updated = { ...rowErrors };
+        delete updated[field];
+        const nextRows = new Map(prev.rows);
+        if (updated.issueKey || updated.description) {
+          nextRows.set(entryId, updated);
+        } else {
+          nextRows.delete(entryId);
+        }
+        return { ...prev, rows: nextRows };
+      });
+    },
+    []
+  );
 
   // Warn before navigating away if there are unsaved entries
   useEffect(() => {
@@ -212,42 +230,51 @@ export default function LogWorkPage() {
     []
   );
 
-  const validateEntries = useCallback((): string | null => {
+  const validateEntries = useCallback((): ValidationErrors => {
+    const result: ValidationErrors = { global: {}, rows: new Map() };
+
     if (!isConfigured) {
-      return 'Please configure your Jira settings first.';
+      result.global.config = 'Please configure your Jira settings first.';
     }
 
     if (parsedDates.length === 0) {
-      return 'Please select at least one date on the calendar.';
+      result.global.dates = 'Please select at least one date.';
     }
 
     const validEntries = entries.filter(e => e.issueKey.trim());
     if (validEntries.length === 0) {
-      return 'Please add at least one work entry with an issue key.';
+      result.global.entries =
+        'Please add at least one work entry with an issue key.';
     }
 
     for (const entry of validEntries) {
+      const rowErrors: RowErrors = {};
       if (!isValidIssueKey(entry.issueKey)) {
-        return `Invalid issue key: "${entry.issueKey}". Expected format: PROJECT-123`;
+        rowErrors.issueKey = 'Expected format: PROJECT-123';
       }
-      if (entry.hours < MIN_HOURS || entry.hours > MAX_HOURS) {
-        return `Hours for ${entry.issueKey} must be between ${MIN_HOURS} and ${MAX_HOURS}.`;
+      if (!entry.description.trim()) {
+        rowErrors.description = 'Description is required';
+      }
+      if (rowErrors.issueKey || rowErrors.description) {
+        result.rows.set(entry.id, rowErrors);
       }
     }
 
-    return null;
+    return result;
   }, [isConfigured, parsedDates, entries]);
 
+  const hasErrors = useCallback(
+    (v: ValidationErrors) =>
+      Object.values(v.global).some(Boolean) || v.rows.size > 0,
+    []
+  );
+
   const handleSubmitClick = useCallback(() => {
-    const validationError = validateEntries();
-    if (validationError) {
-      setError(validationError);
-      toast.error(validationError);
-      return;
-    }
-    setError('');
+    const validationResult = validateEntries();
+    setErrors(validationResult);
+    if (hasErrors(validationResult)) return;
     setShowConfirmDialog(true);
-  }, [validateEntries]);
+  }, [validateEntries, hasErrors]);
 
   const processResults = useCallback(
     (logResults: LogWorkResult[]) => {
@@ -340,9 +367,8 @@ export default function LogWorkPage() {
           <ToolPageHeader
             title='Log Work'
             description='Log your work entries to Jira timesheet. Select dates, add work entries, and submit them in bulk.'
-            error={error || undefined}
             infoMessage={
-              !error && isConfigured
+              isConfigured
                 ? 'Your Jira settings are configured. You can start logging work entries.'
                 : undefined
             }
@@ -351,23 +377,31 @@ export default function LogWorkPage() {
           <NotConfiguredAlert isConfigured={isConfigured} />
 
           <MissingWorklogsCard
-              projects={projects}
-              selectedProjectId={selectedProjectId}
-              onProjectChange={handleProjectChange}
-              isLoadingProjects={isLoadingProjects}
-              warningFromDate={warningFromDate}
-              warningToDate={warningToDate}
-              onWarningFromDateChange={setWarningFromDate}
-              onWarningToDateChange={setWarningToDate}
-              isSearchingWarnings={isSearchingWarnings}
-              onSearchWarnings={handleSearchWarnings}
-              selectedDates={selectedDates}
-              onSelectedDatesChange={setSelectedDates}
-              parsedDates={parsedDates}
-              onClearAllDates={clearAllDates}
-              includeWeekends={includeWeekends}
-              onIncludeWeekendsChange={setIncludeWeekends}
-            />
+            projects={projects}
+            selectedProjectId={selectedProjectId}
+            onProjectChange={handleProjectChange}
+            isLoadingProjects={isLoadingProjects}
+            warningFromDate={warningFromDate}
+            warningToDate={warningToDate}
+            onWarningFromDateChange={setWarningFromDate}
+            onWarningToDateChange={setWarningToDate}
+            isSearchingWarnings={isSearchingWarnings}
+            onSearchWarnings={handleSearchWarnings}
+            selectedDates={selectedDates}
+            onSelectedDatesChange={dates => {
+              setSelectedDates(dates);
+              setErrors(prev =>
+                prev.global.dates
+                  ? { ...prev, global: { ...prev.global, dates: undefined } }
+                  : prev
+              );
+            }}
+            parsedDates={parsedDates}
+            onClearAllDates={clearAllDates}
+            includeWeekends={includeWeekends}
+            onIncludeWeekendsChange={setIncludeWeekends}
+            dateError={errors.global.dates}
+          />
 
           {/* Work Entries Card */}
           <Card>
@@ -402,41 +436,38 @@ export default function LogWorkPage() {
                 Add work entries
               </div>
               <div className='overflow-hidden rounded-lg border'>
-                <Table>
-                  <TableHeader className='bg-muted/50 top-0 z-10'>
-                    <TableRow>
-                      <TableHead className='w-[230px] font-semibold'>
-                        Key
-                      </TableHead>
-                      <TableHead className='font-semibold'>
-                        Description
-                      </TableHead>
-                      <TableHead className='w-[150px] font-semibold'>
-                        Type of Work
-                      </TableHead>
-                      <TableHead className='w-[100px] font-semibold'>
-                        Hours
-                      </TableHead>
-                      <TableHead className='w-[50px]' />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {entries.map(entry => (
-                      <WorkEntryRow
-                        key={entry.id}
-                        entry={entry}
-                        issues={issues}
-                        issuesByKey={issuesByKey}
-                        isLoadingIssues={isLoadingIssues}
-                        onUpdate={updateEntry}
-                        onRemove={removeEntry}
-                        onFetchTypeOfWork={fetchIssueTypeOfWork}
-                        isLastRow={entries.length === 1}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
+                {/* Grid header */}
+                <div className='grid grid-cols-[230px_1fr_150px_140px_50px] gap-2 bg-muted/50 px-3 py-2 text-sm font-semibold text-muted-foreground'>
+                  <span>Key</span>
+                  <span>Description</span>
+                  <span>Type of Work</span>
+                  <span>Hours</span>
+                  <span />
+                </div>
+                {/* Entry rows */}
+                {entries.map(entry => (
+                  <WorkEntryRow
+                    key={entry.id}
+                    entry={entry}
+                    issues={issues}
+                    issuesByKey={issuesByKey}
+                    isLoadingIssues={isLoadingIssues}
+                    onUpdate={updateEntry}
+                    onRemove={removeEntry}
+                    onFetchTypeOfWork={fetchIssueTypeOfWork}
+                    onClearError={clearRowError}
+                    errors={errors.rows.get(entry.id)}
+                    isLastRow={entries.length === 1}
+                  />
+                ))}
               </div>
+
+              {/* Global entries error */}
+              {errors.global.entries && (
+                <p className='text-sm text-destructive' role='alert'>
+                  {errors.global.entries}
+                </p>
+              )}
 
               {/* Action Buttons */}
               <div className='flex flex-col sm:flex-row sm:justify-between gap-3 border-t pt-6'>

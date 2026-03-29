@@ -15,15 +15,16 @@ import {
 } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
-import { TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { HOUR_STEP, MIN_HOURS } from '@/lib/timesheet';
 import {
   type JiraIssue,
+  type RowErrors,
   WORK_TYPES,
   type WorkEntry,
   type WorkType,
 } from '@/types/timesheet';
+
+import { HoursStepper } from './hours-stepper';
 
 interface WorkEntryRowProps {
   entry: WorkEntry;
@@ -37,6 +38,8 @@ interface WorkEntryRowProps {
   ) => void;
   onRemove: (id: string) => void;
   onFetchTypeOfWork: (issueId: number) => Promise<WorkType | null>;
+  onClearError?: (id: string, field: keyof RowErrors) => void;
+  errors?: RowErrors;
   disabled?: boolean;
   isLastRow?: boolean;
 }
@@ -49,6 +52,8 @@ export const WorkEntryRow = memo(function WorkEntryRow({
   onUpdate,
   onRemove,
   onFetchTypeOfWork,
+  onClearError,
+  errors,
   disabled = false,
   isLastRow = false,
 }: WorkEntryRowProps) {
@@ -58,14 +63,16 @@ export const WorkEntryRow = memo(function WorkEntryRow({
     (value: string, eventDetails: { reason: string }) => {
       if (eventDetails.reason === 'input-clear') return;
       onUpdate(entry.id, 'issueKey', value);
+      onClearError?.(entry.id, 'issueKey');
     },
-    [entry.id, onUpdate]
+    [entry.id, onUpdate, onClearError]
   );
 
   const handleIssueSelect = useCallback(
     (value: JiraIssue | null) => {
       onUpdate(entry.id, 'issueKey', value?.key ?? '');
       onUpdate(entry.id, 'description', value?.summary ?? '');
+      onClearError?.(entry.id, 'issueKey');
 
       if (!value) return;
 
@@ -88,13 +95,15 @@ export const WorkEntryRow = memo(function WorkEntryRow({
         })
         .finally(() => setIsFetchingTypeOfWork(false));
     },
-    [entry.id, onUpdate, onFetchTypeOfWork]
+    [entry.id, onUpdate, onClearError, onFetchTypeOfWork]
   );
 
   const handleDescriptionChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      onUpdate(entry.id, 'description', e.target.value),
-    [entry.id, onUpdate]
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdate(entry.id, 'description', e.target.value);
+      onClearError?.(entry.id, 'description');
+    },
+    [entry.id, onUpdate, onClearError]
   );
 
   const handleTypeChange = useCallback(
@@ -104,8 +113,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
   );
 
   const handleHoursChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      onUpdate(entry.id, 'hours', parseFloat(e.target.value) || 0),
+    (value: number) => onUpdate(entry.id, 'hours', value),
     [entry.id, onUpdate]
   );
 
@@ -117,8 +125,8 @@ export const WorkEntryRow = memo(function WorkEntryRow({
   const selectedIssue = issuesByKey.get(entry.issueKey) ?? null;
 
   return (
-    <TableRow>
-      <TableCell>
+    <div className='grid grid-cols-[230px_1fr_150px_140px_50px] items-start gap-2 border-b px-3 py-2'>
+      <div>
         <Combobox
           items={issues}
           value={selectedIssue}
@@ -129,8 +137,12 @@ export const WorkEntryRow = memo(function WorkEntryRow({
         >
           <ComboboxInput
             placeholder={isLoadingIssues ? 'Loading...' : 'Select ticket'}
-            className='h-8'
+            className={cn(
+              'h-8',
+              errors?.issueKey && 'border-destructive ring-1 ring-destructive'
+            )}
             disabled={isLoadingIssues || disabled}
+            aria-invalid={!!errors?.issueKey}
             showClear
           />
           <ComboboxContent>
@@ -144,17 +156,31 @@ export const WorkEntryRow = memo(function WorkEntryRow({
             <ComboboxEmpty>No issues found</ComboboxEmpty>
           </ComboboxContent>
         </Combobox>
-      </TableCell>
-      <TableCell>
+        {errors?.issueKey && (
+          <span className='mt-1 text-xs text-destructive' role='alert'>
+            {errors.issueKey}
+          </span>
+        )}
+      </div>
+      <div>
         <Input
           placeholder='Description of work done'
           value={entry.description}
           onChange={handleDescriptionChange}
           maxLength={500}
-          className='h-8'
+          className={cn(
+            'h-8',
+            errors?.description && 'border-destructive ring-1 ring-destructive'
+          )}
+          aria-invalid={!!errors?.description}
         />
-      </TableCell>
-      <TableCell>
+        {errors?.description && (
+          <span className='mt-1 text-xs text-destructive' role='alert'>
+            {errors.description}
+          </span>
+        )}
+      </div>
+      <div>
         {/* Subtle pulse border while background fetch is in flight */}
         <div
           className={cn(
@@ -174,18 +200,15 @@ export const WorkEntryRow = memo(function WorkEntryRow({
             ))}
           </NativeSelect>
         </div>
-      </TableCell>
-      <TableCell>
-        <Input
-          type='number'
-          min={MIN_HOURS}
-          step={HOUR_STEP}
-          value={entry.hours || ''}
+      </div>
+      <div>
+        <HoursStepper
+          value={entry.hours}
           onChange={handleHoursChange}
-          className='h-8 w-20'
+          disabled={disabled}
         />
-      </TableCell>
-      <TableCell>
+      </div>
+      <div className='flex justify-center'>
         <ActionButton
           aria-label='Delete'
           variant='ghost'
@@ -195,7 +218,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           disabled={isLastRow}
           leftIcon={<Trash2 />}
         />
-      </TableCell>
-    </TableRow>
+      </div>
+    </div>
   );
 });

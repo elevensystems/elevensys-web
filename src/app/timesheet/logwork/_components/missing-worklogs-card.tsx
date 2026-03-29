@@ -1,12 +1,8 @@
 'use client';
 
-import {
-  CalendarDays,
-  CalendarPlus,
-  Search,
-  Trash2,
-} from 'lucide-react';
 import { useState } from 'react';
+
+import { CalendarDays, CalendarPlus, Search, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { ActionButton } from '@/components/action-button';
@@ -32,7 +28,6 @@ import { parseApiDate } from '@/lib/timesheet';
 import type { JiraProject } from '@/types/timesheet';
 
 import { DateChipList } from './date-chip-list';
-
 
 const isWeekend = (date: Date) => {
   const day = date.getDay();
@@ -60,6 +55,7 @@ interface MissingWorklogsCardProps {
   onClearAllDates: () => void;
   includeWeekends: boolean;
   onIncludeWeekendsChange: (value: boolean) => void;
+  dateError?: string;
 }
 
 export function MissingWorklogsCard({
@@ -79,6 +75,7 @@ export function MissingWorklogsCard({
   onClearAllDates,
   includeWeekends,
   onIncludeWeekendsChange,
+  dateError,
 }: MissingWorklogsCardProps) {
   const [manualDateKeys, setManualDateKeys] = useState<Set<string>>(new Set());
 
@@ -101,7 +98,9 @@ export function MissingWorklogsCard({
   const handleCalendarSelect = (newDates: Date[] | undefined) => {
     const next = newDates ?? [];
     const prevKeys = new Set(selectedDates.map(toDateKey));
-    const addedKeys = next.filter(d => !prevKeys.has(toDateKey(d))).map(toDateKey);
+    const addedKeys = next
+      .filter(d => !prevKeys.has(toDateKey(d)))
+      .map(toDateKey);
     const removedKeys = selectedDates
       .filter(d => !next.some(n => n.getTime() === d.getTime()))
       .map(toDateKey);
@@ -290,8 +289,14 @@ export function MissingWorklogsCard({
             </div>
           ) : (
             <span className='text-xs text-muted-foreground italic'>
-              No dates selected. Use &quot;Find Dates&quot; or add manually below.
+              No dates selected. Use &quot;Find Dates&quot; or add manually
+              below.
             </span>
+          )}
+          {dateError && (
+            <p className='text-sm text-destructive' role='alert'>
+              {dateError}
+            </p>
           )}
         </div>
       </CardContent>

@@ -108,22 +108,30 @@ export function ConfirmDialog({
           <div className='mt-2 rounded-lg border bg-muted/30 overflow-hidden'>
             <div className='grid grid-cols-3 divide-x'>
               <div className='flex flex-col items-center py-3 gap-0.5'>
-                <span className='text-lg font-bold tabular-nums leading-none'>{totalWorklogs}</span>
+                <span className='text-lg font-bold tabular-nums leading-none'>
+                  {totalWorklogs}
+                </span>
                 <span className='text-xs text-muted-foreground'>worklogs</span>
               </div>
               <div className='flex flex-col items-center py-3 gap-0.5'>
-                <span className='text-lg font-bold tabular-nums leading-none'>{parsedDates.length}</span>
-                <span className='text-xs text-muted-foreground'>{parsedDates.length !== 1 ? 'dates' : 'date'}</span>
+                <span className='text-lg font-bold tabular-nums leading-none'>
+                  {parsedDates.length}
+                </span>
+                <span className='text-xs text-muted-foreground'>
+                  {parsedDates.length !== 1 ? 'dates' : 'date'}
+                </span>
               </div>
               <div className='flex flex-col items-center py-3 gap-0.5'>
-                <span className='text-lg font-bold tabular-nums leading-none'>{formatHours(totalHoursAll)}h</span>
+                <span className='text-lg font-bold tabular-nums leading-none'>
+                  {formatHours(totalHoursAll)}h
+                </span>
                 <span className='text-xs text-muted-foreground'>total</span>
               </div>
             </div>
             {selectedProject && (
               <div className='flex items-center gap-1.5 border-t px-3 py-2'>
                 <LayoutList className='h-3 w-3 shrink-0 text-muted-foreground' />
-                <span className='text-xs text-muted-foreground font-mono'>{selectedProject.key}</span>
+                <span className='text-xs text-muted-foreground font-mono'>{`${selectedProject.key} — ${selectedProject.name}`}</span>
               </div>
             )}
           </div>
