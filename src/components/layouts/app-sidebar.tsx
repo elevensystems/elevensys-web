@@ -159,7 +159,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           />
         )}
         <SidebarFooter>
-          <NavUser user={user} />
+          {(user || tenant !== 'fhmhub') && <NavUser user={user} />}
         </SidebarFooter>
       </Sidebar>
       <SupportModal
