@@ -84,15 +84,15 @@ export async function POST(request: NextRequest) {
 
     const jiraInstance = payload.jiraInstance || 'jiradc';
     const authHeader = request.headers.get('Authorization') || '';
+    const params = new URLSearchParams({ jiraInstance });
 
-    const response = await fetch(TIMESHEET_URLS.PROJECTS, {
+    const response = await fetch(`${TIMESHEET_URLS.PROJECTS}?${params.toString()}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: authHeader,
       },
       body: JSON.stringify({
-        jiraInstance,
         jql: payload.jql,
         columnConfig: payload.columnConfig || 'explicit',
         layoutKey: payload.layoutKey || 'split-view',
