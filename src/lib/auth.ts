@@ -87,11 +87,7 @@ export const getUserFromSession = async (): Promise<AuthUser | null> => {
         (group): group is string => typeof group === 'string'
       )
     : [];
-  const role: UserRole = groups.includes('admin')
-    ? 'admin'
-    : groups.includes('pro')
-      ? 'pro'
-      : 'free';
+  const role: UserRole = groups.includes('pro') ? 'pro' : 'free';
 
   return {
     sub,

@@ -24,7 +24,6 @@ function getUserInitials(name: string) {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  admin: 'Admin',
   pro: 'Pro',
   free: 'Free',
 };
@@ -61,7 +60,6 @@ export default function ProfilePage() {
                   <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback
                     className={clsx('rounded-xl text-lg font-semibold', {
-                      'bg-yellow-500 text-white': user.role === 'admin',
                       'bg-indigo-500 text-white': user.role === 'pro',
                     })}
                   >
@@ -79,8 +77,6 @@ export default function ProfilePage() {
                     <Badge
                       variant={user.role === 'free' ? 'secondary' : 'default'}
                       className={clsx({
-                        'bg-yellow-500 hover:bg-yellow-600 text-white':
-                          user.role === 'admin',
                         'bg-indigo-500 hover:bg-indigo-600 text-white':
                           user.role === 'pro',
                       })}

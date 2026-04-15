@@ -23,27 +23,23 @@ import {
 
 export function NavMain({
   items,
-  isAdmin = false,
 }: {
   items: {
     title: string;
     url: string;
     icon: LucideIcon;
     isActive?: boolean;
-    adminOnly?: boolean;
     items?: {
       title: string;
       url: string;
     }[];
   }[];
-  isAdmin?: boolean;
 }) {
-  const filteredItems = items.filter(item => !item.adminOnly || isAdmin);
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Jira</SidebarGroupLabel>
       <SidebarMenu>
-        {filteredItems.map(item => (
+        {items.map(item => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>

@@ -16,7 +16,7 @@ const buildPrompt = (
 export async function POST(request: NextRequest) {
   try {
     const user = await getUserFromSession();
-    if (!user || (user.role !== 'pro' && user.role !== 'admin')) {
+    if (!user || user.role !== 'pro') {
       return NextResponse.json(
         { error: 'Pro access required.' },
         { status: 403 }

@@ -12,6 +12,5 @@ export const hasRole = (
   roles: UserRole[]
 ): boolean => {
   if (!user) return false;
-  if (user.role === 'admin') return true;
   return roles.includes(user.role);
 };

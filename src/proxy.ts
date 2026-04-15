@@ -82,16 +82,6 @@ export async function proxy(request: NextRequest) {
   const expired = payload ? isTokenExpired(payload) : true;
   const isAuthenticated = payload !== null && !expired;
 
-  // --- Block /admin routes on non-elevensys tenants (skip in dev for localhost) ---
-  const isLocalhost = hostname.split(':')[0] === 'localhost';
-  if (
-    !isLocalhost &&
-    tenant !== 'elevensys' &&
-    (pathname === '/admin' || pathname.startsWith('/admin/'))
-  ) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
   // Redirect authenticated users away from auth pages (sync, no refresh needed).
   if (isAuthenticated && isAuthRoute(pathname)) {
     return NextResponse.redirect(new URL('/', request.url));

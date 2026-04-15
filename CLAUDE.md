@@ -59,7 +59,6 @@ npm run test:coverage
 src/
 ├── app/                    # Next.js App Router
 │   ├── api/                # API route handlers
-│   │   ├── admin/urlify/   # Admin URL management (list, delete)
 │   │   ├── auth/           # OAuth2 endpoints (login, callback, logout, session, signup)
 │   │   ├── beatly/         # Song recommender API
 │   │   ├── passly/         # Password generator API
@@ -84,11 +83,6 @@ src/
 │   │   ├── logwork/        # Log work page
 │   │   ├── project-worklogs/ # Per-project worklog view
 │   │   └── worklogs/       # My worklogs page
-│   ├── admin/              # Admin pages (protected by admin role)
-│   │   ├── layout.tsx      # Server-side admin auth check
-│   │   ├── page.tsx        # Admin redirect
-│   │   ├── dashboard/      # Admin dashboard
-│   │   └── urlify/         # URL management (table, pagination, bulk actions)
 │   ├── login/              # Login page
 │   ├── signup/             # Sign up page
 │   ├── forgot-password/    # Forgot password page
@@ -105,7 +99,6 @@ src/
 │   │   ├── nav-main.tsx
 │   │   ├── nav-tools.tsx
 │   │   ├── nav-user.tsx
-│   │   ├── nav-admin.tsx
 │   │   ├── nav-projects.tsx
 │   │   ├── nav-secondary.tsx
 │   │   ├── pro-access-only.tsx  # Pro tier gating
@@ -121,7 +114,6 @@ src/
 ├── hooks/
 │   ├── use-mobile.ts                # Mobile breakpoint detection
 │   ├── use-copy-to-clipboard.ts     # Clipboard copy with feedback
-│   ├── use-urlify-admin.ts          # Admin URL management (fetch, paginate, select, delete)
 │   ├── use-timesheet-settings.ts    # Timesheet Jira config state
 │   ├── use-worklogs.ts              # My worklogs list with filtering/pagination
 │   ├── use-project-worklogs.ts      # Per-project worklog view
@@ -298,12 +290,13 @@ export async function POST(request: NextRequest) {
 ### User Roles
 
 ```typescript
-type UserRole = 'admin' | 'pro' | 'free';
+type UserRole = 'pro' | 'free';
 ```
 
-- **admin**: Full access to all features
 - **pro**: Access to premium features (translately, etc.)
 - **free**: Basic features only
+
+Admin features were moved to the separate `elevensys-admin` SvelteKit app; this repo no longer ships any admin pages or API routes.
 
 ### Auth Context Usage
 

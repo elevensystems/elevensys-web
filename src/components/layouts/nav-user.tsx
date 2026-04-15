@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 
-import clsx from 'clsx';
 import {
   BadgeCheck,
   ChevronsUpDown,
@@ -104,11 +103,7 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
             >
               <Avatar className='h-8 w-8 rounded-lg'>
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback
-                  className={clsx('rounded-lg', {
-                    'bg-yellow-500 text-white': user.role === 'admin',
-                  })}
-                >
+                <AvatarFallback className='rounded-lg'>
                   {getUserInitials(user.name)}
                 </AvatarFallback>
               </Avatar>

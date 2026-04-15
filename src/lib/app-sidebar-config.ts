@@ -17,7 +17,6 @@ import {
   ScrollText,
   Send,
   Settings,
-  ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 
@@ -83,18 +82,6 @@ export const appSidebarData = {
       isActive: false,
     },
   ] satisfies NavMainItem[],
-  navAdmin: [
-    {
-      title: 'Dashboard',
-      url: '/admin/dashboard',
-      icon: ShieldCheck,
-    },
-    {
-      title: 'Urlify',
-      url: '/admin/urlify',
-      icon: LinkIcon,
-    },
-  ],
   navSecondary: [
     {
       title: 'Support',

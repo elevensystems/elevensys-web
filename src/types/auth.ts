@@ -12,7 +12,7 @@ export type JwtPayload = {
   [key: string]: unknown;
 };
 
-export type UserRole = 'admin' | 'free' | 'pro';
+export type UserRole = 'free' | 'pro';
 
 export type AuthUser = {
   sub: string;
