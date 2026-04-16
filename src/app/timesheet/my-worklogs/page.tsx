@@ -49,7 +49,7 @@ export default function MyWorklogsPage() {
     worklogs,
     isLoading,
     deletingId,
-    error,
+    error: _error,
     hasSearched,
     totalHours,
     selectedIds,

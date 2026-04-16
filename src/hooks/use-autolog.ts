@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { toast } from 'sonner';
 
@@ -24,10 +24,13 @@ export function useAutolog({
   const [configs, setConfigs] = useState<AutologConfig[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const authHeaders = {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
+  const authHeaders = useMemo(
+    () => ({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    }),
+    [token]
+  );
 
   const fetchConfigs = useCallback(async () => {
     if (!isConfigured) return;
@@ -40,7 +43,7 @@ export function useAutolog({
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setConfigs(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load autolog configurations');
     } finally {
       setIsLoading(false);
