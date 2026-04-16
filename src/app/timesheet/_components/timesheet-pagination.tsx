@@ -29,8 +29,8 @@ export function TimesheetPagination({
   const hasNextPage = currentPage < totalPages;
 
   return (
-    <div className='flex justify-end mt-4'>
-      <Pagination className='mx-0 w-auto'>
+    <div className="flex justify-end mt-4">
+      <Pagination className="mx-0 w-auto">
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
@@ -75,7 +75,7 @@ export function TimesheetPagination({
                 <PaginationLink
                   isActive={pageNum === currentPage}
                   onClick={() => onPageChange(pageNum)}
-                  className='cursor-pointer'
+                  className="cursor-pointer"
                 >
                   {pageNum}
                 </PaginationLink>

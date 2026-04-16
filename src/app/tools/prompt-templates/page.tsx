@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { ActionButton } from '@/components/action-button';
 import GuestLoginAlert from '@/components/layouts/guest-login-alert';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
@@ -27,7 +28,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { ActionButton } from '@/components/action-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -203,15 +203,18 @@ export default function PromptTemplatesPage() {
     setFilteredTemplates(filtered);
   }, [searchQuery, templates, activeTab]);
 
-  const handleCopy = useCallback(async (template: Template) => {
-    try {
-      await navigator.clipboard.writeText(template.content);
-      trigger(template.id);
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
-      trigger(template.id, { error: true });
-    }
-  }, [trigger]);
+  const handleCopy = useCallback(
+    async (template: Template) => {
+      try {
+        await navigator.clipboard.writeText(template.content);
+        trigger(template.id);
+      } catch (err) {
+        console.error('Failed to copy to clipboard:', err);
+        trigger(template.id, { error: true });
+      }
+    },
+    [trigger]
+  );
 
   // Open input modal for a template
   const handleOpenInputModal = useCallback((template: Template) => {
@@ -287,15 +290,15 @@ export default function PromptTemplatesPage() {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'pr-review':
-        return <Code2 className='h-3 w-3' />;
+        return <Code2 className="h-3 w-3" />;
       case 'testing':
-        return <FileCode className='h-3 w-3' />;
+        return <FileCode className="h-3 w-3" />;
       case 'project-management':
-        return <FileText className='h-3 w-3' />;
+        return <FileText className="h-3 w-3" />;
       case 'ai-agent':
-        return <Sparkles className='h-3 w-3' />;
+        return <Sparkles className="h-3 w-3" />;
       default:
-        return <FileText className='h-3 w-3' />;
+        return <FileText className="h-3 w-3" />;
     }
   };
 
@@ -308,34 +311,34 @@ export default function PromptTemplatesPage() {
     {
       value: 'all',
       label: 'All Templates',
-      icon: <ScrollText className='h-4 w-4' />,
+      icon: <ScrollText className="h-4 w-4" />,
     },
     {
       value: 'ai-agent',
       label: 'AI Agents',
-      icon: <Sparkles className='h-4 w-4' />,
+      icon: <Sparkles className="h-4 w-4" />,
     },
     {
       value: 'pr-review',
       label: 'PR Review',
-      icon: <Code2 className='h-4 w-4' />,
+      icon: <Code2 className="h-4 w-4" />,
     },
     {
       value: 'testing',
       label: 'Testing',
-      icon: <FileCode className='h-4 w-4' />,
+      icon: <FileCode className="h-4 w-4" />,
     },
     {
       value: 'project-management',
       label: 'Project Mgmt',
-      icon: <FileText className='h-4 w-4' />,
+      icon: <FileText className="h-4 w-4" />,
     },
   ];
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-full mx-auto space-y-8'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-full mx-auto space-y-8">
           <ToolPageHeader
             title={PAGE_METADATA.title}
             description={PAGE_METADATA.description}
@@ -343,22 +346,22 @@ export default function PromptTemplatesPage() {
           />
 
           {isGuest && (
-            <GuestLoginAlert title='Sign in to use template actions' />
+            <GuestLoginAlert title="Sign in to use template actions" />
           )}
 
           {/* Stats Bar */}
-          <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
-            <Card className='border-none shadow-sm bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20'>
-              <CardContent className='p-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='p-2 rounded-lg bg-blue-500/10'>
-                    <FileText className='h-5 w-5 text-blue-600 dark:text-blue-400' />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <Card className="border-none shadow-sm bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-500/10">
+                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <p className='text-2xl font-bold text-blue-900 dark:text-blue-100'>
+                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
                       {templates.length}
                     </p>
-                    <p className='text-xs text-blue-700 dark:text-blue-300'>
+                    <p className="text-xs text-blue-700 dark:text-blue-300">
                       Total Templates
                     </p>
                   </div>
@@ -366,17 +369,17 @@ export default function PromptTemplatesPage() {
               </CardContent>
             </Card>
 
-            <Card className='border-none shadow-sm bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20'>
-              <CardContent className='p-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='p-2 rounded-lg bg-purple-500/10'>
-                    <Sparkles className='h-5 w-5 text-purple-600 dark:text-purple-400' />
+            <Card className="border-none shadow-sm bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-purple-500/10">
+                    <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
-                    <p className='text-2xl font-bold text-purple-900 dark:text-purple-100'>
+                    <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
                       {getCategoryCount('ai-agent')}
                     </p>
-                    <p className='text-xs text-purple-700 dark:text-purple-300'>
+                    <p className="text-xs text-purple-700 dark:text-purple-300">
                       AI Agents
                     </p>
                   </div>
@@ -384,17 +387,17 @@ export default function PromptTemplatesPage() {
               </CardContent>
             </Card>
 
-            <Card className='border-none shadow-sm bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20'>
-              <CardContent className='p-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='p-2 rounded-lg bg-green-500/10'>
-                    <Code2 className='h-5 w-5 text-green-600 dark:text-green-400' />
+            <Card className="border-none shadow-sm bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-green-500/10">
+                    <Code2 className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <p className='text-2xl font-bold text-green-900 dark:text-green-100'>
+                    <p className="text-2xl font-bold text-green-900 dark:text-green-100">
                       {getCategoryCount('pr-review')}
                     </p>
-                    <p className='text-xs text-green-700 dark:text-green-300'>
+                    <p className="text-xs text-green-700 dark:text-green-300">
                       PR Reviews
                     </p>
                   </div>
@@ -402,17 +405,17 @@ export default function PromptTemplatesPage() {
               </CardContent>
             </Card>
 
-            <Card className='border-none shadow-sm bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-900/20'>
-              <CardContent className='p-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='p-2 rounded-lg bg-orange-500/10'>
-                    <FileCode className='h-5 w-5 text-orange-600 dark:text-orange-400' />
+            <Card className="border-none shadow-sm bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-900/20">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-orange-500/10">
+                    <FileCode className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                   </div>
                   <div>
-                    <p className='text-2xl font-bold text-orange-900 dark:text-orange-100'>
+                    <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
                       {getCategoryCount('testing')}
                     </p>
-                    <p className='text-xs text-orange-700 dark:text-orange-300'>
+                    <p className="text-xs text-orange-700 dark:text-orange-300">
                       Testing
                     </p>
                   </div>
@@ -421,58 +424,58 @@ export default function PromptTemplatesPage() {
             </Card>
           </div>
 
-          <Card className='border shadow-sm'>
-            <CardHeader className='space-y-1 pb-6'>
-              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10'>
-                    <Sparkles className='h-6 w-6 text-primary' />
+          <Card className="border shadow-sm">
+            <CardHeader className="space-y-1 pb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
+                    <Sparkles className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className='text-2xl'>
+                    <CardTitle className="text-2xl">
                       Templates Library
                     </CardTitle>
-                    <p className='text-sm text-muted-foreground mt-0.5'>
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       Find and copy templates instantly
                     </p>
                   </div>
                 </div>
                 <Badge
-                  variant='secondary'
-                  className='text-sm px-3 py-1.5 w-fit'
+                  variant="secondary"
+                  className="text-sm px-3 py-1.5 w-fit"
                 >
                   {filteredTemplates.length} of {templates.length} shown
                 </Badge>
               </div>
             </CardHeader>
 
-            <CardContent className='space-y-6'>
+            <CardContent className="space-y-6">
               {/* Enhanced Search Input */}
-              <div className='relative group'>
-                <Search className='absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground transition-colors group-focus-within:text-primary' />
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground transition-colors group-focus-within:text-primary" />
                 <Input
                   value={searchQuery}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setSearchQuery(e.target.value)
                   }
-                  placeholder='Search templates by title or content...'
-                  className='pl-12 pr-10 h-12 text-base border-2 focus-visible:ring-2 transition-all'
+                  placeholder="Search templates by title or content..."
+                  className="pl-12 pr-10 h-12 text-base border-2 focus-visible:ring-2 transition-all"
                 />
                 {searchQuery && (
                   <ActionButton
-                    variant='ghost'
-                    size='sm'
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setSearchQuery('')}
-                    className='absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-muted'
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-muted"
                     leftIcon={<X />}
-                    aria-label='Clear search'
+                    aria-label="Clear search"
                   />
                 )}
               </div>
 
               {/* Category Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className='w-full justify-start h-auto flex-wrap gap-2 bg-muted/50 p-2 rounded-xl'>
+                <TabsList className="w-full justify-start h-auto flex-wrap gap-2 bg-muted/50 p-2 rounded-xl">
                   {categories.map(category => (
                     <TabsTrigger
                       key={category.value}
@@ -483,10 +486,10 @@ export default function PromptTemplatesPage() {
                       )}
                     >
                       {category.icon}
-                      <span className='font-medium'>{category.label}</span>
+                      <span className="font-medium">{category.label}</span>
                       <Badge
-                        variant='secondary'
-                        className='ml-1 h-5 px-2 text-xs font-semibold'
+                        variant="secondary"
+                        className="ml-1 h-5 px-2 text-xs font-semibold"
                       >
                         {getCategoryCount(category.value)}
                       </Badge>
@@ -494,44 +497,44 @@ export default function PromptTemplatesPage() {
                   ))}
                 </TabsList>
 
-                <TabsContent value={activeTab} className='mt-6'>
+                <TabsContent value={activeTab} className="mt-6">
                   {/* Templates Container */}
                   {isLoading ? (
-                    <div className='flex flex-col items-center justify-center py-20 text-muted-foreground'>
-                      <div className='relative mb-6'>
-                        <div className='absolute inset-0 blur-xl bg-primary/20 animate-pulse rounded-full' />
-                        <Spinner className='size-14 text-primary relative' />
+                    <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                      <div className="relative mb-6">
+                        <div className="absolute inset-0 blur-xl bg-primary/20 animate-pulse rounded-full" />
+                        <Spinner className="size-14 text-primary relative" />
                       </div>
-                      <p className='text-lg font-medium'>
+                      <p className="text-lg font-medium">
                         Loading templates...
                       </p>
-                      <p className='text-sm mt-1'>Please wait a moment</p>
+                      <p className="text-sm mt-1">Please wait a moment</p>
                     </div>
                   ) : filteredTemplates.length === 0 ? (
-                    <div className='flex flex-col items-center justify-center py-20 text-muted-foreground'>
-                      <div className='p-6 rounded-2xl bg-muted/50 mb-6'>
-                        <Search className='h-14 w-14 opacity-40' />
+                    <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                      <div className="p-6 rounded-2xl bg-muted/50 mb-6">
+                        <Search className="h-14 w-14 opacity-40" />
                       </div>
-                      <p className='text-xl font-semibold mb-2'>
+                      <p className="text-xl font-semibold mb-2">
                         No templates found
                       </p>
-                      <p className='text-sm text-center max-w-md'>
+                      <p className="text-sm text-center max-w-md">
                         Try adjusting your search or category filter to find
                         what you&apos;re looking for
                       </p>
                       {searchQuery && (
                         <ActionButton
-                          variant='outline'
-                          size='sm'
+                          variant="outline"
+                          size="sm"
                           onClick={() => setSearchQuery('')}
-                          className='mt-4'
+                          className="mt-4"
                         >
                           Clear search
                         </ActionButton>
                       )}
                     </div>
                   ) : (
-                    <Accordion type='multiple' className='space-y-3'>
+                    <Accordion type="multiple" className="space-y-3">
                       {filteredTemplates.map((template, index) => {
                         return (
                           <AccordionItem
@@ -547,27 +550,27 @@ export default function PromptTemplatesPage() {
                               animation: 'fadeIn 0.3s ease-out forwards',
                             }}
                           >
-                            <AccordionTrigger className='px-6 py-5 hover:no-underline hover:bg-muted/50 [&[data-state=open]]:bg-muted/50 transition-colors group'>
-                              <div className='flex items-center gap-4 flex-1 text-left'>
-                                <div className='p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 text-primary group-hover:scale-110 transition-transform'>
+                            <AccordionTrigger className="px-6 py-5 hover:no-underline hover:bg-muted/50 [&[data-state=open]]:bg-muted/50 transition-colors group">
+                              <div className="flex items-center gap-4 flex-1 text-left">
+                                <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 text-primary group-hover:scale-110 transition-transform">
                                   {getCategoryIcon(
                                     template.category || 'other'
                                   )}
                                 </div>
-                                <div className='flex-1 min-w-0'>
-                                  <div className='font-semibold text-base mb-1.5 group-hover:text-primary transition-colors'>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-base mb-1.5 group-hover:text-primary transition-colors">
                                     {template.title}
                                   </div>
-                                  <div className='flex items-center gap-2 flex-wrap'>
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <Badge
-                                      variant='outline'
-                                      className='text-xs font-medium'
+                                      variant="outline"
+                                      className="text-xs font-medium"
                                     >
                                       {getCategoryLabel(
                                         template.category || 'other'
                                       )}
                                     </Badge>
-                                    <span className='text-xs text-muted-foreground'>
+                                    <span className="text-xs text-muted-foreground">
                                       {template.content.split('\n').length}{' '}
                                       lines
                                     </span>
@@ -576,74 +579,74 @@ export default function PromptTemplatesPage() {
                               </div>
                             </AccordionTrigger>
 
-                            <AccordionContent className='px-6 pb-6 pt-2'>
-                              <div className='space-y-4'>
+                            <AccordionContent className="px-6 pb-6 pt-2">
+                              <div className="space-y-4">
                                 {/* Template Preview */}
-                                <div className='relative rounded-xl border-2 bg-muted/30 overflow-hidden shadow-inner'>
-                                  <div className='absolute top-4 right-4 z-10'>
+                                <div className="relative rounded-xl border-2 bg-muted/30 overflow-hidden shadow-inner">
+                                  <div className="absolute top-4 right-4 z-10">
                                     <ActionButton
-                                      size='sm'
-                                      variant='ghost'
+                                      size="sm"
+                                      variant="ghost"
                                       onClick={e => {
                                         e.stopPropagation();
                                         handleCopy(template);
                                       }}
                                       disabled={isGuest}
-                                      aria-label='Copy to clipboard'
-                                      leftIcon={<Copy aria-hidden='true' />}
+                                      aria-label="Copy to clipboard"
+                                      leftIcon={<Copy aria-hidden="true" />}
                                       feedbackActive={isActive(template.id)}
                                     />
                                   </div>
 
-                                  <ScrollArea className='h-[400px] w-full'>
-                                    <pre className='p-6 pr-32 text-sm leading-relaxed font-mono whitespace-pre-wrap break-words'>
+                                  <ScrollArea className="h-[400px] w-full">
+                                    <pre className="p-6 pr-32 text-sm leading-relaxed font-mono whitespace-pre-wrap break-words">
                                       {template.content}
                                     </pre>
                                   </ScrollArea>
                                 </div>
 
                                 {/* Template Stats */}
-                                <div className='flex items-center justify-between p-4 bg-muted/50 rounded-lg'>
-                                  <div className='flex items-center gap-4 text-xs text-muted-foreground'>
-                                    <div className='flex items-center gap-1.5'>
-                                      <FileCode className='h-3.5 w-3.5' />
-                                      <span className='font-medium'>
+                                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                    <div className="flex items-center gap-1.5">
+                                      <FileCode className="h-3.5 w-3.5" />
+                                      <span className="font-medium">
                                         {template.content.split('\n').length}{' '}
                                         lines
                                       </span>
                                     </div>
                                     <span>•</span>
-                                    <span className='font-medium'>
+                                    <span className="font-medium">
                                       {template.content.length.toLocaleString()}{' '}
                                       characters
                                     </span>
                                     <span>•</span>
-                                    <span className='font-medium'>
+                                    <span className="font-medium">
                                       {template.content
                                         .split(' ')
                                         .length.toLocaleString()}{' '}
                                       words
                                     </span>
                                   </div>
-                                  <div className='flex items-center gap-2'>
+                                  <div className="flex items-center gap-2">
                                     {templateHasInputs(template.id) && (
                                       <ActionButton
-                                        size='sm'
-                                        variant='outline'
+                                        size="sm"
+                                        variant="outline"
                                         onClick={e => {
                                           e.stopPropagation();
                                           handleOpenInputModal(template);
                                         }}
                                         disabled={isGuest}
-                                        className='gap-1.5'
+                                        className="gap-1.5"
                                         leftIcon={<Settings2 />}
                                       >
                                         Generate With Inputs
                                       </ActionButton>
                                     )}
                                     <Badge
-                                      variant='secondary'
-                                      className='text-xs'
+                                      variant="secondary"
+                                      className="text-xs"
                                     >
                                       Markdown
                                     </Badge>
@@ -661,16 +664,16 @@ export default function PromptTemplatesPage() {
 
               {/* Info Footer */}
               {!isLoading && filteredTemplates.length > 0 && (
-                <div className='mt-8 p-5 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 rounded-xl'>
-                  <div className='flex gap-4'>
-                    <div className='p-2.5 rounded-xl bg-primary/10 h-fit'>
-                      <Info className='h-5 w-5 text-primary' />
+                <div className="mt-8 p-5 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-2 border-primary/20 rounded-xl">
+                  <div className="flex gap-4">
+                    <div className="p-2.5 rounded-xl bg-primary/10 h-fit">
+                      <Info className="h-5 w-5 text-primary" />
                     </div>
-                    <div className='flex-1'>
-                      <p className='text-sm font-semibold mb-2 text-foreground'>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold mb-2 text-foreground">
                         💡 Pro Tips
                       </p>
-                      <ul className='text-sm text-muted-foreground space-y-1.5 list-disc list-inside'>
+                      <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
                         <li>
                           Click any template to expand and view its full content
                         </li>
@@ -697,27 +700,27 @@ export default function PromptTemplatesPage() {
 
       {/* Input Modal */}
       <Dialog open={isInputModalOpen} onOpenChange={setIsInputModalOpen}>
-        <DialogContent className='max-w-lg'>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className='flex items-center gap-2'>
-              <Settings2 className='h-5 w-5 text-primary' />
+            <DialogTitle className="flex items-center gap-2">
+              <Settings2 className="h-5 w-5 text-primary" />
               Configure Template Inputs
             </DialogTitle>
             <DialogDescription>{selectedTemplate?.title}</DialogDescription>
           </DialogHeader>
 
-          <div className='space-y-4 py-4'>
+          <div className="space-y-4 py-4">
             {selectedInputConfig?.inputs.map(input => (
-              <div key={input.id} className='space-y-2'>
-                <Label htmlFor={input.id} className='flex items-center gap-2'>
+              <div key={input.id} className="space-y-2">
+                <Label htmlFor={input.id} className="flex items-center gap-2">
                   {input.label}
                   {input.required &&
                     input.type !== 'image' &&
                     input.type !== 'file' && (
-                      <span className='text-destructive'>*</span>
+                      <span className="text-destructive">*</span>
                     )}
                   {(input.type === 'image' || input.type === 'file') && (
-                    <Badge variant='outline' className='text-xs font-normal'>
+                    <Badge variant="outline" className="text-xs font-normal">
                       Manual
                     </Badge>
                   )}
@@ -729,14 +732,14 @@ export default function PromptTemplatesPage() {
                     value={inputValues[input.id] || ''}
                     onChange={e => handleInputChange(input.id, e.target.value)}
                     rows={3}
-                    className='resize-none font-mono text-sm'
+                    className="resize-none font-mono text-sm"
                   />
                 ) : input.type === 'image' || input.type === 'file' ? (
                   <Input
                     id={input.id}
                     placeholder={input.placeholder}
                     disabled
-                    className='font-mono text-sm bg-muted'
+                    className="font-mono text-sm bg-muted"
                   />
                 ) : (
                   <Input
@@ -751,11 +754,11 @@ export default function PromptTemplatesPage() {
                     placeholder={input.placeholder}
                     value={inputValues[input.id] || ''}
                     onChange={e => handleInputChange(input.id, e.target.value)}
-                    className='font-mono text-sm'
+                    className="font-mono text-sm"
                   />
                 )}
                 {input.helpText && (
-                  <p className='text-xs text-muted-foreground'>
+                  <p className="text-xs text-muted-foreground">
                     {input.helpText}
                   </p>
                 )}
@@ -763,14 +766,18 @@ export default function PromptTemplatesPage() {
             ))}
           </div>
 
-          <DialogFooter className='flex-col sm:flex-row gap-2'>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <ActionButton
-              variant='outline'
+              variant="outline"
               onClick={() => setIsInputModalOpen(false)}
             >
               Cancel
             </ActionButton>
-            <ActionButton onClick={handleGenerate} disabled={isGuest || !canGenerate} leftIcon={<Sparkles />}>
+            <ActionButton
+              onClick={handleGenerate}
+              disabled={isGuest || !canGenerate}
+              leftIcon={<Sparkles />}
+            >
               Generate Prompt
             </ActionButton>
           </DialogFooter>
@@ -779,37 +786,37 @@ export default function PromptTemplatesPage() {
 
       {/* Result Modal */}
       <Dialog open={isResultModalOpen} onOpenChange={setIsResultModalOpen}>
-        <DialogContent className='max-w-3xl max-h-[85vh] flex flex-col'>
-          <DialogHeader className='flex-shrink-0'>
-            <DialogTitle className='flex items-center gap-2'>
-              <Sparkles className='h-5 w-5 text-primary' />
+        <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
               Generated Prompt
             </DialogTitle>
             <DialogDescription>{selectedTemplate?.title}</DialogDescription>
           </DialogHeader>
 
-          <div className='flex-1 min-h-0 my-4'>
-            <ScrollArea className='h-[50vh] w-full rounded-lg border-2 bg-muted/30'>
-              <pre className='p-4 text-sm leading-relaxed font-mono whitespace-pre-wrap break-words'>
+          <div className="flex-1 min-h-0 my-4">
+            <ScrollArea className="h-[50vh] w-full rounded-lg border-2 bg-muted/30">
+              <pre className="p-4 text-sm leading-relaxed font-mono whitespace-pre-wrap break-words">
                 {generatedPrompt}
               </pre>
             </ScrollArea>
           </div>
 
-          <DialogFooter className='flex-shrink-0 flex-col sm:flex-row gap-3 items-stretch sm:items-center'>
+          <DialogFooter className="flex-shrink-0 flex-col sm:flex-row gap-3 items-stretch sm:items-center">
             {manualWarning && (
-              <div className='flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-800 dark:text-amber-200 text-sm flex-1'>
-                <AlertTriangle className='h-4 w-4 mt-0.5 flex-shrink-0' />
+              <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-800 dark:text-amber-200 text-sm flex-1">
+                <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <span>{manualWarning}</span>
               </div>
             )}
-            <div className='flex gap-2 flex-shrink-0'>
-              <ActionButton variant='outline' onClick={handleCloseModals}>
+            <div className="flex gap-2 flex-shrink-0">
+              <ActionButton variant="outline" onClick={handleCloseModals}>
                 Close
               </ActionButton>
               <ActionButton
                 onClick={handleCopyGenerated}
-                className='gap-2'
+                className="gap-2"
                 disabled={isGuest}
                 leftIcon={<Copy />}
                 feedbackActive={isActive('generated')}

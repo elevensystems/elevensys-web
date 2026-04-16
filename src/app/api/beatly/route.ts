@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { OPENAI_URL } from '@/lib/api-urls';
 import { validateModel } from '@/lib/constants';
 import { fetchWithTimeout } from '@/lib/fetch-utils';
-import { OPENAI_URL } from '@/lib/api-urls';
 import type { ChatMessage, MoodRequest } from '@/types/beatly';
 
 export async function POST(request: NextRequest) {

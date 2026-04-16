@@ -12,9 +12,9 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { ActionButton } from '@/components/action-button';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { ActionButton } from '@/components/action-button';
 import {
   Card,
   CardContent,
@@ -70,7 +70,7 @@ export default function UrlifyPage() {
           setResult(data);
           toast.success('URL shortened successfully', {
             description: 'Your short URL is ready to use.',
-            icon: <Check className='h-4 w-4' />,
+            icon: <Check className="h-4 w-4" />,
             duration: 5000,
           });
         } else {
@@ -101,22 +101,22 @@ export default function UrlifyPage() {
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-full mx-auto'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-full mx-auto">
           <ToolPageHeader
-            title='Urlify'
-            description='Make your URLs shorter and easier to share. Free tool for creating short links.'
-            infoMessage='URL shortening is processed securely through our server. Your links are never stored permanently.'
+            title="Urlify"
+            description="Make your URLs shorter and easier to share. Free tool for creating short links."
+            infoMessage="URL shortening is processed securely through our server. Your links are never stored permanently."
             error={error}
           />
 
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Settings Card */}
             <Card>
               <CardHeader>
-                <div className='flex flex-col gap-1'>
-                  <CardTitle className='flex items-center gap-2'>
-                    <SettingsIcon className='h-5 w-5' />
+                <div className="flex flex-col gap-1">
+                  <CardTitle className="flex items-center gap-2">
+                    <SettingsIcon className="h-5 w-5" />
                     Settings
                   </CardTitle>
                   <CardDescription>
@@ -124,10 +124,10 @@ export default function UrlifyPage() {
                   </CardDescription>
                 </div>
               </CardHeader>
-              <CardContent className='space-y-6'>
+              <CardContent className="space-y-6">
                 {/* URL Input */}
                 <form.Field
-                  name='url'
+                  name="url"
                   children={field => {
                     const isInvalid =
                       field.state.meta.isTouched && !field.state.meta.isValid;
@@ -138,8 +138,8 @@ export default function UrlifyPage() {
                         </FieldLabel>
                         <Input
                           id={field.name}
-                          type='url'
-                          placeholder='https://example.com/very/long/url/path'
+                          type="url"
+                          placeholder="https://example.com/very/long/url/path"
                           value={field.state.value}
                           onBlur={field.handleBlur}
                           onChange={e => {
@@ -153,7 +153,7 @@ export default function UrlifyPage() {
                               form.handleSubmit();
                             }
                           }}
-                          className='h-12'
+                          className="h-12"
                           aria-invalid={isInvalid}
                         />
                         {isInvalid && (
@@ -166,21 +166,21 @@ export default function UrlifyPage() {
 
                 {/* Auto-delete */}
                 <form.Field
-                  name='autoDelete'
+                  name="autoDelete"
                   children={field => (
-                    <div className='flex items-center gap-3 rounded-lg border bg-muted/30 p-4'>
+                    <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-4">
                       <Checkbox
-                        id='auto-delete'
+                        id="auto-delete"
                         checked={field.state.value}
                         onCheckedChange={checked => {
                           field.handleChange(checked === true);
                         }}
                       />
-                      <div className='space-y-1'>
-                        <FieldLabel htmlFor='auto-delete'>
+                      <div className="space-y-1">
+                        <FieldLabel htmlFor="auto-delete">
                           Auto-delete link
                         </FieldLabel>
-                        <p className='text-xs text-muted-foreground'>
+                        <p className="text-xs text-muted-foreground">
                           Enable to expire the link after a set number of days.
                         </p>
                       </div>
@@ -189,7 +189,7 @@ export default function UrlifyPage() {
                 />
 
                 <form.Field
-                  name='ttlDays'
+                  name="ttlDays"
                   children={field => {
                     const isInvalid =
                       autoDelete &&
@@ -202,18 +202,18 @@ export default function UrlifyPage() {
                         </FieldLabel>
                         <Input
                           id={field.name}
-                          type='number'
+                          type="number"
                           min={1}
                           step={1}
-                          placeholder='30'
+                          placeholder="30"
                           value={field.state.value}
                           disabled={!autoDelete}
                           onBlur={field.handleBlur}
                           onChange={e => field.handleChange(e.target.value)}
-                          className='h-12'
+                          className="h-12"
                           aria-invalid={isInvalid}
                         />
-                        <p className='text-xs text-muted-foreground'>
+                        <p className="text-xs text-muted-foreground">
                           Leave blank to use the default 30-day expiration.
                         </p>
                         {isInvalid && (
@@ -228,11 +228,11 @@ export default function UrlifyPage() {
                 <ActionButton
                   onClick={() => form.handleSubmit()}
                   disabled={form.state.isSubmitting}
-                  className='w-full'
-                  size='lg'
+                  className="w-full"
+                  size="lg"
                   leftIcon={<Link2 />}
                   isLoading={form.state.isSubmitting}
-                  loadingText='Shortening...'
+                  loadingText="Shortening..."
                 >
                   Shorten URL
                 </ActionButton>
@@ -242,75 +242,75 @@ export default function UrlifyPage() {
             {/* Result Card */}
             <Card>
               <CardHeader>
-                <CardTitle className='flex items-center gap-2'>
-                  <Link2 className='h-5 w-5' />
+                <CardTitle className="flex items-center gap-2">
+                  <Link2 className="h-5 w-5" />
                   Result
                 </CardTitle>
               </CardHeader>
-              <CardContent className='space-y-4'>
+              <CardContent className="space-y-4">
                 {!result?.shortUrl ? (
-                  <div className='flex items-center justify-center h-40 text-muted-foreground'>
+                  <div className="flex items-center justify-center h-40 text-muted-foreground">
                     <p>
                       Enter a URL and click &quot;Shorten URL&quot; to get
                       started
                     </p>
                   </div>
                 ) : (
-                  <div className='space-y-4'>
-                    <div className='space-y-2'>
-                      <FieldLabel className='text-sm font-medium'>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <FieldLabel className="text-sm font-medium">
                         Shortened URL
                       </FieldLabel>
-                      <div className='flex items-center gap-2 p-3 bg-muted rounded-lg'>
-                        <code className='flex-1 text-sm font-mono break-all select-all'>
+                      <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                        <code className="flex-1 text-sm font-mono break-all select-all">
                           {result.shortUrl}
                         </code>
                         <ActionButton
-                          size='sm'
-                          variant='ghost'
+                          size="sm"
+                          variant="ghost"
                           onClick={handleCopy}
-                          aria-label='Copy to clipboard'
-                          leftIcon={<Copy aria-hidden='true' />}
+                          aria-label="Copy to clipboard"
+                          leftIcon={<Copy aria-hidden="true" />}
                           feedbackActive={isActive('copy')}
                         />
                       </div>
                     </div>
 
-                    <div className='grid gap-3 rounded-lg border bg-muted/30 p-4 text-sm'>
-                      <div className='flex items-center justify-between gap-3'>
-                        <span className='text-muted-foreground'>
+                    <div className="grid gap-3 rounded-lg border bg-muted/30 p-4 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-muted-foreground">
                           Short code
                         </span>
-                        <span className='font-medium'>
+                        <span className="font-medium">
                           {result.shortCode ?? '—'}
                         </span>
                       </div>
-                      <div className='flex items-center justify-between gap-3'>
-                        <span className='text-muted-foreground'>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-muted-foreground">
                           Original URL
                         </span>
-                        <span className='font-medium break-all text-right'>
+                        <span className="font-medium break-all text-right">
                           {result.originalUrl ??
                             form.getFieldValue('url').trim()}
                         </span>
                       </div>
-                      <div className='flex items-center justify-between gap-3'>
-                        <span className='flex items-center gap-2 text-muted-foreground'>
-                          <CalendarClock className='h-4 w-4' />
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-2 text-muted-foreground">
+                          <CalendarClock className="h-4 w-4" />
                           Created
                         </span>
-                        <span className='font-medium'>
+                        <span className="font-medium">
                           {result.createdAt
                             ? new Date(result.createdAt).toLocaleString()
                             : '—'}
                         </span>
                       </div>
-                      <div className='flex items-center justify-between gap-3'>
-                        <span className='flex items-center gap-2 text-muted-foreground'>
-                          <CalendarClock className='h-4 w-4' />
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-2 text-muted-foreground">
+                          <CalendarClock className="h-4 w-4" />
                           Expires
                         </span>
-                        <span className='font-medium'>
+                        <span className="font-medium">
                           {result.expiresAt
                             ? new Date(result.expiresAt).toLocaleString()
                             : 'Never'}

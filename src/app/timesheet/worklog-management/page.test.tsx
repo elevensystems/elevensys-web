@@ -36,7 +36,7 @@ jest.mock('@/hooks/use-worklogs', () => ({
 jest.mock('@/components/layouts/main-layout', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid='main-layout'>{children}</div>
+    <div data-testid="main-layout">{children}</div>
   ),
 }));
 
@@ -50,10 +50,10 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
     description: string;
     error?: string;
   }) => (
-    <div data-testid='tool-page-header'>
+    <div data-testid="tool-page-header">
       <h1>{title}</h1>
       <p>{description}</p>
-      {error && <div data-testid='header-error'>{error}</div>}
+      {error && <div data-testid="header-error">{error}</div>}
     </div>
   ),
 }));
@@ -78,7 +78,7 @@ jest.mock('./_components/bulk-delete-action', () => ({
     onBulkDelete: () => void;
     onClearSelection: () => void;
   }) => (
-    <div data-testid='bulk-delete-action'>
+    <div data-testid="bulk-delete-action">
       <span>{selectedCount} selected</span>
       <button onClick={onBulkDelete}>Bulk Delete</button>
       <button onClick={onClearSelection}>Clear Selection</button>
@@ -105,13 +105,13 @@ jest.mock('next/link', () => ({
 }));
 
 jest.mock('lucide-react', () => ({
-  AlertCircle: () => <span data-testid='icon-alert-circle' />,
-  ClipboardList: () => <span data-testid='icon-clipboard-list' />,
-  Search: () => <span data-testid='icon-search' />,
+  AlertCircle: () => <span data-testid="icon-alert-circle" />,
+  ClipboardList: () => <span data-testid="icon-clipboard-list" />,
+  Search: () => <span data-testid="icon-search" />,
 }));
 
 jest.mock('@/components/ui/spinner', () => ({
-  Spinner: () => <span data-testid='icon-loader' />,
+  Spinner: () => <span data-testid="icon-loader" />,
 }));
 
 jest.mock('@/components/ui/alert', () => ({
@@ -122,7 +122,7 @@ jest.mock('@/components/ui/alert', () => ({
     children: React.ReactNode;
     className?: string;
   }) => (
-    <div role='alert' {...props}>
+    <div role="alert" {...props}>
       {children}
     </div>
   ),
@@ -146,7 +146,7 @@ jest.mock('@/components/ui/card', () => ({
     <div>{children}</div>
   ),
   CardDescription: ({ children }: { children: React.ReactNode }) => (
-    <p data-testid='card-description'>{children}</p>
+    <p data-testid="card-description">{children}</p>
   ),
   CardHeader: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
@@ -167,7 +167,7 @@ jest.mock('@/components/ui/checkbox', () => ({
     'aria-label'?: string;
   }) => (
     <input
-      type='checkbox'
+      type="checkbox"
       checked={checked === true}
       onChange={() => onCheckedChange?.(!checked)}
       {...props}
@@ -181,9 +181,9 @@ jest.mock('@/components/ui/date-range-picker', () => ({
   }: {
     onRangeChange?: (from: string, to: string) => void;
   }) => (
-    <div data-testid='date-range-picker'>
+    <div data-testid="date-range-picker">
       <button
-        data-testid='change-date-range'
+        data-testid="change-date-range"
         onClick={() => onRangeChange?.('2025-02-01', '2025-02-28')}
       />
     </div>
@@ -216,7 +216,7 @@ jest.mock('@/components/ui/native-select', () => ({
 
 jest.mock('@/components/ui/pagination', () => ({
   Pagination: ({ children }: { children: React.ReactNode }) => (
-    <nav data-testid='pagination'>{children}</nav>
+    <nav data-testid="pagination">{children}</nav>
   ),
   PaginationContent: ({ children }: { children: React.ReactNode }) => (
     <ul>{children}</ul>
@@ -246,7 +246,7 @@ jest.mock('@/components/ui/pagination', () => ({
     'aria-disabled'?: boolean;
     className?: string;
   }) => (
-    <button data-testid='pagination-next' onClick={onClick} {...props}>
+    <button data-testid="pagination-next" onClick={onClick} {...props}>
       Next
     </button>
   ),
@@ -258,7 +258,7 @@ jest.mock('@/components/ui/pagination', () => ({
     'aria-disabled'?: boolean;
     className?: string;
   }) => (
-    <button data-testid='pagination-prev' onClick={onClick} {...props}>
+    <button data-testid="pagination-prev" onClick={onClick} {...props}>
       Previous
     </button>
   ),
@@ -266,7 +266,7 @@ jest.mock('@/components/ui/pagination', () => ({
 
 jest.mock('@/components/ui/skeleton', () => ({
   Skeleton: ({ className }: { className?: string }) => (
-    <div data-testid='skeleton' className={className} />
+    <div data-testid="skeleton" className={className} />
   ),
 }));
 

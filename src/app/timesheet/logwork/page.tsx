@@ -344,9 +344,9 @@ export default function LogWorkPage() {
   if (!isLoaded) {
     return (
       <MainLayout>
-        <section className='container mx-auto px-4 py-12'>
-          <div className='flex items-center justify-center h-40'>
-            <Spinner className='size-6 text-muted-foreground' />
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center justify-center h-40">
+            <Spinner className="size-6 text-muted-foreground" />
           </div>
         </section>
       </MainLayout>
@@ -362,11 +362,11 @@ export default function LogWorkPage() {
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-full mx-auto space-y-8'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-full mx-auto space-y-8">
           <ToolPageHeader
-            title='Log Work'
-            description='Log your work entries to Jira timesheet. Select dates, add work entries, and submit them in bulk.'
+            title="Log Work"
+            description="Log your work entries to Jira timesheet. Select dates, add work entries, and submit them in bulk."
           />
 
           <NotConfiguredAlert isConfigured={isConfigured} />
@@ -401,9 +401,9 @@ export default function LogWorkPage() {
           {/* Work Entries Card */}
           <Card>
             <CardHeader>
-              <div className='flex flex-col gap-1'>
-                <CardTitle className='flex items-center gap-2'>
-                  <Clock className='h-5 w-5' />
+              <div className="flex flex-col gap-1">
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
                   Work Entries
                 </CardTitle>
                 <CardDescription>
@@ -412,8 +412,8 @@ export default function LogWorkPage() {
                 </CardDescription>
               </div>
               <CardAction>
-                <div className='flex flex-col items-end gap-0.5 text-sm'>
-                  <span className='text-muted-foreground text-xs'>
+                <div className="flex flex-col items-end gap-0.5 text-sm">
+                  <span className="text-muted-foreground text-xs">
                     Daily target
                   </span>
                   <span className={`font-semibold ${hoursColor}`}>
@@ -422,17 +422,17 @@ export default function LogWorkPage() {
                 </div>
               </CardAction>
             </CardHeader>
-            <CardContent className='space-y-6'>
+            <CardContent className="space-y-6">
               {/* Entries Table */}
-              <div className='flex mb-3 items-center gap-2 text-sm font-medium text-muted-foreground'>
-                <span className='flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
+              <div className="flex mb-3 items-center gap-2 text-sm font-medium text-muted-foreground">
+                <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                   3
                 </span>
                 Add work entries
               </div>
-              <div className='overflow-hidden rounded-lg border'>
+              <div className="overflow-hidden rounded-lg border">
                 {/* Grid header */}
-                <div className='grid grid-cols-[230px_1fr_150px_140px_50px] gap-2 bg-muted/50 px-3 py-2 text-sm font-semibold text-muted-foreground'>
+                <div className="grid grid-cols-[230px_1fr_150px_140px_50px] gap-2 bg-muted/50 px-3 py-2 text-sm font-semibold text-muted-foreground">
                   <span>Key</span>
                   <span>Description</span>
                   <span>Type of Work</span>
@@ -459,18 +459,18 @@ export default function LogWorkPage() {
 
               {/* Global entries error */}
               {errors.global.entries && (
-                <p className='text-sm text-destructive' role='alert'>
+                <p className="text-sm text-destructive" role="alert">
                   {errors.global.entries}
                 </p>
               )}
 
               {/* Action Buttons */}
-              <div className='flex flex-col sm:flex-row sm:justify-between gap-3 border-t pt-6'>
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-3 border-t pt-6">
                 <ActionButton
-                  variant='outline'
+                  variant="outline"
                   onClick={addEntry}
                   disabled={isSubmitting || !isConfigured}
-                  className='w-full sm:w-auto'
+                  className="w-full sm:w-auto"
                   leftIcon={<Plus />}
                 >
                   Add Entry
@@ -478,10 +478,10 @@ export default function LogWorkPage() {
                 <ActionButton
                   onClick={handleSubmitClick}
                   disabled={isSubmitting || !isConfigured}
-                  className='w-full sm:w-auto'
+                  className="w-full sm:w-auto"
                   leftIcon={<Send />}
                   isLoading={isSubmitting}
-                  loadingText='Submitting...'
+                  loadingText="Submitting..."
                   title={
                     parsedDates.length > 0 && validEntryCount > 0
                       ? `Will submit ${validEntryCount * parsedDates.length} worklogs (${validEntryCount} entr${validEntryCount !== 1 ? 'ies' : 'y'} × ${parsedDates.length} date${parsedDates.length !== 1 ? 's' : ''})`

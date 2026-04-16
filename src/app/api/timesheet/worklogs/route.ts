@@ -26,11 +26,18 @@ export async function GET(request: NextRequest) {
 
     // Project worklogs path
     if (projectKey) {
-      const params = new URLSearchParams({ projectKey, fromDate, toDate, jiraInstance });
+      const params = new URLSearchParams({
+        projectKey,
+        fromDate,
+        toDate,
+        jiraInstance,
+      });
 
       // Forward any additional query params (e.g. username, statusWorklog, etc.)
       for (const [key, value] of searchParams.entries()) {
-        if (!['projectKey', 'fromDate', 'toDate', 'jiraInstance'].includes(key)) {
+        if (
+          !['projectKey', 'fromDate', 'toDate', 'jiraInstance'].includes(key)
+        ) {
           params.set(key, value);
         }
       }
@@ -40,7 +47,9 @@ export async function GET(request: NextRequest) {
 
       const [worklogsResponse, paginationResponse] = await Promise.all([
         fetch(`${TIMESHEET_URLS.PROJECT_WORKLOGS}?${queryString}`, { headers }),
-        fetch(`${TIMESHEET_URLS.PROJECT_WORKLOGS_PAGINATION}?${queryString}`, { headers }),
+        fetch(`${TIMESHEET_URLS.PROJECT_WORKLOGS_PAGINATION}?${queryString}`, {
+          headers,
+        }),
       ]);
 
       if (!worklogsResponse.ok) {
@@ -82,11 +91,20 @@ export async function GET(request: NextRequest) {
     }
 
     const statusWorklog = searchParams.get('statusWorklog') ?? 'All';
-    const params = new URLSearchParams({ fromDate, toDate, user: username, statusWorklog, jiraInstance });
-
-    const response = await fetch(`${TIMESHEET_URLS.WORKLOGS}?${params.toString()}`, {
-      headers: { Authorization: authHeader },
+    const params = new URLSearchParams({
+      fromDate,
+      toDate,
+      user: username,
+      statusWorklog,
+      jiraInstance,
     });
+
+    const response = await fetch(
+      `${TIMESHEET_URLS.WORKLOGS}?${params.toString()}`,
+      {
+        headers: { Authorization: authHeader },
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();

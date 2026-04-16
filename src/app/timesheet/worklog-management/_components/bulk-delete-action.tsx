@@ -2,6 +2,7 @@
 
 import { EraserIcon, Trash2 } from 'lucide-react';
 
+import { ActionButton } from '@/components/action-button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +14,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ActionButton } from '@/components/action-button';
 import { CardAction } from '@/components/ui/card';
 
 interface BulkDeleteActionProps {
@@ -35,15 +35,15 @@ export function BulkDeleteAction({
 
   return (
     <CardAction>
-      <div className='flex items-center gap-2'>
-        <span className='text-sm text-muted-foreground'>
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">
           {selectedCount} selected
         </span>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <ActionButton
-              variant='destructive'
-              size='sm'
+              variant="destructive"
+              size="sm"
               leftIcon={<Trash2 />}
               isLoading={isBulkDeleting}
               loadingText={`Deleting... ${bulkDeleteProgress}%`}
@@ -59,21 +59,26 @@ export function BulkDeleteAction({
               </AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to delete{' '}
-                <span className='font-semibold'>{selectedCount}</span> selected
+                <span className="font-semibold">{selectedCount}</span> selected
                 worklog
                 {selectedCount !== 1 ? 's' : ''}? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction variant='destructive' onClick={onBulkDelete}>
+              <AlertDialogAction variant="destructive" onClick={onBulkDelete}>
                 Delete {selectedCount} Worklog
                 {selectedCount !== 1 ? 's' : ''}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <ActionButton variant='ghost' size='sm' onClick={onClearSelection} leftIcon={<EraserIcon />}>
+        <ActionButton
+          variant="ghost"
+          size="sm"
+          onClick={onClearSelection}
+          leftIcon={<EraserIcon />}
+        >
           Clear
         </ActionButton>
       </div>

@@ -11,12 +11,12 @@ import {
   X,
 } from 'lucide-react';
 
+import { ActionButton } from '@/components/action-button';
 import GuestLoginAlert from '@/components/layouts/guest-login-alert';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { ActionButton } from '@/components/action-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -227,38 +227,38 @@ export default function TranslatelyPage() {
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-full mx-auto'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-full mx-auto">
           <ToolPageHeader
             title={PAGE_METADATA.title}
             description={PAGE_METADATA.description}
           />
 
           {error && (
-            <Alert variant='destructive' className='mb-6'>
+            <Alert variant="destructive" className="mb-6">
               <AlertTitle>Translation failed</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {isGuest && (
-            <GuestLoginAlert className='mb-6' title='Sign in to translate' />
+            <GuestLoginAlert className="mb-6" title="Sign in to translate" />
           )}
 
-          <div className='grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-start'>
-            <Card className='lg:sticky lg:top-6'>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-start">
+            <Card className="lg:sticky lg:top-6">
               <CardHeader>
-                <CardTitle className='flex items-center justify-between py-2'>
+                <CardTitle className="flex items-center justify-between py-2">
                   <span>Input Text</span>
-                  <p className='text-sm text-muted-foreground'>
+                  <p className="text-sm text-muted-foreground">
                     {directionLabel}
                   </p>
                 </CardTitle>
               </CardHeader>
-              <CardContent className='space-y-5'>
-                <div className='space-y-2'>
+              <CardContent className="space-y-5">
+                <div className="space-y-2">
                   <Textarea
-                    id='input-text'
+                    id="input-text"
                     value={inputText}
                     onChange={event => {
                       const newValue = event.target.value;
@@ -268,11 +268,11 @@ export default function TranslatelyPage() {
                     }}
                     onKeyDown={handleKeyDown}
                     placeholder={inputPlaceholder}
-                    className='min-h-[180px]'
+                    className="min-h-[180px]"
                     disabled={loading}
                     maxLength={MAX_TRANSLATE_INPUT_LENGTH}
                   />
-                  <div className='flex items-center justify-between text-xs text-muted-foreground'>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>Ctrl + Enter to translate</span>
                     <span
                       className={
@@ -286,13 +286,13 @@ export default function TranslatelyPage() {
                   </div>
                 </div>
 
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                  <div className='space-y-3'>
-                    <Label className='text-base'>Model</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <Label className="text-base">Model</Label>
                     <NativeSelect
                       value={model}
                       onChange={event => setModel(event.target.value)}
-                      containerClassName='w-full'
+                      containerClassName="w-full"
                     >
                       {AI_MODELS.map(item => (
                         <option key={item.value} value={item.value}>
@@ -302,42 +302,42 @@ export default function TranslatelyPage() {
                     </NativeSelect>
                   </div>
 
-                  <div className='space-y-3'>
-                    <Label className='text-base'>Tone & Style</Label>
+                  <div className="space-y-3">
+                    <Label className="text-base">Tone & Style</Label>
                     <Dialog
                       open={isToneModalOpen}
                       onOpenChange={setIsToneModalOpen}
                     >
                       <DialogTrigger asChild>
                         <Button
-                          variant='outline'
-                          className='w-full justify-between hover:bg-accent'
+                          variant="outline"
+                          className="w-full justify-between hover:bg-accent"
                         >
-                          <span className='flex items-center gap-2 text-sm'>
-                            <SlidersHorizontal className='h-4 w-4' />
+                          <span className="flex items-center gap-2 text-sm">
+                            <SlidersHorizontal className="h-4 w-4" />
                             {tones.length > 0
                               ? `${tones.length} selected`
                               : 'Select tones'}
                           </span>
-                          <ChevronDown className='h-4 w-4' />
+                          <ChevronDown className="h-4 w-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className='max-w-[90vw] md:max-w-2xl lg:max-w-3xl max-h-[85vh]'>
+                      <DialogContent className="max-w-[90vw] md:max-w-2xl lg:max-w-3xl max-h-[85vh]">
                         <DialogHeader>
-                          <DialogTitle className='flex items-center gap-2'>
-                            <SlidersHorizontal className='h-5 w-5' />
+                          <DialogTitle className="flex items-center gap-2">
+                            <SlidersHorizontal className="h-5 w-5" />
                             Select Tone & Style
                           </DialogTitle>
                         </DialogHeader>
-                        <div className='overflow-y-auto max-h-[60vh] pr-2'>
-                          <div className='flex flex-wrap gap-2'>
+                        <div className="overflow-y-auto max-h-[60vh] pr-2">
+                          <div className="flex flex-wrap gap-2">
                             {TRANSLATION_TONES.map(tone => {
                               const checked = tones.includes(tone.value);
                               return (
                                 <Badge
                                   key={tone.value}
                                   variant={checked ? 'default' : 'outline'}
-                                  className='cursor-pointer transition-all hover:scale-105 text-xs py-1.5 px-3'
+                                  className="cursor-pointer transition-all hover:scale-105 text-xs py-1.5 px-3"
                                   onClick={() =>
                                     handleToneToggle(tone.value, !checked)
                                   }
@@ -348,8 +348,8 @@ export default function TranslatelyPage() {
                             })}
                           </div>
                         </div>
-                        <div className='flex items-center justify-between pt-4 border-t'>
-                          <div className='text-sm text-muted-foreground'>
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <div className="text-sm text-muted-foreground">
                             {tones.length > 0 ? (
                               <span>
                                 {tones.length} tone
@@ -359,18 +359,18 @@ export default function TranslatelyPage() {
                               <span>No tones selected (default)</span>
                             )}
                           </div>
-                          <div className='flex gap-2'>
+                          <div className="flex gap-2">
                             {tones.length > 1 && (
                               <Button
-                                variant='outline'
-                                size='sm'
+                                variant="outline"
+                                size="sm"
                                 onClick={() => setTones(['neutral'])}
                               >
                                 Clear All
                               </Button>
                             )}
                             <Button
-                              size='sm'
+                              size="sm"
                               onClick={() => setIsToneModalOpen(false)}
                             >
                               Apply
@@ -382,7 +382,7 @@ export default function TranslatelyPage() {
                   </div>
                 </div>
                 {tones.length > 0 && (
-                  <div className='flex flex-wrap gap-1.5 p-3 bg-accent/50 rounded-lg'>
+                  <div className="flex flex-wrap gap-1.5 p-3 bg-accent/50 rounded-lg">
                     {tones.map(tone => {
                       const toneLabel =
                         TRANSLATION_TONES.find(item => item.value === tone)
@@ -390,21 +390,21 @@ export default function TranslatelyPage() {
                       return (
                         <Badge
                           key={tone}
-                          variant='default'
-                          className='cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors'
+                          variant="default"
+                          className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
                           onClick={() => handleToneToggle(tone, false)}
                         >
                           {toneLabel}
-                          <X className='ml-1 h-3 w-3' />
+                          <X className="ml-1 h-3 w-3" />
                         </Badge>
                       );
                     })}
                   </div>
                 )}
                 <RainbowButton
-                  className='w-full'
-                  size='lg'
-                  variant='outline'
+                  className="w-full"
+                  size="lg"
+                  variant="outline"
                   onClick={handleTranslate}
                   disabled={isGuest || loading || !inputText.trim()}
                 >
@@ -414,28 +414,28 @@ export default function TranslatelyPage() {
               </CardContent>
             </Card>
 
-            <div className='flex flex-col items-center justify-center gap-3 lg:pt-10'>
+            <div className="flex flex-col items-center justify-center gap-3 lg:pt-10">
               <ActionButton
-                variant='outline'
-                size='icon'
+                variant="outline"
+                size="icon"
                 onClick={handleSwap}
                 disabled={loading}
-                aria-label='Swap translation direction'
-                className='h-11 w-11 rounded-full shadow-sm'
+                aria-label="Swap translation direction"
+                className="h-11 w-11 rounded-full shadow-sm"
                 leftIcon={<ArrowRightLeft />}
               />
-              <span className='text-xs text-muted-foreground text-center max-w-[120px]'>
+              <span className="text-xs text-muted-foreground text-center max-w-[120px]">
                 Swap direction
               </span>
             </div>
 
-            <Card className='lg:sticky lg:top-6'>
+            <Card className="lg:sticky lg:top-6">
               <CardHeader>
-                <CardTitle className='flex items-center justify-between'>
+                <CardTitle className="flex items-center justify-between">
                   <span>{outputLabel}</span>
                   <ActionButton
-                    variant='ghost'
-                    size='sm'
+                    variant="ghost"
+                    size="sm"
                     onClick={handleCopy}
                     disabled={!outputText}
                     leftIcon={<Copy />}
@@ -445,14 +445,14 @@ export default function TranslatelyPage() {
                   </ActionButton>
                 </CardTitle>
               </CardHeader>
-              <CardContent className='space-y-4'>
+              <CardContent className="space-y-4">
                 <Textarea
                   value={outputText}
                   readOnly
-                  placeholder='Translation will appear here...'
-                  className='min-h-[180px]'
+                  placeholder="Translation will appear here..."
+                  className="min-h-[180px]"
                 />
-                <div className='flex items-center justify-between text-xs text-muted-foreground'>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Auto-filled after translation</span>
                   <span>{outputText.length} characters</span>
                 </div>

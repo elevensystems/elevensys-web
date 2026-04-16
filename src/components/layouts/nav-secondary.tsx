@@ -51,7 +51,7 @@ export function NavSecondary({
             <SidebarMenuItem key={item.title}>
               {item.onClick ? (
                 <SidebarMenuButton
-                  size='sm'
+                  size="sm"
                   onClick={e => {
                     e.preventDefault();
                     onItemClick?.(item.onClick);
@@ -61,7 +61,7 @@ export function NavSecondary({
                   <span>{item.title}</span>
                 </SidebarMenuButton>
               ) : (
-                <SidebarMenuButton asChild size='sm'>
+                <SidebarMenuButton asChild size="sm">
                   <Link href={item.url}>
                     <item.icon />
                     <span>{item.title}</span>
@@ -73,14 +73,14 @@ export function NavSecondary({
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton size='sm'>
+                <SidebarMenuButton size="sm">
                   <Palette />
                   <span>Theme</span>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 side={isMobile ? 'bottom' : 'right'}
-                align='end'
+                align="end"
                 sideOffset={4}
               >
                 {THEMES.map(({ label, value, icon: Icon }) => (

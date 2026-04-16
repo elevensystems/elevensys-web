@@ -27,9 +27,9 @@ export default function NewAutologConfigPage() {
   if (!isLoaded) {
     return (
       <MainLayout>
-        <section className='container mx-auto px-4 py-12'>
-          <div className='flex items-center justify-center h-40'>
-            <Spinner className='size-6 text-muted-foreground' />
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center justify-center h-40">
+            <Spinner className="size-6 text-muted-foreground" />
           </div>
         </section>
       </MainLayout>
@@ -38,11 +38,11 @@ export default function NewAutologConfigPage() {
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-5xl mx-auto space-y-8'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-5xl mx-auto space-y-8">
           <ToolPageHeader
-            title='New Configuration'
-            description='Create a new autolog configuration to automatically log work to Jira.'
+            title="New Configuration"
+            description="Create a new autolog configuration to automatically log work to Jira."
           />
 
           <NotConfiguredAlert isConfigured={isConfigured} />

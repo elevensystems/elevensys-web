@@ -7,15 +7,15 @@ import { Copy, Eraser } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 
-import MainLayout from '@/components/layouts/main-layout';
 import { ActionButton } from '@/components/action-button';
 import { JsonToolToolbar } from '@/components/layouts/json-tool-toolbar';
+import MainLayout from '@/components/layouts/main-layout';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useActionFeedback } from '@/hooks/use-action-feedback';
-import { parseJsonSafely } from '@/lib/json-utils';
 import { DEFAULT_JSON, generateJsCode } from '@/lib/json-objectify';
 import type { ConversionOptions } from '@/lib/json-objectify';
+import { parseJsonSafely } from '@/lib/json-utils';
 import {
   BASE_EDITOR_OPTIONS,
   READONLY_EDITOR_OPTIONS,
@@ -98,17 +98,17 @@ export default function JsonObjectifyPage() {
 
   const optionsContent = (
     <>
-      <div className='flex items-center justify-between lg:justify-start gap-2'>
-        <span className='text-xs text-muted-foreground lg:hidden'>Type</span>
+      <div className="flex items-center justify-between lg:justify-start gap-2">
+        <span className="text-xs text-muted-foreground lg:hidden">Type</span>
         <Tabs
           value={outputType}
           onValueChange={value => setOutputType(value as 'const' | 'let')}
         >
-          <TabsList className='h-8'>
-            <TabsTrigger value='const' className='text-xs px-2.5'>
+          <TabsList className="h-8">
+            <TabsTrigger value="const" className="text-xs px-2.5">
               const
             </TabsTrigger>
-            <TabsTrigger value='let' className='text-xs px-2.5'>
+            <TabsTrigger value="let" className="text-xs px-2.5">
               let
             </TabsTrigger>
           </TabsList>
@@ -116,22 +116,22 @@ export default function JsonObjectifyPage() {
       </div>
 
       <Separator
-        orientation='vertical'
-        className='hidden lg:block data-[orientation=vertical]:h-4'
+        orientation="vertical"
+        className="hidden lg:block data-[orientation=vertical]:h-4"
       />
-      <Separator className='lg:hidden' />
+      <Separator className="lg:hidden" />
 
-      <div className='flex items-center justify-between lg:justify-start gap-2'>
-        <span className='text-xs text-muted-foreground lg:hidden'>Quotes</span>
+      <div className="flex items-center justify-between lg:justify-start gap-2">
+        <span className="text-xs text-muted-foreground lg:hidden">Quotes</span>
         <Tabs
           value={quoteStyle}
           onValueChange={value => setQuoteStyle(value as 'single' | 'double')}
         >
-          <TabsList className='h-8'>
-            <TabsTrigger value='single' className='text-xs px-2.5'>
+          <TabsList className="h-8">
+            <TabsTrigger value="single" className="text-xs px-2.5">
               &apos;single&apos;
             </TabsTrigger>
-            <TabsTrigger value='double' className='text-xs px-2.5'>
+            <TabsTrigger value="double" className="text-xs px-2.5">
               &quot;double&quot;
             </TabsTrigger>
           </TabsList>
@@ -139,24 +139,24 @@ export default function JsonObjectifyPage() {
       </div>
 
       <Separator
-        orientation='vertical'
-        className='hidden lg:block data-[orientation=vertical]:h-4'
+        orientation="vertical"
+        className="hidden lg:block data-[orientation=vertical]:h-4"
       />
-      <Separator className='lg:hidden' />
+      <Separator className="lg:hidden" />
 
-      <div className='flex items-center justify-between lg:justify-start gap-2'>
-        <span className='text-xs text-muted-foreground lg:hidden'>
+      <div className="flex items-center justify-between lg:justify-start gap-2">
+        <span className="text-xs text-muted-foreground lg:hidden">
           Trailing Comma
         </span>
         <Tabs
           value={trailingComma ? 'yes' : 'no'}
           onValueChange={value => setTrailingComma(value === 'yes')}
         >
-          <TabsList className='h-8'>
-            <TabsTrigger value='yes' className='text-xs px-2.5'>
+          <TabsList className="h-8">
+            <TabsTrigger value="yes" className="text-xs px-2.5">
               Comma
             </TabsTrigger>
-            <TabsTrigger value='no' className='text-xs px-2.5'>
+            <TabsTrigger value="no" className="text-xs px-2.5">
               No comma
             </TabsTrigger>
           </TabsList>
@@ -164,24 +164,24 @@ export default function JsonObjectifyPage() {
       </div>
 
       <Separator
-        orientation='vertical'
-        className='hidden lg:block data-[orientation=vertical]:h-4'
+        orientation="vertical"
+        className="hidden lg:block data-[orientation=vertical]:h-4"
       />
-      <Separator className='lg:hidden' />
+      <Separator className="lg:hidden" />
 
-      <div className='flex items-center justify-between lg:justify-start gap-2'>
-        <span className='text-xs text-muted-foreground lg:hidden'>
+      <div className="flex items-center justify-between lg:justify-start gap-2">
+        <span className="text-xs text-muted-foreground lg:hidden">
           Semicolons
         </span>
         <Tabs
           value={semicolons ? 'yes' : 'no'}
           onValueChange={value => setSemicolons(value === 'yes')}
         >
-          <TabsList className='h-8'>
-            <TabsTrigger value='yes' className='text-xs px-2.5'>
+          <TabsList className="h-8">
+            <TabsTrigger value="yes" className="text-xs px-2.5">
               Semi
             </TabsTrigger>
-            <TabsTrigger value='no' className='text-xs px-2.5'>
+            <TabsTrigger value="no" className="text-xs px-2.5">
               No semi
             </TabsTrigger>
           </TabsList>
@@ -189,22 +189,22 @@ export default function JsonObjectifyPage() {
       </div>
 
       <Separator
-        orientation='vertical'
-        className='hidden lg:block data-[orientation=vertical]:h-4'
+        orientation="vertical"
+        className="hidden lg:block data-[orientation=vertical]:h-4"
       />
-      <Separator className='lg:hidden' />
+      <Separator className="lg:hidden" />
 
-      <div className='flex items-center justify-between lg:justify-start gap-2'>
-        <span className='text-xs text-muted-foreground lg:hidden'>Output</span>
+      <div className="flex items-center justify-between lg:justify-start gap-2">
+        <span className="text-xs text-muted-foreground lg:hidden">Output</span>
         <Tabs
           value={typescript ? 'ts' : 'js'}
           onValueChange={value => setTypescript(value === 'ts')}
         >
-          <TabsList className='h-8'>
-            <TabsTrigger value='js' className='text-xs px-2.5'>
+          <TabsList className="h-8">
+            <TabsTrigger value="js" className="text-xs px-2.5">
               JS
             </TabsTrigger>
-            <TabsTrigger value='ts' className='text-xs px-2.5'>
+            <TabsTrigger value="ts" className="text-xs px-2.5">
               TS
             </TabsTrigger>
           </TabsList>
@@ -212,25 +212,25 @@ export default function JsonObjectifyPage() {
       </div>
 
       <Separator
-        orientation='vertical'
-        className='hidden lg:block data-[orientation=vertical]:h-4'
+        orientation="vertical"
+        className="hidden lg:block data-[orientation=vertical]:h-4"
       />
-      <Separator className='lg:hidden' />
+      <Separator className="lg:hidden" />
 
-      <div className='flex items-center justify-between lg:justify-start gap-2'>
+      <div className="flex items-center justify-between lg:justify-start gap-2">
         <label
-          htmlFor='variableName'
-          className='text-xs text-muted-foreground lg:hidden'
+          htmlFor="variableName"
+          className="text-xs text-muted-foreground lg:hidden"
         >
           Variable Name
         </label>
         <input
-          id='variableName'
-          type='text'
+          id="variableName"
+          type="text"
           value={variableName}
           onChange={e => setVariableName(e.target.value)}
-          className='w-full lg:w-24 h-8 px-2 text-xs rounded-md border bg-background'
-          placeholder='data'
+          className="w-full lg:w-24 h-8 px-2 text-xs rounded-md border bg-background"
+          placeholder="data"
         />
       </div>
     </>
@@ -238,42 +238,42 @@ export default function JsonObjectifyPage() {
 
   return (
     <MainLayout>
-      <div className='flex flex-col h-[calc(100vh-57px)]'>
+      <div className="flex flex-col h-[calc(100vh-57px)]">
         <JsonToolToolbar
-          title='JSON Objectify'
+          title="JSON Objectify"
           options={optionsContent}
           actions={
             <>
               <ActionButton
-                variant='ghost'
-                size='sm'
+                variant="ghost"
+                size="sm"
                 onClick={handleCopy}
                 disabled={!jsOutput}
                 leftIcon={<Copy />}
                 feedbackActive={isActive('copy')}
               >
-                <span className='hidden md:inline'>Copy</span>
+                <span className="hidden md:inline">Copy</span>
               </ActionButton>
               <ActionButton
-                variant='ghost'
-                size='sm'
+                variant="ghost"
+                size="sm"
                 onClick={handleClear}
                 leftIcon={<Eraser />}
                 feedbackActive={isActive('clear')}
               >
-                <span className='hidden md:inline'>Clear</span>
+                <span className="hidden md:inline">Clear</span>
               </ActionButton>
             </>
           }
         />
 
         {/* Editors */}
-        <div className='grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0 gap-1'>
+        <div className="grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0 gap-1">
           {/* JSON Input */}
-          <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
+          <div className="flex flex-col min-h-0 rounded-sm overflow-hidden">
             <Editor
-              height='100%'
-              language='json'
+              height="100%"
+              language="json"
               value={jsonText}
               theme={editorTheme}
               onChange={value => setJsonText(value ?? '')}
@@ -283,9 +283,9 @@ export default function JsonObjectifyPage() {
           </div>
 
           {/* Output */}
-          <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
+          <div className="flex flex-col min-h-0 rounded-sm overflow-hidden">
             <Editor
-              height='100%'
+              height="100%"
               language={outputLanguage}
               value={outputDisplayValue}
               theme={editorTheme}

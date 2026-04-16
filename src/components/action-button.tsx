@@ -36,7 +36,7 @@ function ActionButton({
 
   React.useEffect(() => {
     if (feedbackActive && !prevFeedbackActive.current) {
-      setFeedbackKey((k) => k + 1);
+      setFeedbackKey(k => k + 1);
       const text = buttonRef.current?.textContent?.trim() || '';
       const suffix = feedbackError ? 'failed' : 'successful';
       setAnnouncement(text ? `${text} ${suffix}` : suffix);
@@ -44,7 +44,7 @@ function ActionButton({
       setExiting(true);
       const timer = setTimeout(() => {
         setExiting(false);
-        setRestoreKey((k) => k + 1);
+        setRestoreKey(k => k + 1);
         setAnnouncement('');
       }, 200);
       return () => clearTimeout(timer);
@@ -67,7 +67,7 @@ function ActionButton({
   const hasIconSlot = !!(leftIcon || feedbackActive || exiting || isLoading);
 
   const resolvedLeft = hasIconSlot ? (
-    <span className='inline-flex items-center justify-center [&>svg]:shrink-0'>
+    <span className="inline-flex items-center justify-center [&>svg]:shrink-0">
       {isLoading ? (
         <Spinner />
       ) : feedbackActive || exiting ? (
@@ -97,7 +97,7 @@ function ActionButton({
       {isLoading && loadingText ? loadingText : children}
       {rightIcon}
       {announcement && (
-        <span className='sr-only' aria-live='polite'>
+        <span className="sr-only" aria-live="polite">
           {announcement}
         </span>
       )}

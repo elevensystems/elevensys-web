@@ -118,7 +118,6 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       setResults([]);
       abortRef.current = false;
 
-
       const logResults: LogWorkResult[] = [];
 
       for (const entry of validEntries) {
@@ -213,14 +212,9 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       setResults(logResults);
       setIsSubmitting(false);
 
-
       return logResults;
     },
-    [
-      settings.token,
-      submitSingleDate,
-      updateRequestStatus,
-    ]
+    [settings.token, submitSingleDate, updateRequestStatus]
   );
 
   const retryFailed = useCallback(
@@ -243,7 +237,6 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       setIsSubmitting(true);
       setIsCancelled(false);
       abortRef.current = false;
-
 
       const logResults: LogWorkResult[] = [];
 
@@ -322,14 +315,9 @@ export function useLogWorkSubmission(settings: TimesheetSettings) {
       setResults(logResults);
       setIsSubmitting(false);
 
-
       return logResults;
     },
-    [
-      settings.token,
-      submitSingleDate,
-      updateRequestStatus,
-    ]
+    [settings.token, submitSingleDate, updateRequestStatus]
   );
 
   const resetResults = useCallback(() => {

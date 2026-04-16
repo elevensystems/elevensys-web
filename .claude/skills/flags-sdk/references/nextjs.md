@@ -46,6 +46,7 @@ pnpm i @vercel/toolbar
 ```ts
 // next.config.ts
 import type { NextConfig } from 'next';
+
 import createWithVercelToolbar from '@vercel/toolbar/plugins/next';
 
 const nextConfig: NextConfig = {};
@@ -60,11 +61,7 @@ export default withVercelToolbar(nextConfig);
 // app/layout.tsx
 import { VercelToolbar } from '@vercel/toolbar/next';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   // On Vercel, the toolbar is auto-injected in preview deployments.
   // This manual injection is only needed for local development.
   const shouldInjectToolbar = process.env.NODE_ENV === 'development';
@@ -99,7 +96,8 @@ Pass `req` to the flag in `getServerSideProps`:
 
 ```tsx
 // pages/index.tsx
-import type { InferGetServerSidePropsType, GetServerSideProps } from 'next';
+import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+
 import { exampleFlag } from '../flags';
 
 export const getServerSideProps = (async ({ req }) => {
@@ -107,9 +105,7 @@ export const getServerSideProps = (async ({ req }) => {
   return { props: { example } };
 }) satisfies GetServerSideProps<{ example: boolean }>;
 
-export default function Page({
-  example,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Page({ example }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return <div>{example ? 'Flag is on' : 'Flag is off'}</div>;
 }
 ```
@@ -119,19 +115,17 @@ export default function Page({
 Use `identify` to establish who the request is for. The returned entities are passed to `decide`:
 
 ```ts
-import { flag, dedupe } from 'flags/next';
 import type { ReadonlyRequestCookies } from 'flags';
+import { dedupe, flag } from 'flags/next';
 
 interface Entities {
   user?: { id: string };
 }
 
-const identify = dedupe(
-  ({ cookies }: { cookies: ReadonlyRequestCookies }): Entities => {
-    const userId = cookies.get('user-id')?.value;
-    return { user: userId ? { id: userId } : undefined };
-  },
-);
+const identify = dedupe(({ cookies }: { cookies: ReadonlyRequestCookies }): Entities => {
+  const userId = cookies.get('user-id')?.value;
+  return { user: userId ? { id: userId } : undefined };
+});
 
 export const myFlag = flag<boolean, Entities>({
   key: 'my-flag',
@@ -142,7 +136,8 @@ export const myFlag = flag<boolean, Entities>({
 });
 ```
 
-`identify` receives normalized `headers` and `cookies` that work across App Router, Pages Router, and Proxy.
+`identify` receives normalized `headers` and `cookies` that work across App Router, Pages Router,
+and Proxy.
 
 ### Custom evaluation context
 
@@ -166,6 +161,7 @@ const identify = dedupe(({ cookies }) => {
 ```
 
 Use cases:
+
 - Prevent duplicate `identify` calls across multiple flags
 - Generate consistent random IDs for anonymous visitor experiments
 
@@ -207,7 +203,9 @@ export const marketingFlags = [showSummerSale, showBanner] as const;
 ```ts
 // proxy.ts
 import { type NextRequest, NextResponse } from 'next/server';
+
 import { precompute } from 'flags/next';
+
 import { marketingFlags } from './flags';
 
 export const config = { matcher: ['/'] };
@@ -216,7 +214,7 @@ export async function proxy(request: NextRequest) {
   const code = await precompute(marketingFlags);
   const nextUrl = new URL(
     `/${code}${request.nextUrl.pathname}${request.nextUrl.search}`,
-    request.url,
+    request.url
   );
   return NextResponse.rewrite(nextUrl, { request });
 }
@@ -226,7 +224,7 @@ export async function proxy(request: NextRequest) {
 
 ```tsx
 // app/[code]/page.tsx
-import { marketingFlags, showSummerSale, showBanner } from '../../flags';
+import { marketingFlags, showBanner, showSummerSale } from '../../flags';
 
 type Params = Promise<{ code: string }>;
 
@@ -252,7 +250,7 @@ import { generatePermutations } from 'flags/next';
 
 export async function generateStaticParams() {
   const codes = await generatePermutations(marketingFlags);
-  return codes.map((code) => ({ code }));
+  return codes.map(code => ({ code }));
 }
 
 export default async function Layout({ children }) {
@@ -312,12 +310,12 @@ import { generatePermutations } from 'flags/next';
 export const getStaticPaths = (async () => {
   const codes = await generatePermutations(marketingFlags);
   return {
-    paths: codes.map((code) => ({ params: { code } })),
+    paths: codes.map(code => ({ params: { code } })),
     fallback: 'blocking',
   };
 }) satisfies GetStaticPaths;
 
-export const getStaticProps = (async (context) => {
+export const getStaticProps = (async context => {
   if (typeof context.params?.code !== 'string') return { notFound: true };
   const example = await exampleFlag(context.params.code, marketingFlags);
   return { props: { example } };
@@ -330,18 +328,16 @@ For authenticated dashboard pages, use `identify` to read user context from cook
 
 ```ts
 import type { ReadonlyRequestCookies } from 'flags';
-import { flag, dedupe } from 'flags/next';
+import { dedupe, flag } from 'flags/next';
 
 interface Entities {
   user?: { id: string };
 }
 
-const identify = dedupe(
-  ({ cookies }: { cookies: ReadonlyRequestCookies }): Entities => {
-    const userId = cookies.get('dashboard-user-id')?.value;
-    return { user: userId ? { id: userId } : undefined };
-  },
-);
+const identify = dedupe(({ cookies }: { cookies: ReadonlyRequestCookies }): Entities => {
+  const userId = cookies.get('dashboard-user-id')?.value;
+  return { user: userId ? { id: userId } : undefined };
+});
 
 export const dashboardFlag = flag<boolean, Entities>({
   key: 'dashboard-flag',
@@ -371,43 +367,39 @@ For static marketing pages with A/B tests, combine precompute with visitor ID ge
 
 ```ts
 // proxy.ts
-import { precompute } from 'flags/next';
 import { type NextRequest, NextResponse } from 'next/server';
+
+import { precompute } from 'flags/next';
+
 import { marketingFlags } from './flags';
 import { getOrGenerateVisitorId } from './get-or-generate-visitor-id';
 
 export async function marketingProxy(request: NextRequest) {
-  const visitorId = await getOrGenerateVisitorId(
-    request.cookies,
-    request.headers,
-  );
+  const visitorId = await getOrGenerateVisitorId(request.cookies, request.headers);
 
   const code = await precompute(marketingFlags);
 
-  return NextResponse.rewrite(
-    new URL(`/examples/marketing-pages/${code}`, request.url),
-    {
-      headers: {
-        'Set-Cookie': `marketing-visitor-id=${visitorId}; Path=/`,
-        'x-marketing-visitor-id': visitorId,
-      },
+  return NextResponse.rewrite(new URL(`/examples/marketing-pages/${code}`, request.url), {
+    headers: {
+      'Set-Cookie': `marketing-visitor-id=${visitorId}; Path=/`,
+      'x-marketing-visitor-id': visitorId,
     },
-  );
+  });
 }
 ```
 
 ### Deduplicated visitor ID generation
 
 ```ts
-import { nanoid } from 'nanoid';
-import { dedupe } from 'flags/next';
 import type { ReadonlyHeaders, ReadonlyRequestCookies } from 'flags';
+import { dedupe } from 'flags/next';
+import { nanoid } from 'nanoid';
 
 const generateId = dedupe(async () => nanoid());
 
 export const getOrGenerateVisitorId = async (
   cookies: ReadonlyRequestCookies,
-  headers: ReadonlyHeaders,
+  headers: ReadonlyHeaders
 ) => {
   const cookieVisitorId = cookies.get('marketing-visitor-id')?.value;
   if (cookieVisitorId) return cookieVisitorId;
@@ -426,7 +418,7 @@ const identify = dedupe(
   async ({ cookies }: { cookies: ReadonlyRequestCookies }): Promise<Entities> => {
     const visitorId = await getOrGenerateVisitorId(cookies);
     return { visitor: visitorId ? { id: visitorId } : undefined };
-  },
+  }
 );
 
 export const marketingAbTest = flag<boolean, Entities>({
@@ -446,6 +438,7 @@ Use flags in proxy to rewrite requests to static page variants:
 ```ts
 // proxy.ts
 import { type NextRequest, NextResponse } from 'next/server';
+
 import { myFlag } from './flags';
 
 export const config = { matcher: ['/example'] };
@@ -475,17 +468,20 @@ async function Example() {
 }
 ```
 
-The `hasAuthCookieFlag` checks cookie existence without authenticating. Two shells get prerendered — one for each auth state — served statically with no layout shift.
+The `hasAuthCookieFlag` checks cookie existence without authenticating. Two shells get prerendered —
+one for each auth state — served statically with no layout shift.
 
 ## Flags Explorer (Next.js)
 
-The Flags Explorer is part of the Vercel Toolbar. Before adding the discovery endpoint below, make sure the toolbar is set up by following the [Toolbar Setup](#toolbar-setup) steps first.
+The Flags Explorer is part of the Vercel Toolbar. Before adding the discovery endpoint below, make
+sure the toolbar is set up by following the [Toolbar Setup](#toolbar-setup) steps first.
 
 ### App Router
 
 ```ts
 // app/.well-known/vercel/flags/route.ts
-import { getProviderData, createFlagsDiscoveryEndpoint } from 'flags/next';
+import { createFlagsDiscoveryEndpoint, getProviderData } from 'flags/next';
+
 import * as flags from '../../../../flags';
 
 export const GET = createFlagsDiscoveryEndpoint(async () => {
@@ -513,13 +509,16 @@ module.exports = {
 ```ts
 // pages/api/vercel/flags.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
+
 import { verifyAccess } from 'flags';
 
 export async function handler(req: NextApiRequest, res: NextApiResponse) {
   const access = await verifyAccess(req.headers.authorization);
   if (!access) return res.status(401).json(null);
 
-  const providerData = { /* ... */ };
+  const providerData = {
+    /* ... */
+  };
   return res.status(200).json(providerData);
 }
 ```

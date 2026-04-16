@@ -9,10 +9,10 @@ import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 
-import MainLayout from '@/components/layouts/main-layout';
-import { Badge } from '@/components/ui/badge';
 import { ActionButton } from '@/components/action-button';
 import { JsonToolToolbar } from '@/components/layouts/json-tool-toolbar';
+import MainLayout from '@/components/layouts/main-layout';
+import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -333,13 +333,13 @@ export default function JsonDiffinityPage() {
 
   return (
     <MainLayout>
-      <div className='flex flex-col h-[calc(100vh-57px)]'>
+      <div className="flex flex-col h-[calc(100vh-57px)]">
         <JsonToolToolbar
-          title='JSON Diffinity'
+          title="JSON Diffinity"
           actions={
-            <div className='flex items-center gap-1.5'>
+            <div className="flex items-center gap-1.5">
               <ActionButton
-                size='sm'
+                size="sm"
                 onClick={handleCompare}
                 disabled={isCompareDisabled}
                 leftIcon={<GitCompare />}
@@ -350,10 +350,10 @@ export default function JsonDiffinityPage() {
               {diffPaths && (
                 <>
                   <Separator
-                    orientation='vertical'
-                    className='data-[orientation=vertical]:h-4'
+                    orientation="vertical"
+                    className="data-[orientation=vertical]:h-4"
                   />
-                  <div className='flex items-center gap-1'>
+                  <div className="flex items-center gap-1">
                     {diffPaths.added.length > 0 && (
                       <Badge
                         className={cn(
@@ -366,7 +366,7 @@ export default function JsonDiffinityPage() {
                     )}
                     {diffPaths.removed.length > 0 && (
                       <Badge
-                        variant='destructive'
+                        variant="destructive"
                         className={cn(
                           'font-mono text-[10px] px-1.5 py-0',
                           isStale && 'line-through opacity-50'
@@ -390,16 +390,16 @@ export default function JsonDiffinityPage() {
               )}
 
               <Separator
-                orientation='vertical'
-                className='data-[orientation=vertical]:h-4'
+                orientation="vertical"
+                className="data-[orientation=vertical]:h-4"
               />
               <ActionButton
-                variant='ghost'
-                size='sm'
+                variant="ghost"
+                size="sm"
                 onClick={handleClearAll}
                 leftIcon={<Eraser />}
               >
-                <span className='hidden md:inline'>Clear</span>
+                <span className="hidden md:inline">Clear</span>
               </ActionButton>
             </div>
           }
@@ -413,12 +413,12 @@ export default function JsonDiffinityPage() {
           )}
         >
           {/* Editors grid */}
-          <div className='grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0 gap-1'>
+          <div className="grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0 gap-1">
             {/* Original */}
-            <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
+            <div className="flex flex-col min-h-0 rounded-sm overflow-hidden">
               <Editor
-                height='100%'
-                language='json'
+                height="100%"
+                language="json"
                 value={originalText}
                 theme={editorTheme}
                 onChange={handleOriginalChange}
@@ -430,10 +430,10 @@ export default function JsonDiffinityPage() {
             </div>
 
             {/* Modified */}
-            <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
+            <div className="flex flex-col min-h-0 rounded-sm overflow-hidden">
               <Editor
-                height='100%'
-                language='json'
+                height="100%"
+                language="json"
                 value={modifiedText}
                 theme={editorTheme}
                 onChange={handleModifiedChange}
@@ -447,25 +447,25 @@ export default function JsonDiffinityPage() {
 
           {/* Diff drawer */}
           {diffOpen && (
-            <div className='h-[250px] shrink-0 border-t'>
-              <div className='flex items-center justify-between px-3 py-1.5 border-b bg-muted/30'>
-                <span className='text-xs font-medium text-muted-foreground flex items-center gap-1.5'>
-                  <GitCompare className='size-3.5' />
+            <div className="h-[250px] shrink-0 border-t">
+              <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/30">
+                <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                  <GitCompare className="size-3.5" />
                   Diff Viewer
                 </span>
                 <ActionButton
-                  variant='ghost'
-                  size='sm'
-                  className='h-6 w-6 p-0'
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
                   onClick={() => setDiffOpen(false)}
                   leftIcon={<X />}
-                  aria-label='Close diff viewer'
+                  aria-label="Close diff viewer"
                 />
               </div>
-              <ScrollArea className='h-[calc(250px-37px)]'>
-                <div className='p-4'>
+              <ScrollArea className="h-[calc(250px-37px)]">
+                <div className="p-4">
                   <div
-                    className='json-diff-viewer'
+                    className="json-diff-viewer"
                     dangerouslySetInnerHTML={{ __html: diffHtml }}
                   />
                 </div>

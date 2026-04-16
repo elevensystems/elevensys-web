@@ -7,9 +7,9 @@ import { Copy, Eraser, Minimize2, TextInitial } from 'lucide-react';
 import type * as Monaco from 'monaco-editor';
 import { useTheme } from 'next-themes';
 
-import MainLayout from '@/components/layouts/main-layout';
 import { ActionButton } from '@/components/action-button';
 import { JsonToolToolbar } from '@/components/layouts/json-tool-toolbar';
+import MainLayout from '@/components/layouts/main-layout';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useActionFeedback } from '@/hooks/use-action-feedback';
@@ -150,7 +150,12 @@ export default function JsonLensPage() {
     } catch {
       trigger('minify', { error: true });
     }
-  }, [jsonValidation.isValid, jsonValidation.value, applyTextToEditor, trigger]);
+  }, [
+    jsonValidation.isValid,
+    jsonValidation.value,
+    applyTextToEditor,
+    trigger,
+  ]);
 
   const handleClear = useCallback(() => {
     applyTextToEditor('');
@@ -169,20 +174,20 @@ export default function JsonLensPage() {
   }, [jsonText, trigger]);
 
   const optionsContent = (
-    <div className='flex items-center justify-between lg:justify-start gap-2'>
-      <span className='text-xs text-muted-foreground lg:hidden'>Indent</span>
+    <div className="flex items-center justify-between lg:justify-start gap-2">
+      <span className="text-xs text-muted-foreground lg:hidden">Indent</span>
       <Tabs
         value={indentSize}
         onValueChange={value => setIndentSize(value as IndentSize)}
       >
-        <TabsList className='h-8'>
-          <TabsTrigger value='2' className='text-xs px-2.5'>
+        <TabsList className="h-8">
+          <TabsTrigger value="2" className="text-xs px-2.5">
             2 spaces
           </TabsTrigger>
-          <TabsTrigger value='4' className='text-xs px-2.5'>
+          <TabsTrigger value="4" className="text-xs px-2.5">
             4 spaces
           </TabsTrigger>
-          <TabsTrigger value='tab' className='text-xs px-2.5'>
+          <TabsTrigger value="tab" className="text-xs px-2.5">
             Tab
           </TabsTrigger>
         </TabsList>
@@ -192,62 +197,62 @@ export default function JsonLensPage() {
 
   return (
     <MainLayout>
-      <div className='flex flex-col h-[calc(100vh-57px)]'>
+      <div className="flex flex-col h-[calc(100vh-57px)]">
         <JsonToolToolbar
-          title='JSON Lens'
+          title="JSON Lens"
           options={optionsContent}
           actions={
             <>
               <ActionButton
-                variant='ghost'
-                size='sm'
+                variant="ghost"
+                size="sm"
                 onClick={handleFormat}
                 disabled={!jsonValidation.isValid}
                 leftIcon={<TextInitial />}
                 feedbackActive={isActive('format')}
               >
-                <span className='hidden md:inline'>Format</span>
+                <span className="hidden md:inline">Format</span>
               </ActionButton>
               <ActionButton
-                variant='ghost'
-                size='sm'
+                variant="ghost"
+                size="sm"
                 onClick={handleMinify}
                 disabled={!jsonValidation.isValid}
                 leftIcon={<Minimize2 />}
                 feedbackActive={isActive('minify')}
               >
-                <span className='hidden md:inline'>Minify</span>
+                <span className="hidden md:inline">Minify</span>
               </ActionButton>
               <ActionButton
-                variant='ghost'
-                size='sm'
+                variant="ghost"
+                size="sm"
                 onClick={handleCopy}
                 disabled={!jsonText}
                 leftIcon={<Copy />}
                 feedbackActive={isActive('copy')}
               >
-                <span className='hidden md:inline'>Copy</span>
+                <span className="hidden md:inline">Copy</span>
               </ActionButton>
               <ActionButton
-                variant='ghost'
-                size='sm'
+                variant="ghost"
+                size="sm"
                 onClick={handleClear}
                 leftIcon={<Eraser />}
                 feedbackActive={isActive('clear')}
               >
-                <span className='hidden md:inline'>Clear</span>
+                <span className="hidden md:inline">Clear</span>
               </ActionButton>
             </>
           }
         />
 
         {/* Editor + Inspector */}
-        <div className='grid grid-cols-1 lg:grid-cols-[8fr_2fr] flex-1 min-h-0 gap-1'>
+        <div className="grid grid-cols-1 lg:grid-cols-[8fr_2fr] flex-1 min-h-0 gap-1">
           {/* Editor */}
-          <div className='flex flex-col min-h-0 rounded-sm overflow-hidden'>
+          <div className="flex flex-col min-h-0 rounded-sm overflow-hidden">
             <Editor
-              height='100%'
-              language='json'
+              height="100%"
+              language="json"
               value={jsonText}
               theme={editorTheme}
               onChange={value => setJsonText(value ?? '')}
@@ -257,31 +262,27 @@ export default function JsonLensPage() {
           </div>
 
           {/* Inspector */}
-          <div className='flex flex-col min-h-0 rounded-sm overflow-hidden lg:overflow-y-auto p-4'>
-            <div className='space-y-2'>
+          <div className="flex flex-col min-h-0 rounded-sm overflow-hidden lg:overflow-y-auto p-4">
+            <div className="space-y-2">
               {/* Structure */}
-              <div className='space-y-1.5 text-sm'>
-                <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>Type</span>
-                  <span className='font-mono font-semibold'>
-                    {jsonStats
-                      ? jsonStats.isArray
-                        ? 'Array'
-                        : 'Object'
-                      : '—'}
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Type</span>
+                  <span className="font-mono font-semibold">
+                    {jsonStats ? (jsonStats.isArray ? 'Array' : 'Object') : '—'}
                   </span>
                 </div>
-                <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
                     {jsonStats?.isArray ? 'Items' : 'Root Keys'}
                   </span>
-                  <span className='font-mono font-semibold'>
+                  <span className="font-mono font-semibold">
                     {jsonStats ? jsonStats.rootKeys : '—'}
                   </span>
                 </div>
-                <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>Max Depth</span>
-                  <span className='font-mono font-semibold'>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Max Depth</span>
+                  <span className="font-mono font-semibold">
                     {jsonStats ? jsonStats.depth : '—'}
                   </span>
                 </div>
@@ -290,22 +291,22 @@ export default function JsonLensPage() {
               <Separator />
 
               {/* Content */}
-              <div className='space-y-1.5 text-sm'>
-                <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>Lines</span>
-                  <span className='font-mono font-semibold'>
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Lines</span>
+                  <span className="font-mono font-semibold">
                     {jsonStats ? jsonStats.lines : '—'}
                   </span>
                 </div>
-                <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>Characters</span>
-                  <span className='font-mono font-semibold'>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Characters</span>
+                  <span className="font-mono font-semibold">
                     {jsonStats ? jsonStats.chars.toLocaleString() : '—'}
                   </span>
                 </div>
-                <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>Size</span>
-                  <span className='font-mono font-semibold'>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Size</span>
+                  <span className="font-mono font-semibold">
                     {jsonStats ? jsonStats.size : '—'}
                   </span>
                 </div>
@@ -314,16 +315,16 @@ export default function JsonLensPage() {
               <Separator />
 
               {/* Compression */}
-              <div className='space-y-1.5 text-sm'>
-                <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>Formatted</span>
-                  <span className='font-mono font-semibold text-blue-500'>
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Formatted</span>
+                  <span className="font-mono font-semibold text-blue-500">
                     {jsonStats ? jsonStats.formattedSize : '—'}
                   </span>
                 </div>
-                <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>Minified</span>
-                  <span className='font-mono font-semibold text-green-500'>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Minified</span>
+                  <span className="font-mono font-semibold text-green-500">
                     {jsonStats ? jsonStats.minifiedSize : '—'}
                   </span>
                 </div>

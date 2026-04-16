@@ -7,9 +7,9 @@ import { Check, Copy, Key, Settings as SettingsIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import { ActionButton } from '@/components/action-button';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { ActionButton } from '@/components/action-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -110,7 +110,7 @@ export default function PasslyPage() {
           );
           toast.success('Passwords generated successfully', {
             description: `Passwords (${result.passwords.length}) have been generated.`,
-            icon: <Check className='h-4 w-4' />,
+            icon: <Check className="h-4 w-4" />,
           });
         } else {
           throw new Error('Invalid response from server');
@@ -142,37 +142,37 @@ export default function PasslyPage() {
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-full mx-auto'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-full mx-auto">
           <ToolPageHeader
-            title='Passly'
-            description='Generate secure, random passwords with customizable options. Free tool for creating strong passwords.'
-            infoMessage='Password generation is processed securely on the server. Passwords are not stored and are generated fresh each time.'
+            title="Passly"
+            description="Generate secure, random passwords with customizable options. Free tool for creating strong passwords."
+            infoMessage="Password generation is processed securely on the server. Passwords are not stored and are generated fresh each time."
             error={error}
           />
 
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Settings Card */}
             <Card>
               <CardHeader>
-                <CardTitle className='flex items-center gap-2'>
-                  <SettingsIcon className='h-5 w-5' />
+                <CardTitle className="flex items-center gap-2">
+                  <SettingsIcon className="h-5 w-5" />
                   Settings
                 </CardTitle>
               </CardHeader>
-              <CardContent className='space-y-6'>
+              <CardContent className="space-y-6">
                 {/* Password Length */}
                 <form.Field
-                  name='length'
+                  name="length"
                   children={field => (
-                    <div className='space-y-3'>
-                      <div className='flex items-center justify-between'>
-                        <Label htmlFor='length-input'>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="length-input">
                           Password Length: {field.state.value}
                         </Label>
                         <Input
-                          id='length-input'
-                          type='number'
+                          id="length-input"
+                          type="number"
                           min={PASSWORD_MIN_LENGTH}
                           max={PASSWORD_MAX_LENGTH}
                           value={field.state.value}
@@ -187,26 +187,26 @@ export default function PasslyPage() {
                               )
                             )
                           }
-                          className='w-20 h-9'
+                          className="w-20 h-9"
                         />
                       </div>
                       <Slider
-                        id='length'
+                        id="length"
                         min={PASSWORD_MIN_LENGTH}
                         max={PASSWORD_MAX_LENGTH}
                         step={1}
                         value={[field.state.value]}
                         onValueChange={values => field.handleChange(values[0])}
-                        className='w-full'
+                        className="w-full"
                       />
                     </div>
                   )}
                 />
 
                 {/* Character Types */}
-                <div className='space-y-3'>
+                <div className="space-y-3">
                   <Label>Character Types</Label>
-                  <div className='space-y-2'>
+                  <div className="space-y-2">
                     {(
                       [
                         ['uppercase', 'Uppercase Letters (A-Z)'],
@@ -219,14 +219,14 @@ export default function PasslyPage() {
                         key={key}
                         name={`options.${key}` as `options.${typeof key}`}
                         children={field => (
-                          <label className='flex items-center gap-2 cursor-pointer'>
+                          <label className="flex items-center gap-2 cursor-pointer">
                             <Checkbox
                               checked={field.state.value}
                               onCheckedChange={checked =>
                                 field.handleChange(checked === true)
                               }
                             />
-                            <span className='text-sm'>{label}</span>
+                            <span className="text-sm">{label}</span>
                           </label>
                         )}
                       />
@@ -238,11 +238,11 @@ export default function PasslyPage() {
                 <ActionButton
                   onClick={() => form.handleSubmit()}
                   disabled={!hasAtLeastOneOption || form.state.isSubmitting}
-                  className='w-full'
-                  size='lg'
+                  className="w-full"
+                  size="lg"
                   leftIcon={<Key />}
                   isLoading={form.state.isSubmitting}
-                  loadingText='Generating...'
+                  loadingText="Generating..."
                 >
                   Generate Passwords
                 </ActionButton>
@@ -252,14 +252,14 @@ export default function PasslyPage() {
             {/* Result Card */}
             <Card>
               <CardHeader>
-                <CardTitle className='flex items-center gap-2'>
-                  <Key className='h-5 w-5' />
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
                   Result
                 </CardTitle>
               </CardHeader>
-              <CardContent className='space-y-4'>
+              <CardContent className="space-y-4">
                 {passwords.length === 0 ? (
-                  <div className='flex items-center justify-center h-40 text-muted-foreground'>
+                  <div className="flex items-center justify-center h-40 text-muted-foreground">
                     <p>
                       Click &quot;Generate Passwords&quot; to create 5 passwords
                     </p>
@@ -271,13 +271,13 @@ export default function PasslyPage() {
                       options
                     );
                     return (
-                      <div key={password.id} className='space-y-2'>
-                        <Label className='text-xs text-muted-foreground'>
+                      <div key={password.id} className="space-y-2">
+                        <Label className="text-xs text-muted-foreground">
                           Password {index + 1}
                         </Label>
                         {index === 0 && (
-                          <div className='flex items-center justify-between mb-1'>
-                            <Label className='text-sm font-medium'>
+                          <div className="flex items-center justify-between mb-1">
+                            <Label className="text-sm font-medium">
                               Password Strength
                             </Label>
                             <span
@@ -287,18 +287,18 @@ export default function PasslyPage() {
                             </span>
                           </div>
                         )}
-                        <div className='flex items-center gap-2 p-3 bg-muted rounded-lg'>
-                          <code className='flex-1 text-sm font-mono break-all select-all'>
+                        <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                          <code className="flex-1 text-sm font-mono break-all select-all">
                             {password.value}
                           </code>
                           <ActionButton
-                            size='sm'
-                            variant='ghost'
+                            size="sm"
+                            variant="ghost"
                             onClick={() =>
                               handleCopy(password.value, password.id)
                             }
-                            aria-label='Copy to clipboard'
-                            leftIcon={<Copy aria-hidden='true' />}
+                            aria-label="Copy to clipboard"
+                            leftIcon={<Copy aria-hidden="true" />}
                             feedbackActive={isActive(password.id)}
                           />
                         </div>

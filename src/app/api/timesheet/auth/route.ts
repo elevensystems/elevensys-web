@@ -18,12 +18,15 @@ export async function GET(request: NextRequest) {
 
     const params = new URLSearchParams({ jiraInstance });
 
-    const response = await fetch(`${TIMESHEET_URLS.AUTH}?${params.toString()}`, {
-      method: 'GET',
-      headers: {
-        Authorization: authHeader,
-      },
-    });
+    const response = await fetch(
+      `${TIMESHEET_URLS.AUTH}?${params.toString()}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: authHeader,
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();

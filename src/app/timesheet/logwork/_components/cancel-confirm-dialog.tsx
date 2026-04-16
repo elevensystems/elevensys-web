@@ -25,7 +25,7 @@ export function CancelConfirmDialog({
 }: CancelConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Cancel submission?</DialogTitle>
           <DialogDescription>
@@ -34,15 +34,12 @@ export function CancelConfirmDialog({
               : 'Are you sure you want to cancel the submission?'}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className='gap-2'>
-          <ActionButton
-            variant='outline'
-            onClick={() => onOpenChange(false)}
-          >
+        <DialogFooter className="gap-2">
+          <ActionButton variant="outline" onClick={() => onOpenChange(false)}>
             Continue
           </ActionButton>
           <ActionButton
-            variant='destructive'
+            variant="destructive"
             onClick={() => {
               onConfirmCancel();
               onOpenChange(false);

@@ -16,7 +16,9 @@ export function FlagsProvider({
   children: React.ReactNode;
   flags: FlagsRecord;
 }) {
-  return <FlagsContext.Provider value={flags}>{children}</FlagsContext.Provider>;
+  return (
+    <FlagsContext.Provider value={flags}>{children}</FlagsContext.Provider>
+  );
 }
 
 export function useFlags() {

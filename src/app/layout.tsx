@@ -69,11 +69,11 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang='en' suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={`${ubuntu.variable} ${ubuntuMono.variable} antialiased`}>
         <ThemeProvider
-          attribute='class'
-          defaultTheme='system'
+          attribute="class"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
@@ -81,7 +81,7 @@ export default async function RootLayout({
             <AuthProvider user={user}>
               <FlagsProvider flags={flags}>
                 {children}
-                <Toaster position='top-right' />
+                <Toaster position="top-right" />
               </FlagsProvider>
             </AuthProvider>
           </DomainProvider>

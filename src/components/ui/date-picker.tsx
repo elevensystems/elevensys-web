@@ -36,19 +36,19 @@ function DatePicker({
       <PopoverTrigger asChild>
         <Button
           id={id}
-          variant='outline'
+          variant="outline"
           className={cn(
             'w-full justify-start text-left font-normal',
             !value && 'text-muted-foreground'
           )}
         >
-          <CalendarIcon className='mr-2 h-4 w-4' />
+          <CalendarIcon className="mr-2 h-4 w-4" />
           {selected ? format(selected, 'PPP') : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-auto p-0' align='start'>
+      <PopoverContent className="w-auto p-0" align="start">
         <Calendar
-          mode='single'
+          mode="single"
           defaultMonth={selected}
           selected={selected}
           onSelect={(date: Date | undefined) => {

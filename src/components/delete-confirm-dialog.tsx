@@ -55,14 +55,18 @@ export function DeleteConfirmDialog({
             <X /> {cancelLabel}
           </AlertDialogCancel>
           <AlertDialogAction
-            variant='destructive'
+            variant="destructive"
             onClick={onConfirm}
             disabled={isDeleting}
           >
             {isDeleting ? (
-              <><Loader2 className='animate-spin' /> Deleting...</>
+              <>
+                <Loader2 className="animate-spin" /> Deleting...
+              </>
             ) : (
-              <><Trash2 /> {confirmLabel}</>
+              <>
+                <Trash2 /> {confirmLabel}
+              </>
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

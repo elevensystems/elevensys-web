@@ -64,7 +64,7 @@ export function useAutolog({
           throw new Error(err?.error || `HTTP ${res.status}`);
         }
         const newConfig: AutologConfig = await res.json();
-        setConfigs((prev) => [...prev, newConfig]);
+        setConfigs(prev => [...prev, newConfig]);
         toast.success('Autolog configuration created');
         return true;
       } catch (err) {
@@ -93,8 +93,8 @@ export function useAutolog({
           throw new Error(err?.error || `HTTP ${res.status}`);
         }
         const updated: AutologConfig = await res.json();
-        setConfigs((prev) =>
-          prev.map((c) => (c.configId === configId ? updated : c))
+        setConfigs(prev =>
+          prev.map(c => (c.configId === configId ? updated : c))
         );
         toast.success('Configuration updated');
         return true;
@@ -119,7 +119,7 @@ export function useAutolog({
           const err = await res.json().catch(() => null);
           throw new Error(err?.error || `HTTP ${res.status}`);
         }
-        setConfigs((prev) => prev.filter((c) => c.configId !== configId));
+        setConfigs(prev => prev.filter(c => c.configId !== configId));
         toast.success('Configuration deleted');
         return true;
       } catch (err) {

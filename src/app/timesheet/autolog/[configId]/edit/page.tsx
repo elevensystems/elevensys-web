@@ -38,9 +38,9 @@ export default function EditAutologConfigPage({
   if (!isLoaded || isLoading) {
     return (
       <MainLayout>
-        <section className='container mx-auto px-4 py-12'>
-          <div className='flex items-center justify-center h-40'>
-            <Spinner className='size-6 text-muted-foreground' />
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center justify-center h-40">
+            <Spinner className="size-6 text-muted-foreground" />
           </div>
         </section>
       </MainLayout>
@@ -50,10 +50,10 @@ export default function EditAutologConfigPage({
   if (!config) {
     return (
       <MainLayout>
-        <section className='container mx-auto px-4 py-12'>
-          <div className='max-w-5xl mx-auto'>
-            <div className='rounded-lg border border-dashed p-10 text-center text-muted-foreground'>
-              <p className='text-sm'>Configuration not found.</p>
+        <section className="container mx-auto px-4 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="rounded-lg border border-dashed p-10 text-center text-muted-foreground">
+              <p className="text-sm">Configuration not found.</p>
             </div>
           </div>
         </section>
@@ -63,10 +63,10 @@ export default function EditAutologConfigPage({
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-5xl mx-auto space-y-8'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-5xl mx-auto space-y-8">
           <ToolPageHeader
-            title='Edit Configuration'
+            title="Edit Configuration"
             description={`Editing autolog configuration for ${config.projectName}.`}
           />
 

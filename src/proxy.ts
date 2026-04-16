@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { env } from '@/env';
 import { AUTH_COOKIES, decodeJwt, isTokenExpired } from '@/lib/auth';
 import { authCookie, deletedCookie } from '@/lib/auth-cookies';
-import { env } from '@/env';
 import {
   getTenantConfig,
   resolveTenantFromHostname,

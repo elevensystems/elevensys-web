@@ -28,17 +28,17 @@ export const ProjectWorklogRow = memo(function ProjectWorklogRow({
 
   return (
     <TableRow>
-      <TableCell className='text-muted-foreground text-sm'>
+      <TableCell className="text-muted-foreground text-sm">
         {row.no + 1}
       </TableCell>
-      <TableCell className='font-mono font-semibold'>{row.key}</TableCell>
-      <TableCell className='max-w-[220px]'>
+      <TableCell className="font-mono font-semibold">{row.key}</TableCell>
+      <TableCell className="max-w-[220px]">
         {row.description ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className='block truncate'>{row.description}</span>
+              <span className="block truncate">{row.description}</span>
             </TooltipTrigger>
-            <TooltipContent side='bottom' className='max-w-sm'>
+            <TooltipContent side="bottom" className="max-w-sm">
               <p>{row.description}</p>
             </TooltipContent>
           </Tooltip>
@@ -46,22 +46,22 @@ export const ProjectWorklogRow = memo(function ProjectWorklogRow({
           '-'
         )}
       </TableCell>
-      <TableCell className='text-right font-medium'>
+      <TableCell className="text-right font-medium">
         {isNaN(hours) ? row.worked?.trim() : `${hours}h`}
       </TableCell>
       <TableCell>
         <Badge
-          variant='outline'
+          variant="outline"
           className={getWorkTypeBadgeClass(row.attribute)}
         >
           {row.attribute}
         </Badge>
       </TableCell>
-      <TableCell className='text-nowrap'>{displayDate}</TableCell>
+      <TableCell className="text-nowrap">{displayDate}</TableCell>
       <TableCell>
         <Badge variant={getStatusVariant(row.status)}>{row.status}</Badge>
       </TableCell>
-      <TableCell className='text-muted-foreground'>{row.user}</TableCell>
+      <TableCell className="text-muted-foreground">{row.user}</TableCell>
     </TableRow>
   );
 });

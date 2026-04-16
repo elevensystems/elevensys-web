@@ -15,10 +15,10 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { ActionButton } from '@/components/action-button';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
 import { Badge } from '@/components/ui/badge';
-import { ActionButton } from '@/components/action-button';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -114,9 +114,9 @@ export default function TimesheetConfigPage() {
   if (!isLoaded) {
     return (
       <MainLayout>
-        <section className='container mx-auto px-4 py-12'>
-          <div className='flex items-center justify-center h-40'>
-            <Spinner className='size-6 text-muted-foreground' />
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center justify-center h-40">
+            <Spinner className="size-6 text-muted-foreground" />
           </div>
         </section>
       </MainLayout>
@@ -125,134 +125,134 @@ export default function TimesheetConfigPage() {
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-5xl mx-auto space-y-12'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-5xl mx-auto space-y-12">
           <ToolPageHeader
-            title='Configurations'
-            description='Configure your credentials to connect with Jira. These configs are stored locally in your browser.'
+            title="Configurations"
+            description="Configure your credentials to connect with Jira. These configs are stored locally in your browser."
             infoMessage="Your credentials are stored only in your browser's local storage and are never sent to our servers — they are passed directly to the Jira API."
           />
 
           {/* Connection Status */}
           <Card>
             <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <SettingsIcon className='h-5 w-5' />
+              <CardTitle className="flex items-center gap-2">
+                <SettingsIcon className="h-5 w-5" />
                 Jira Connection
               </CardTitle>
               <CardAction>
                 {isConfigured ? (
-                  <Badge variant='secondary' className='gap-1.5'>
-                    <span className='h-2 w-2 rounded-full bg-green-500' />
+                  <Badge variant="secondary" className="gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-green-500" />
                     Connected
                   </Badge>
                 ) : (
-                  <Badge variant='destructive'>Not Configured</Badge>
+                  <Badge variant="destructive">Not Configured</Badge>
                 )}
               </CardAction>
               <CardDescription>
                 Enter your Jira username, token, and select your Jira instance.
               </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-6'>
+            <CardContent className="space-y-6">
               {/* Jira Instance */}
-              <div className='space-y-2'>
-                <Label htmlFor='jira-instance'>Jira Instance</Label>
+              <div className="space-y-2">
+                <Label htmlFor="jira-instance">Jira Instance</Label>
                 <NativeSelect
-                  id='jira-instance'
+                  id="jira-instance"
                   value={jiraInstance}
                   onChange={e => setJiraInstance(e.target.value)}
                 >
-                  <option value='jiradc'>jiradc</option>
-                  <option value='jira3'>jira3</option>
-                  <option value='jira9'>jira9</option>
+                  <option value="jiradc">jiradc</option>
+                  <option value="jira3">jira3</option>
+                  <option value="jira9">jira9</option>
                 </NativeSelect>
-                <p className='text-xs text-muted-foreground'>
+                <p className="text-xs text-muted-foreground">
                   Click{' '}
                   <a
                     href={`https://insight.fsoft.com.vn/${jiraInstance}/secure/ViewProfile.jspa`}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='font-medium text-blue-600 underline underline-offset-4 hover:text-blue-800'
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-blue-600 underline underline-offset-4 hover:text-blue-800"
                   >
                     here
                   </a>
                   , → Then Click on{' '}
-                  <span className='font-medium'>Personal Access Tokens</span> →{' '}
-                  <span className='font-medium'>Create Token</span>
+                  <span className="font-medium">Personal Access Tokens</span> →{' '}
+                  <span className="font-medium">Create Token</span>
                 </p>
               </div>
 
               {/* Username */}
-              <div className='space-y-2'>
-                <Label htmlFor='username'>Username</Label>
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id='username'
-                  placeholder='e.g. ThaoLNP5'
+                  id="username"
+                  placeholder="e.g. ThaoLNP5"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                 />
-                <p className='text-xs text-muted-foreground'>
+                <p className="text-xs text-muted-foreground">
                   Your Jira account username used for logging timesheets.
                 </p>
               </div>
 
               {/* Token */}
-              <div className='space-y-2'>
-                <Label htmlFor='token'>Token</Label>
-                <div className='relative'>
+              <div className="space-y-2">
+                <Label htmlFor="token">Token</Label>
+                <div className="relative">
                   <Input
-                    id='token'
+                    id="token"
                     type={showToken ? 'text' : 'password'}
-                    placeholder='Your token'
+                    placeholder="Your token"
                     value={token}
                     onChange={e => setToken(e.target.value)}
-                    className='pr-10'
+                    className="pr-10"
                   />
                   <ActionButton
-                    type='button'
-                    variant='ghost'
-                    size='icon-sm'
-                    className='absolute right-1 top-1/2 -translate-y-1/2'
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2"
                     onClick={() => setShowToken(prev => !prev)}
                     aria-label={showToken ? 'Hide token' : 'Show token'}
                     leftIcon={
                       showToken ? (
-                        <EyeOff className='text-muted-foreground' />
+                        <EyeOff className="text-muted-foreground" />
                       ) : (
-                        <Eye className='text-muted-foreground' />
+                        <Eye className="text-muted-foreground" />
                       )
                     }
                   />
                 </div>
-                <p className='text-xs text-muted-foreground'>
+                <p className="text-xs text-muted-foreground">
                   Token from for API authentication.
                 </p>
               </div>
             </CardContent>
-            <CardFooter className='flex items-center justify-between gap-3'>
-              <div className='flex items-center gap-3'>
+            <CardFooter className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
                 {isConfigured && (
                   <>
-                    <Button variant='outline' asChild>
-                      <Link href='/timesheet/logwork'>
-                        <ArrowLeft className='h-4 w-4' />
+                    <Button variant="outline" asChild>
+                      <Link href="/timesheet/logwork">
+                        <ArrowLeft className="h-4 w-4" />
                         Go to Log Work
                       </Link>
                     </Button>
-                    <Button variant='outline' asChild>
-                      <Link href='/timesheet/my-worklogs'>
-                        <ArrowLeft className='h-4 w-4' />
+                    <Button variant="outline" asChild>
+                      <Link href="/timesheet/my-worklogs">
+                        <ArrowLeft className="h-4 w-4" />
                         Go to My Worklogs
                       </Link>
                     </Button>
                   </>
                 )}
               </div>
-              <div className='flex items-center gap-3'>
+              <div className="flex items-center gap-3">
                 <ActionButton
-                  variant='outline'
-                  className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+                  variant="outline"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                   onClick={handleClear}
                   disabled={!isConfigured}
                   leftIcon={<Trash2 />}
@@ -262,15 +262,9 @@ export default function TimesheetConfigPage() {
                 <ActionButton
                   onClick={handleSave}
                   disabled={isSaving || (!hasChanges && isConfigured)}
-                  leftIcon={
-                    isConfigured && !hasChanges ? (
-                      <Check />
-                    ) : (
-                      <Save />
-                    )
-                  }
+                  leftIcon={isConfigured && !hasChanges ? <Check /> : <Save />}
                   isLoading={isSaving}
-                  loadingText='Verifying...'
+                  loadingText="Verifying..."
                 >
                   {isConfigured && !hasChanges ? 'Saved' : 'Save'}
                 </ActionButton>

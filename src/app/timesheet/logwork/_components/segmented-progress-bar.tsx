@@ -16,20 +16,18 @@ const STATUS_COLORS: Record<RequestStatusState, string> = {
   skipped: 'bg-muted/50',
 };
 
-function SegmentedBar({
-  statuses,
-}: {
-  statuses: RequestStatus[];
-}) {
+function SegmentedBar({ statuses }: { statuses: RequestStatus[] }) {
   const completed = statuses.filter(
-    s => s.status === 'success' || s.status === 'failed' || s.status === 'skipped'
+    s =>
+      s.status === 'success' || s.status === 'failed' || s.status === 'skipped'
   ).length;
-  const pct = statuses.length > 0 ? Math.round((completed / statuses.length) * 100) : 0;
+  const pct =
+    statuses.length > 0 ? Math.round((completed / statuses.length) * 100) : 0;
 
   return (
     <div
-      className='flex h-2.5 w-full gap-px overflow-hidden rounded-full'
-      role='progressbar'
+      className="flex h-2.5 w-full gap-px overflow-hidden rounded-full"
+      role="progressbar"
       aria-valuenow={pct}
       aria-valuemin={0}
       aria-valuemax={100}
@@ -48,22 +46,19 @@ function SegmentedBar({
   );
 }
 
-function SmoothBar({
-  statuses,
-}: {
-  statuses: RequestStatus[];
-}) {
+function SmoothBar({ statuses }: { statuses: RequestStatus[] }) {
   const completed = statuses.filter(
-    (s) => s.status === 'success' || s.status === 'failed' || s.status === 'skipped'
+    s =>
+      s.status === 'success' || s.status === 'failed' || s.status === 'skipped'
   ).length;
   const total = statuses.length;
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const hasFailed = statuses.some((s) => s.status === 'failed');
+  const hasFailed = statuses.some(s => s.status === 'failed');
 
   return (
     <div
-      className='h-2.5 w-full overflow-hidden rounded-full bg-muted'
-      role='progressbar'
+      className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
+      role="progressbar"
       aria-valuenow={pct}
       aria-valuemin={0}
       aria-valuemax={100}
@@ -93,7 +88,7 @@ export function SegmentedProgressBar({
   const completed = useMemo(
     () =>
       statuses.filter(
-        (s) =>
+        s =>
           s.status === 'success' ||
           s.status === 'failed' ||
           s.status === 'skipped'
@@ -110,25 +105,25 @@ export function SegmentedProgressBar({
       ) : (
         <SmoothBar statuses={statuses} />
       )}
-      <div className='flex items-center justify-between text-xs text-muted-foreground'>
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>
           {completed}/{statuses.length} requests
         </span>
-        <div className='flex items-center gap-1.5'>
-          <Badge className='gap-1 bg-transparent text-green-600 dark:text-green-400 border-green-500/20'>
-            <span className='inline-block h-1.5 w-1.5 rounded-full bg-green-500' />
-            {statuses.filter((s) => s.status === 'success').length}
+        <div className="flex items-center gap-1.5">
+          <Badge className="gap-1 bg-transparent text-green-600 dark:text-green-400 border-green-500/20">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
+            {statuses.filter(s => s.status === 'success').length}
           </Badge>
-          {statuses.some((s) => s.status === 'failed') && (
-            <Badge className='gap-1 bg-transparent text-red-600 dark:text-red-400 border-red-500/20'>
-              <span className='inline-block h-1.5 w-1.5 rounded-full bg-red-500' />
-              {statuses.filter((s) => s.status === 'failed').length}
+          {statuses.some(s => s.status === 'failed') && (
+            <Badge className="gap-1 bg-transparent text-red-600 dark:text-red-400 border-red-500/20">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-red-500" />
+              {statuses.filter(s => s.status === 'failed').length}
             </Badge>
           )}
-          {statuses.some((s) => s.status === 'skipped') && (
-            <Badge className='gap-1 bg-transparent text-muted-foreground border-muted-foreground/20'>
-              <span className='inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50' />
-              {statuses.filter((s) => s.status === 'skipped').length}
+          {statuses.some(s => s.status === 'skipped') && (
+            <Badge className="gap-1 bg-transparent text-muted-foreground border-muted-foreground/20">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+              {statuses.filter(s => s.status === 'skipped').length}
             </Badge>
           )}
         </div>

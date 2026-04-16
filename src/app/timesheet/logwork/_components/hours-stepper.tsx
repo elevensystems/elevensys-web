@@ -131,8 +131,8 @@ export function HoursStepper({
   return (
     <div
       ref={containerRef}
-      role='group'
-      aria-label='Hours'
+      role="group"
+      aria-label="Hours"
       tabIndex={isEditing ? -1 : 0}
       onKeyDown={handleContainerKeyDown}
       className={cn(
@@ -142,52 +142,52 @@ export function HoursStepper({
       )}
     >
       <Button
-        type='button'
-        variant='outline'
-        size='icon'
-        className='h-7 w-7 shrink-0'
+        type="button"
+        variant="outline"
+        size="icon"
+        className="h-7 w-7 shrink-0"
         disabled={disabled || !canDecrement}
         onClick={handleDecrement}
-        aria-label='Decrease hours'
+        aria-label="Decrease hours"
         tabIndex={-1}
       >
-        <Minus className='h-3 w-3' />
+        <Minus className="h-3 w-3" />
       </Button>
 
       {isEditing ? (
         <input
           ref={inputRef}
-          type='text'
-          inputMode='decimal'
-          aria-label='Enter hours'
+          type="text"
+          inputMode="decimal"
+          aria-label="Enter hours"
           value={editValue}
           onChange={e => setEditValue(e.target.value)}
           onBlur={commitEdit}
           onKeyDown={handleInputKeyDown}
-          className='h-7 w-14 rounded-sm bg-transparent text-center text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+          className="h-7 w-14 rounded-sm bg-transparent text-center text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
       ) : (
         <span
-          role='status'
-          aria-live='polite'
+          role="status"
+          aria-live="polite"
           onClick={enterEditMode}
-          className='flex h-7 w-14 cursor-pointer select-none items-center justify-center rounded-sm text-sm font-medium hover:bg-accent'
+          className="flex h-7 w-14 cursor-pointer select-none items-center justify-center rounded-sm text-sm font-medium hover:bg-accent"
         >
           {value.toFixed(1)}h
         </span>
       )}
 
       <Button
-        type='button'
-        variant='outline'
-        size='icon'
-        className='h-7 w-7 shrink-0'
+        type="button"
+        variant="outline"
+        size="icon"
+        className="h-7 w-7 shrink-0"
         disabled={disabled || !canIncrement}
         onClick={handleIncrement}
-        aria-label='Increase hours'
+        aria-label="Increase hours"
         tabIndex={-1}
       >
-        <Plus className='h-3 w-3' />
+        <Plus className="h-3 w-3" />
       </Button>
     </div>
   );

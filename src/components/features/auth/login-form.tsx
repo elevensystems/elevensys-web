@@ -25,13 +25,13 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action='/api/auth/login' method='get'>
+          <form action="/api/auth/login" method="get">
             <FieldGroup>
               <Field>
-                <Button type='submit'>Continue to sign in</Button>
-                <FieldDescription className='text-center'>
+                <Button type="submit">Continue to sign in</Button>
+                <FieldDescription className="text-center">
                   Don&apos;t have an account?{' '}
-                  <Link href='/signup'>Sign up</Link>
+                  <Link href="/signup">Sign up</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

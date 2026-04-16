@@ -29,7 +29,7 @@ export function EntryStatusList({ statuses }: EntryStatusListProps) {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className='max-h-[300px] overflow-y-auto rounded-lg border'>
+      <div className="max-h-[300px] overflow-y-auto rounded-lg border">
         {entries.map(([entryId, { issueKey, dateStatuses }]) => (
           <EntryStatusRow
             key={entryId}

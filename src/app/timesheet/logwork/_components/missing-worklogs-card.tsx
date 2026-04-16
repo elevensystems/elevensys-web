@@ -135,9 +135,9 @@ export function MissingWorklogsCard({
   return (
     <Card>
       <CardHeader>
-        <div className='flex flex-col gap-1'>
-          <CardTitle className='flex items-center gap-2'>
-            <CalendarDays className='h-5 w-5 text-primary' />
+        <div className="flex flex-col gap-1">
+          <CardTitle className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-primary" />
             Find Missing Worklogs
           </CardTitle>
           <CardDescription>
@@ -146,27 +146,27 @@ export function MissingWorklogsCard({
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className='space-y-6'>
+      <CardContent className="space-y-6">
         {/* Step 1 — Search Controls */}
-        <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
-          <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
+        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
             1
           </span>
           Select project &amp; date range
         </div>
 
-        <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 items-end'>
-          <div className='space-y-2'>
-            <Label htmlFor='project-select'>
-              Project <span className='text-destructive'>*</span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div className="space-y-2">
+            <Label htmlFor="project-select">
+              Project <span className="text-destructive">*</span>
             </Label>
             <NativeSelect
-              id='project-select'
+              id="project-select"
               value={selectedProjectId}
               onChange={e => onProjectChange(e.target.value)}
               disabled={isLoadingProjects}
             >
-              <option value=''>
+              <option value="">
                 {isLoadingProjects ? 'Loading projects...' : 'Select a project'}
               </option>
               {projects.map(project => (
@@ -176,28 +176,28 @@ export function MissingWorklogsCard({
               ))}
             </NativeSelect>
           </div>
-          <div className='space-y-2 sm:col-span-2'>
+          <div className="space-y-2 sm:col-span-2">
             <Label>Date Range</Label>
-            <div className='flex flex-col sm:flex-row items-end gap-3'>
+            <div className="flex flex-col sm:flex-row items-end gap-3">
               <DateRangePicker
-                id='warning-date-range'
+                id="warning-date-range"
                 from={warningFromDate}
                 to={warningToDate}
                 onRangeChange={(from, to) => {
                   onWarningFromDateChange(from);
                   onWarningToDateChange(to);
                 }}
-                className='flex-1 w-full'
+                className="flex-1 w-full"
               />
               <ActionButton
                 onClick={handleSearchClick}
                 disabled={
                   !selectedProjectId || !warningFromDate || !warningToDate
                 }
-                className='w-full sm:w-auto'
+                className="w-full sm:w-auto"
                 leftIcon={<Search />}
                 isLoading={isSearchingWarnings}
-                loadingText='Searching...'
+                loadingText="Searching..."
               >
                 Find Dates
               </ActionButton>
@@ -206,18 +206,18 @@ export function MissingWorklogsCard({
         </div>
 
         {/* Step 2 — Date Selection */}
-        <div className='space-y-3'>
+        <div className="space-y-3">
           {/* Header row */}
-          <div className='flex items-center justify-between gap-2 flex-wrap'>
-            <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
-              <span className='flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                 2
               </span>
               Select dates
               {parsedDates.length > 0 && (
                 <Badge
-                  variant='secondary'
-                  className='ml-1 bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-300 border-green-200 dark:border-green-800'
+                  variant="secondary"
+                  className="ml-1 bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-300 border-green-200 dark:border-green-800"
                 >
                   {parsedDates.length} date
                   {parsedDates.length !== 1 ? 's' : ''}
@@ -225,11 +225,11 @@ export function MissingWorklogsCard({
               )}
             </div>
 
-            <div className='flex items-center gap-2 ml-auto'>
+            <div className="flex items-center gap-2 ml-auto">
               {/* Clear all */}
               <ActionButton
-                variant='ghost'
-                size='sm'
+                variant="ghost"
+                size="sm"
                 onClick={handleClearAll}
                 className={`h-7 text-xs text-destructive hover:bg-destructive hover:text-white ${parsedDates.length > 0 ? 'visible' : 'invisible'}`}
                 leftIcon={<Trash2 />}
@@ -241,21 +241,21 @@ export function MissingWorklogsCard({
               <Popover>
                 <PopoverTrigger asChild>
                   <ActionButton
-                    variant='outline'
-                    size='sm'
-                    className='h-7 text-xs'
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
                     leftIcon={<CalendarPlus />}
                   >
                     Add manually
                   </ActionButton>
                 </PopoverTrigger>
                 <PopoverContent
-                  className='w-auto p-0'
-                  align='end'
+                  className="w-auto p-0"
+                  align="end"
                   sideOffset={8}
                 >
-                  <div className='p-3 border-b'>
-                    <label className='flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none'>
+                  <div className="p-3 border-b">
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
                       <Checkbox
                         checked={includeWeekends}
                         onCheckedChange={checked =>
@@ -266,7 +266,7 @@ export function MissingWorklogsCard({
                     </label>
                   </div>
                   <Calendar
-                    mode='multiple'
+                    mode="multiple"
                     selected={selectedDates}
                     onSelect={handleCalendarSelect}
                     disabled={includeWeekends ? undefined : isWeekend}
@@ -280,7 +280,7 @@ export function MissingWorklogsCard({
 
           {/* Chip list — bordered box only when dates exist */}
           {selectedDates.length > 0 ? (
-            <div className='rounded-md border border-border bg-muted/30 p-2'>
+            <div className="rounded-md border border-border bg-muted/30 p-2">
               <DateChipList
                 dates={selectedDates}
                 manualDateKeys={manualDateKeys}
@@ -288,13 +288,13 @@ export function MissingWorklogsCard({
               />
             </div>
           ) : (
-            <span className='text-xs text-muted-foreground italic'>
+            <span className="text-xs text-muted-foreground italic">
               No dates selected. Use &quot;Find Dates&quot; or add manually
               below.
             </span>
           )}
           {dateError && (
-            <p className='text-sm text-destructive' role='alert'>
+            <p className="text-sm text-destructive" role="alert">
               {dateError}
             </p>
           )}

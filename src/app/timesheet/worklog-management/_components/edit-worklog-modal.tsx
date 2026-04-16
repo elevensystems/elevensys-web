@@ -19,7 +19,12 @@ import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
-import { formatDateForApi, jiraDateToISO, MAX_HOURS, MIN_HOURS } from '@/lib/timesheet';
+import {
+  MAX_HOURS,
+  MIN_HOURS,
+  formatDateForApi,
+  jiraDateToISO,
+} from '@/lib/timesheet';
 import { WORK_TYPES } from '@/types/timesheet';
 import type { MyWorklogsRow, UpdateWorklogRequest } from '@/types/timesheet';
 
@@ -47,7 +52,6 @@ interface EditWorklogModalProps {
     changes: Omit<UpdateWorklogRequest, 'id' | 'jiraInstance'>
   ) => void;
 }
-
 
 function getDefaultValues(worklog: MyWorklogsRow) {
   return {
@@ -114,25 +118,25 @@ export function EditWorklogModal({
 
   return (
     <Dialog open={!!worklog} onOpenChange={open => !open && onClose()}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit Worklog</DialogTitle>
           <DialogDescription>
             Editing worklog for{' '}
-            <span className='font-semibold'>{worklog?.issueKey}</span>
+            <span className="font-semibold">{worklog?.issueKey}</span>
           </DialogDescription>
         </DialogHeader>
-        <div className='space-y-4 py-2'>
+        <div className="space-y-4 py-2">
           <form.Field
-            name='startDateEdit'
+            name="startDateEdit"
             children={field => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor='edit-date'>Date</FieldLabel>
+                  <FieldLabel htmlFor="edit-date">Date</FieldLabel>
                   <DatePicker
-                    id='edit-date'
+                    id="edit-date"
                     value={field.state.value}
                     onChange={val => field.handleChange(val)}
                   />
@@ -142,16 +146,16 @@ export function EditWorklogModal({
             }}
           />
           <form.Field
-            name='worked'
+            name="worked"
             children={field => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor='edit-hours'>Hours</FieldLabel>
+                  <FieldLabel htmlFor="edit-hours">Hours</FieldLabel>
                   <Input
-                    id='edit-hours'
-                    type='number'
+                    id="edit-hours"
+                    type="number"
                     min={String(MIN_HOURS)}
                     max={String(MAX_HOURS)}
                     step={String(MIN_HOURS)}
@@ -166,15 +170,15 @@ export function EditWorklogModal({
             }}
           />
           <form.Field
-            name='typeOfWork'
+            name="typeOfWork"
             children={field => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor='edit-type'>Type of Work</FieldLabel>
+                  <FieldLabel htmlFor="edit-type">Type of Work</FieldLabel>
                   <NativeSelect
-                    id='edit-type'
+                    id="edit-type"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={e => field.handleChange(e.target.value)}
@@ -192,17 +196,17 @@ export function EditWorklogModal({
             }}
           />
           <form.Field
-            name='description'
+            name="description"
             children={field => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor='edit-description'>
+                  <FieldLabel htmlFor="edit-description">
                     Description
                   </FieldLabel>
                   <Textarea
-                    id='edit-description'
+                    id="edit-description"
                     rows={3}
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -216,13 +220,17 @@ export function EditWorklogModal({
           />
         </div>
         <DialogFooter>
-          <ActionButton variant='outline' onClick={onClose} disabled={isEditing}>
+          <ActionButton
+            variant="outline"
+            onClick={onClose}
+            disabled={isEditing}
+          >
             Cancel
           </ActionButton>
           <ActionButton
             onClick={() => form.handleSubmit()}
             isLoading={isEditing}
-            loadingText='Saving…'
+            loadingText="Saving…"
           >
             Save Changes
           </ActionButton>

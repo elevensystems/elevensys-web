@@ -25,12 +25,12 @@ export function SignupForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action='/api/auth/signup' method='get'>
+          <form action="/api/auth/signup" method="get">
             <FieldGroup>
               <Field>
-                <Button type='submit'>Continue to sign up</Button>
-                <FieldDescription className='text-center'>
-                  Already have an account? <Link href='/login'>Sign in</Link>
+                <Button type="submit">Continue to sign up</Button>
+                <FieldDescription className="text-center">
+                  Already have an account? <Link href="/login">Sign in</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

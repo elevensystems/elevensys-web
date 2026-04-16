@@ -53,7 +53,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
         if (result.success) {
           toast.success('Feedback submitted successfully', {
             description: 'Thank you for your feedback!',
-            icon: <Check className='h-4 w-4' />,
+            icon: <Check className="h-4 w-4" />,
             duration: 5000,
           });
 
@@ -73,7 +73,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Send Feedback</DialogTitle>
           <DialogDescription>
@@ -85,10 +85,10 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
             e.preventDefault();
             form.handleSubmit();
           }}
-          className='space-y-4 py-4'
+          className="space-y-4 py-4"
         >
           <form.Field
-            name='name'
+            name="name"
             children={field => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
@@ -97,7 +97,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
                   <FieldLabel htmlFor={field.name}>Name</FieldLabel>
                   <Input
                     id={field.name}
-                    placeholder='Your name'
+                    placeholder="Your name"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={e => field.handleChange(e.target.value)}
@@ -111,7 +111,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
           />
 
           <form.Field
-            name='email'
+            name="email"
             children={field => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
@@ -120,8 +120,8 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
                   <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                   <Input
                     id={field.name}
-                    type='email'
-                    placeholder='your.email@example.com'
+                    type="email"
+                    placeholder="your.email@example.com"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={e => field.handleChange(e.target.value)}
@@ -135,7 +135,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
           />
 
           <form.Field
-            name='message'
+            name="message"
             children={field => {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
@@ -144,13 +144,13 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
                   <FieldLabel htmlFor={field.name}>Message</FieldLabel>
                   <Textarea
                     id={field.name}
-                    placeholder='Tell us what you think...'
+                    placeholder="Tell us what you think..."
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={e => field.handleChange(e.target.value)}
                     disabled={form.state.isSubmitting}
                     aria-invalid={isInvalid}
-                    className='min-h-[120px]'
+                    className="min-h-[120px]"
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
@@ -158,19 +158,19 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
             }}
           />
 
-          <div className='flex justify-end gap-3'>
+          <div className="flex justify-end gap-3">
             <ActionButton
-              type='button'
-              variant='outline'
+              type="button"
+              variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={form.state.isSubmitting}
             >
               Cancel
             </ActionButton>
             <ActionButton
-              type='submit'
+              type="submit"
               isLoading={form.state.isSubmitting}
-              loadingText='Submitting...'
+              loadingText="Submitting..."
             >
               Submit Feedback
             </ActionButton>

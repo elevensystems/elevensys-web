@@ -58,7 +58,12 @@ export function useWorklogs({ settings, isConfigured }: UseWorklogsParams) {
   // Store last committed filters for pagination
   const lastFiltersRef = useRef<CommittedFilters | null>(null);
 
-  const mutations = useWorklogMutations({ settings, isConfigured, worklogs, setWorklogs });
+  const mutations = useWorklogMutations({
+    settings,
+    isConfigured,
+    worklogs,
+    setWorklogs,
+  });
   const { clearSelection } = mutations;
 
   const fetchPage = useCallback(

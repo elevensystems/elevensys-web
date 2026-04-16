@@ -95,8 +95,7 @@ export function SubmissionModal({
 
   const summaryColor = useMemo(() => {
     if (!isDone) return '';
-    if (isCancelled)
-      return 'bg-muted text-muted-foreground border-border';
+    if (isCancelled) return 'bg-muted text-muted-foreground border-border';
     if (failedCount === 0)
       return 'bg-green-50 text-green-800 border-green-200 [&>svg]:text-green-800 dark:bg-green-950/50 dark:text-green-200 dark:border-green-800 dark:[&>svg]:text-green-200';
     if (successCount === 0)
@@ -131,7 +130,7 @@ export function SubmissionModal({
         }}
       >
         <DialogContent
-          className='sm:max-w-4xl'
+          className="sm:max-w-4xl"
           showCloseButton={false}
           onPointerDownOutside={e => {
             if (isSubmitting) e.preventDefault();
@@ -144,17 +143,17 @@ export function SubmissionModal({
           }}
         >
           <DialogHeader>
-            <div className='flex items-center justify-between'>
+            <div className="flex items-center justify-between">
               <DialogTitle>{title}</DialogTitle>
-              <div className='flex items-center gap-3'>
+              <div className="flex items-center gap-3">
                 {isSubmitting ? (
                   <ActionButton
-                    variant='ghost'
-                    size='default'
+                    variant="ghost"
+                    size="default"
                     onClick={handleCancelClick}
-                    className='h-7 px-2 text-muted-foreground hover:text-destructive'
+                    className="h-7 px-2 text-muted-foreground hover:text-destructive"
                   >
-                    <X className='size-4' />
+                    <X className="size-4" />
                     Cancel
                   </ActionButton>
                 ) : null}
@@ -162,7 +161,7 @@ export function SubmissionModal({
             </div>
           </DialogHeader>
 
-          <div className='space-y-4'>
+          <div className="space-y-4">
             <SegmentedProgressBar statuses={requestStatuses} />
 
             {isDone && summaryLine && (
@@ -172,7 +171,7 @@ export function SubmissionModal({
                   summaryColor
                 )}
               >
-                {SummaryIcon && <SummaryIcon className='size-4' />}
+                {SummaryIcon && <SummaryIcon className="size-4" />}
                 {summaryLine}
               </div>
             )}
@@ -180,22 +179,22 @@ export function SubmissionModal({
             <EntryStatusList statuses={requestStatuses} />
 
             {isDone && (
-              <DialogFooter className='border-t pt-3 gap-2'>
+              <DialogFooter className="border-t pt-3 gap-2">
                 {hasFailedResults && (
                   <ActionButton
-                    variant='outline'
-                    size='default'
+                    variant="outline"
+                    size="default"
                     onClick={onRetryFailed}
                     leftIcon={<RefreshCw />}
-                    className='gap-1.5'
+                    className="gap-1.5"
                   >
                     Retry Failed
                   </ActionButton>
                 )}
                 <ActionButton
-                  size='default'
+                  size="default"
                   onClick={onClose}
-                  leftIcon={<X className='size-4' />}
+                  leftIcon={<X className="size-4" />}
                 >
                   Close
                 </ActionButton>

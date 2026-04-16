@@ -125,7 +125,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
   const selectedIssue = issuesByKey.get(entry.issueKey) ?? null;
 
   return (
-    <div className='grid grid-cols-[230px_1fr_150px_140px_50px] items-start gap-2 border-b px-3 py-2'>
+    <div className="grid grid-cols-[230px_1fr_150px_140px_50px] items-start gap-2 border-b px-3 py-2">
       <div>
         <Combobox
           items={issues}
@@ -149,7 +149,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
             <ComboboxList>
               {(issue: JiraIssue) => (
                 <ComboboxItem key={issue.id} value={issue}>
-                  <span className='shrink-0'>{issue.key}</span>
+                  <span className="shrink-0">{issue.key}</span>
                 </ComboboxItem>
               )}
             </ComboboxList>
@@ -157,14 +157,14 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           </ComboboxContent>
         </Combobox>
         {errors?.issueKey && (
-          <span className='mt-1 text-xs text-destructive' role='alert'>
+          <span className="mt-1 text-xs text-destructive" role="alert">
             {errors.issueKey}
           </span>
         )}
       </div>
       <div>
         <Input
-          placeholder='Description of work done'
+          placeholder="Description of work done"
           value={entry.description}
           onChange={handleDescriptionChange}
           maxLength={500}
@@ -175,7 +175,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           aria-invalid={!!errors?.description}
         />
         {errors?.description && (
-          <span className='mt-1 text-xs text-destructive' role='alert'>
+          <span className="mt-1 text-xs text-destructive" role="alert">
             {errors.description}
           </span>
         )}
@@ -189,7 +189,7 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           )}
         >
           <NativeSelect
-            className='h-8'
+            className="h-8"
             value={entry.typeOfWork}
             onChange={handleTypeChange}
           >
@@ -208,12 +208,12 @@ export const WorkEntryRow = memo(function WorkEntryRow({
           disabled={disabled}
         />
       </div>
-      <div className='flex justify-center'>
+      <div className="flex justify-center">
         <ActionButton
-          aria-label='Delete'
-          variant='ghost'
-          size='icon'
-          className='h-8 w-8 text-destructive hover:bg-destructive hover:text-white'
+          aria-label="Delete"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-destructive hover:bg-destructive hover:text-white"
           onClick={handleRemove}
           disabled={isLastRow}
           leftIcon={<Trash2 />}

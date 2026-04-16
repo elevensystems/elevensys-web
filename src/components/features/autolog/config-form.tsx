@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { WorkEntryRow } from '@/app/timesheet/logwork/_components/work-entry-row';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,11 +19,16 @@ import {
 } from '@/components/ui/table';
 import { useProjectIssues } from '@/hooks/use-project-issues';
 import { generateEntryId } from '@/lib/timesheet';
-import type { AutologConfig, CreateAutologConfigPayload } from '@/types/autolog';
+import type {
+  AutologConfig,
+  CreateAutologConfigPayload,
+} from '@/types/autolog';
 import { DAY_NAMES, HOUR_OPTIONS } from '@/types/autolog';
-import type { JiraProject, TimesheetSettings, WorkEntry } from '@/types/timesheet';
-
-import { WorkEntryRow } from '@/app/timesheet/logwork/_components/work-entry-row';
+import type {
+  JiraProject,
+  TimesheetSettings,
+  WorkEntry,
+} from '@/types/timesheet';
 
 interface ConfigFormProps {
   settings: TimesheetSettings;
@@ -67,7 +73,11 @@ export function ConfigForm({
   // Project
   const [selectedProject, setSelectedProject] = useState<JiraProject | null>(
     editing
-      ? { id: editing.projectId, key: editing.projectKey, name: editing.projectName }
+      ? {
+          id: editing.projectId,
+          key: editing.projectKey,
+          name: editing.projectName,
+        }
       : null
   );
 
@@ -110,7 +120,9 @@ export function ConfigForm({
   );
 
   const removeEntry = useCallback((id: string) => {
-    setEntries(prev => (prev.length > 1 ? prev.filter(e => e.id !== id) : prev));
+    setEntries(prev =>
+      prev.length > 1 ? prev.filter(e => e.id !== id) : prev
+    );
   }, []);
 
   const addEntry = useCallback(() => {
@@ -176,12 +188,12 @@ export function ConfigForm({
   };
 
   return (
-    <div className='space-y-8'>
+    <div className="space-y-8">
       {/* Project */}
-      <div className='space-y-2'>
-        <Label className='text-sm font-medium'>Project</Label>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Project</Label>
         {isLoadingProjects ? (
-          <p className='text-sm text-muted-foreground'>Loading projects...</p>
+          <p className="text-sm text-muted-foreground">Loading projects...</p>
         ) : (
           <NativeSelect
             value={selectedProject?.id ?? ''}
@@ -191,7 +203,7 @@ export function ConfigForm({
             }}
             disabled={!!editing}
           >
-            <option value=''>-- Choose a project --</option>
+            <option value="">-- Choose a project --</option>
             {projects.map(p => (
               <option key={p.id} value={p.id}>
                 [{p.key}] {p.name}
@@ -200,7 +212,7 @@ export function ConfigForm({
           </NativeSelect>
         )}
         {editing && (
-          <p className='text-xs text-muted-foreground'>
+          <p className="text-xs text-muted-foreground">
             Project cannot be changed. Delete and recreate to use a different
             project.
           </p>
@@ -208,29 +220,29 @@ export function ConfigForm({
       </div>
 
       {/* Tickets */}
-      <div className='space-y-3'>
-        <div className='flex items-center justify-between'>
-          <Label className='text-sm font-medium'>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">
             Tickets
-            <span className='ml-2 text-xs font-normal text-muted-foreground'>
+            <span className="ml-2 text-xs font-normal text-muted-foreground">
               {totalHours}h total
             </span>
           </Label>
         </div>
-        <p className='text-xs text-muted-foreground'>
+        <p className="text-xs text-muted-foreground">
           Add tickets to log work for. Hours are logged per missing date.
         </p>
-        <div className='overflow-hidden rounded-lg border'>
+        <div className="overflow-hidden rounded-lg border">
           <Table>
-            <TableHeader className='bg-muted/50'>
+            <TableHeader className="bg-muted/50">
               <TableRow>
-                <TableHead className='w-[230px] font-semibold'>Key</TableHead>
-                <TableHead className='font-semibold'>Description</TableHead>
-                <TableHead className='w-[150px] font-semibold'>
+                <TableHead className="w-[230px] font-semibold">Key</TableHead>
+                <TableHead className="font-semibold">Description</TableHead>
+                <TableHead className="w-[150px] font-semibold">
                   Type of Work
                 </TableHead>
-                <TableHead className='w-[100px] font-semibold'>Hours</TableHead>
-                <TableHead className='w-[50px]' />
+                <TableHead className="w-[100px] font-semibold">Hours</TableHead>
+                <TableHead className="w-[50px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -251,36 +263,36 @@ export function ConfigForm({
           </Table>
         </div>
         <Button
-          variant='outline'
-          size='sm'
+          variant="outline"
+          size="sm"
           onClick={addEntry}
           disabled={!selectedProject}
         >
-          <Plus className='mr-1 h-4 w-4' />
+          <Plus className="mr-1 h-4 w-4" />
           Add Ticket
         </Button>
       </div>
 
       {/* Schedule */}
-      <div className='space-y-3'>
-        <Label className='text-sm font-medium'>Schedule</Label>
-        <div className='grid grid-cols-1 sm:grid-cols-3 gap-3'>
-          <div className='space-y-1'>
-            <Label className='text-xs text-muted-foreground'>Frequency</Label>
+      <div className="space-y-3">
+        <Label className="text-sm font-medium">Schedule</Label>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Frequency</Label>
             <NativeSelect
               value={scheduleType}
               onChange={e =>
                 setScheduleType(e.target.value as 'weekly' | 'monthly')
               }
             >
-              <option value='weekly'>Weekly</option>
-              <option value='monthly'>Monthly</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
             </NativeSelect>
           </div>
 
           {scheduleType === 'weekly' ? (
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">
                 Day of week
               </Label>
               <NativeSelect
@@ -295,23 +307,23 @@ export function ConfigForm({
               </NativeSelect>
             </div>
           ) : (
-            <div className='space-y-1'>
-              <Label className='text-xs text-muted-foreground'>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">
                 Day of month
               </Label>
               <Input
-                type='number'
+                type="number"
                 min={1}
                 max={28}
                 value={dayOfMonth}
                 onChange={e => setDayOfMonth(Number(e.target.value))}
               />
-              <p className='text-xs text-muted-foreground'>Max 28</p>
+              <p className="text-xs text-muted-foreground">Max 28</p>
             </div>
           )}
 
-          <div className='space-y-1'>
-            <Label className='text-xs text-muted-foreground'>Time (UTC)</Label>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Time (UTC)</Label>
             <NativeSelect
               value={String(hour)}
               onChange={e => setHour(Number(e.target.value))}
@@ -327,22 +339,22 @@ export function ConfigForm({
       </div>
 
       {/* Email */}
-      <div className='space-y-2'>
-        <Label className='text-sm font-medium'>Notification Email</Label>
-        <p className='text-xs text-muted-foreground'>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Notification Email</Label>
+        <p className="text-xs text-muted-foreground">
           Confirmation emails will be sent here after each autolog run.
         </p>
         <Input
-          type='email'
+          type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          placeholder='your.name@fpt.com'
+          placeholder="your.name@fpt.com"
         />
       </div>
 
       {/* Actions */}
-      <div className='flex justify-between border-t pt-6'>
-        <Button variant='outline' onClick={onCancel}>
+      <div className="flex justify-between border-t pt-6">
+        <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button onClick={handleSubmit} disabled={isSaving}>

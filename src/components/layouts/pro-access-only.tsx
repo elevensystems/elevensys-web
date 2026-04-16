@@ -33,16 +33,16 @@ export default function ProAccessOnly({
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-3xl mx-auto space-y-6'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-3xl mx-auto space-y-6">
           <ToolPageHeader title={title} description={description} />
-          <Alert className='border-dashed'>
+          <Alert className="border-dashed">
             <AlertTitle>{resolvedTitle}</AlertTitle>
             <AlertDescription>{resolvedMessage}</AlertDescription>
           </Alert>
           {isGuest && (
             <Button asChild>
-              <Link href='/login'>Sign in</Link>
+              <Link href="/login">Sign in</Link>
             </Button>
           )}
         </div>

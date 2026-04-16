@@ -22,7 +22,7 @@ jest.mock('@/hooks/use-action-feedback', () => ({
 jest.mock('@/components/layouts/main-layout', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid='main-layout'>{children}</div>
+    <div data-testid="main-layout">{children}</div>
   ),
 }));
 
@@ -34,7 +34,7 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
     title: string;
     description: string;
   }) => (
-    <div data-testid='tool-page-header'>
+    <div data-testid="tool-page-header">
       <h1>{title}</h1>
       <p>{description}</p>
     </div>
@@ -44,11 +44,11 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
 // --- Mock icons ---
 
 jest.mock('lucide-react', () => ({
-  CaseSensitive: () => <span data-testid='icon-case-sensitive' />,
-  Check: () => <span data-testid='icon-check' />,
-  ChevronDown: () => <span data-testid='icon-chevron-down' />,
-  Copy: () => <span data-testid='icon-copy' />,
-  Eraser: () => <span data-testid='icon-eraser' />,
+  CaseSensitive: () => <span data-testid="icon-case-sensitive" />,
+  Check: () => <span data-testid="icon-check" />,
+  ChevronDown: () => <span data-testid="icon-chevron-down" />,
+  Copy: () => <span data-testid="icon-copy" />,
+  Eraser: () => <span data-testid="icon-eraser" />,
 }));
 
 // --- Mock UI components ---
@@ -118,7 +118,7 @@ jest.mock('@/components/ui/collapsible', () => ({
     children: React.ReactNode;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
-  }) => <div data-testid='collapsible'>{open !== false && children}</div>,
+  }) => <div data-testid="collapsible">{open !== false && children}</div>,
   CollapsibleTrigger: ({
     children,
     ...props

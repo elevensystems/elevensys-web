@@ -32,7 +32,7 @@ jest.mock('@/hooks/use-action-feedback', () => ({
 jest.mock('@/components/layouts/main-layout', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid='main-layout'>{children}</div>
+    <div data-testid="main-layout">{children}</div>
   ),
 }));
 
@@ -48,11 +48,11 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
     infoMessage?: string;
     error?: string;
   }) => (
-    <div data-testid='tool-page-header'>
+    <div data-testid="tool-page-header">
       <h1>{title}</h1>
       <p>{description}</p>
-      {infoMessage && <p data-testid='info-message'>{infoMessage}</p>}
-      {error && <p data-testid='error-message'>{error}</p>}
+      {infoMessage && <p data-testid="info-message">{infoMessage}</p>}
+      {error && <p data-testid="error-message">{error}</p>}
     </div>
   ),
 }));
@@ -60,18 +60,18 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
 // --- Mock icons ---
 
 jest.mock('lucide-react', () => ({
-  CalendarClock: () => <span data-testid='icon-calendar-clock' />,
-  Check: () => <span data-testid='icon-check' />,
-  Copy: () => <span data-testid='icon-copy' />,
-  Link2: () => <span data-testid='icon-link2' />,
-  Settings: () => <span data-testid='icon-settings' />,
+  CalendarClock: () => <span data-testid="icon-calendar-clock" />,
+  Check: () => <span data-testid="icon-check" />,
+  Copy: () => <span data-testid="icon-copy" />,
+  Link2: () => <span data-testid="icon-link2" />,
+  Settings: () => <span data-testid="icon-settings" />,
 }));
 
 // --- Mock spinner ---
 
 jest.mock('@/components/ui/spinner', () => ({
   Spinner: (props: React.HTMLAttributes<HTMLSpanElement>) => (
-    <span data-testid='spinner' {...props} />
+    <span data-testid="spinner" {...props} />
   ),
 }));
 
@@ -115,7 +115,7 @@ jest.mock('@/components/ui/checkbox', () => ({
     onCheckedChange?: (checked: boolean) => void;
   }) => (
     <input
-      type='checkbox'
+      type="checkbox"
       id={id}
       checked={checked}
       onChange={e => onCheckedChange?.(e.target.checked)}
@@ -143,7 +143,7 @@ jest.mock('@/components/ui/field', () => ({
     children,
     ...props
   }: React.HTMLAttributes<HTMLDivElement> & { children: React.ReactNode }) => (
-    <div data-testid='field' {...props}>
+    <div data-testid="field" {...props}>
       {children}
     </div>
   ),
@@ -158,7 +158,7 @@ jest.mock('@/components/ui/field', () => ({
   }: {
     errors?: Array<{ message?: string } | undefined>;
   }) => (
-    <div data-testid='field-error' role='alert'>
+    <div data-testid="field-error" role="alert">
       {errors?.map((e, i) => (
         <span key={i}>{e?.message}</span>
       ))}

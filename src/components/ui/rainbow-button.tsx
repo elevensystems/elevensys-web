@@ -47,7 +47,7 @@ const RainbowButton = React.forwardRef<HTMLButtonElement, RainbowButtonProps>(
     const Comp = asChild ? SlotPrimitive.Slot : 'button';
     return (
       <Comp
-        data-slot='button'
+        data-slot="button"
         className={cn(rainbowButtonVariants({ variant, size, className }))}
         ref={ref}
         {...props}

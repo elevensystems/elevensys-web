@@ -29,21 +29,19 @@ const STATUS_DOT_COLORS: Record<RequestStatusState, string> = {
 function StatusIcon({ status }: { status: RequestStatusState }) {
   switch (status) {
     case 'pending':
-      return <Clock className='h-3.5 w-3.5 text-muted-foreground' />;
+      return <Clock className="h-3.5 w-3.5 text-muted-foreground" />;
     case 'in-progress':
-      return (
-        <Loader2 className='h-3.5 w-3.5 animate-spin text-blue-500' />
-      );
+      return <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-500" />;
     case 'success':
       return (
-        <CheckCircle2 className='h-3.5 w-3.5 text-green-600 dark:text-green-400 animate-in fade-in-0 zoom-in-75 duration-150' />
+        <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400 animate-in fade-in-0 zoom-in-75 duration-150" />
       );
     case 'failed':
       return (
-        <XCircle className='h-3.5 w-3.5 text-red-600 dark:text-red-400 animate-in fade-in-0 zoom-in-75 duration-150' />
+        <XCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400 animate-in fade-in-0 zoom-in-75 duration-150" />
       );
     case 'skipped':
-      return <Clock className='h-3.5 w-3.5 text-muted-foreground/50' />;
+      return <Clock className="h-3.5 w-3.5 text-muted-foreground/50" />;
   }
 }
 
@@ -62,19 +60,15 @@ export function EntryStatusRow({
     value: boolean;
   } | null>(null);
 
-  const hasStarted = dateStatuses.some((s) => s.status !== 'pending');
+  const hasStarted = dateStatuses.some(s => s.status !== 'pending');
   const allDone = dateStatuses.every(
-    (s) =>
-      s.status === 'success' ||
-      s.status === 'failed' ||
-      s.status === 'skipped'
+    s =>
+      s.status === 'success' || s.status === 'failed' || s.status === 'skipped'
   );
 
   const completedCount = dateStatuses.filter(
-    (s) =>
-      s.status === 'success' ||
-      s.status === 'failed' ||
-      s.status === 'skipped'
+    s =>
+      s.status === 'success' || s.status === 'failed' || s.status === 'skipped'
   ).length;
 
   const phase = `${hasStarted}-${allDone}`;
@@ -86,11 +80,11 @@ export function EntryStatusRow({
   const expanded = manualExpanded ?? autoExpanded;
 
   return (
-    <div className='border-b last:border-b-0'>
+    <div className="border-b last:border-b-0">
       <button
-        type='button'
+        type="button"
         onClick={() => setExpandOverride({ phase, value: !expanded })}
-        className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-muted/50 transition-colors'
+        className="flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-muted/50 transition-colors"
       >
         <ChevronRight
           className={cn(
@@ -98,8 +92,8 @@ export function EntryStatusRow({
             expanded && 'rotate-90'
           )}
         />
-        <span className='font-mono font-medium'>{issueKey}</span>
-        <div className='flex items-center gap-0.5 ml-2'>
+        <span className="font-mono font-medium">{issueKey}</span>
+        <div className="flex items-center gap-0.5 ml-2">
           {dateStatuses.map((ds, i) => (
             <span
               key={`${ds.date}-${i}`}
@@ -110,7 +104,7 @@ export function EntryStatusRow({
             />
           ))}
         </div>
-        <span className='ml-auto text-xs text-muted-foreground tabular-nums'>
+        <span className="ml-auto text-xs text-muted-foreground tabular-nums">
           ({completedCount}/{dateStatuses.length})
         </span>
       </button>
@@ -121,27 +115,22 @@ export function EntryStatusRow({
           expanded ? 'max-h-[500px]' : 'max-h-0'
         )}
       >
-        <div className='border-t bg-muted/30 px-3 py-1.5'>
+        <div className="border-t bg-muted/30 px-3 py-1.5">
           {dateStatuses.map((ds, i) => (
             <div
               key={`${ds.date}-${i}`}
-              className='flex items-center gap-2.5 py-1 pl-7 text-xs'
+              className="flex items-center gap-2.5 py-1 pl-7 text-xs"
             >
               <StatusIcon status={ds.status} />
-              <span className='font-mono text-muted-foreground'>
-                {ds.date}
-              </span>
+              <span className="font-mono text-muted-foreground">{ds.date}</span>
               {ds.status === 'failed' && ds.error && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className='ml-1 cursor-help text-red-600 dark:text-red-400 underline decoration-dotted'>
+                    <span className="ml-1 cursor-help text-red-600 dark:text-red-400 underline decoration-dotted">
                       error
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent
-                    side='top'
-                    className='max-w-[300px] text-xs'
-                  >
+                  <TooltipContent side="top" className="max-w-[300px] text-xs">
                     {ds.error.length > 200
                       ? `${ds.error.slice(0, 200)}...`
                       : ds.error}
@@ -149,7 +138,7 @@ export function EntryStatusRow({
                 </Tooltip>
               )}
               {ds.status === 'skipped' && (
-                <span className='text-muted-foreground/60'>skipped</span>
+                <span className="text-muted-foreground/60">skipped</span>
               )}
             </div>
           ))}

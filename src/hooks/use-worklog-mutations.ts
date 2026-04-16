@@ -32,7 +32,9 @@ export function useWorklogMutations({
   setWorklogs,
 }: UseWorklogMutationsParams) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [editingWorklog, setEditingWorklog] = useState<MyWorklogsRow | null>(null);
+  const [editingWorklog, setEditingWorklog] = useState<MyWorklogsRow | null>(
+    null
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
@@ -100,7 +102,9 @@ export function useWorklogMutations({
       setDeletingId(key);
 
       try {
-        const params = new URLSearchParams({ jiraInstance: settings.jiraInstance });
+        const params = new URLSearchParams({
+          jiraInstance: settings.jiraInstance,
+        });
         const response = await fetch(
           `/api/timesheet/worklogs/${issueId}/${worklogId}?${params.toString()}`,
           {
@@ -112,7 +116,8 @@ export function useWorklogMutations({
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
           throw new Error(
-            errorData?.error || `Failed to delete worklog: HTTP ${response.status}`
+            errorData?.error ||
+              `Failed to delete worklog: HTTP ${response.status}`
           );
         }
 
@@ -177,7 +182,8 @@ export function useWorklogMutations({
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
           throw new Error(
-            errorData?.error || `Failed to update worklog: HTTP ${response.status}`
+            errorData?.error ||
+              `Failed to update worklog: HTTP ${response.status}`
           );
         }
 
@@ -186,10 +192,18 @@ export function useWorklogMutations({
             w.id === worklog.id && w.issueId === worklog.issueId
               ? {
                   ...w,
-                  ...(changes.description !== undefined && { description: changes.description }),
-                  ...(changes.worked !== undefined && { worked: changes.worked }),
-                  ...(changes.typeOfWork !== undefined && { typeOfWork: changes.typeOfWork }),
-                  ...(changes.startDateEdit !== undefined && { startDateEdit: changes.startDateEdit }),
+                  ...(changes.description !== undefined && {
+                    description: changes.description,
+                  }),
+                  ...(changes.worked !== undefined && {
+                    worked: changes.worked,
+                  }),
+                  ...(changes.typeOfWork !== undefined && {
+                    typeOfWork: changes.typeOfWork,
+                  }),
+                  ...(changes.startDateEdit !== undefined && {
+                    startDateEdit: changes.startDateEdit,
+                  }),
                 }
               : w
           )
@@ -246,7 +260,9 @@ export function useWorklogMutations({
       setBulkDeleteProgress(Math.round(((i + 1) / total) * 100));
 
       try {
-        const deleteParams = new URLSearchParams({ jiraInstance: settings.jiraInstance });
+        const deleteParams = new URLSearchParams({
+          jiraInstance: settings.jiraInstance,
+        });
         const response = await fetch(
           `/api/timesheet/worklogs/${worklog.issueId}/${worklog.id}?${deleteParams.toString()}`,
           {
@@ -258,12 +274,15 @@ export function useWorklogMutations({
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
           throw new Error(
-            errorData?.error || `Failed to delete worklog: HTTP ${response.status}`
+            errorData?.error ||
+              `Failed to delete worklog: HTTP ${response.status}`
           );
         }
 
         setWorklogs(prev =>
-          prev.filter(w => !(w.id === worklog.id && w.issueId === worklog.issueId))
+          prev.filter(
+            w => !(w.id === worklog.id && w.issueId === worklog.issueId)
+          )
         );
         successCount++;
       } catch {

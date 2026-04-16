@@ -5,7 +5,10 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 import { formatDateForApi, getMonthEnd, getMonthStart } from '@/lib/timesheet';
-import type { TimesheetSettings, WorklogsWarningEntry } from '@/types/timesheet';
+import type {
+  TimesheetSettings,
+  WorklogsWarningEntry,
+} from '@/types/timesheet';
 
 import { useProjectIssues } from './use-project-issues';
 import { useProjects } from './use-projects';

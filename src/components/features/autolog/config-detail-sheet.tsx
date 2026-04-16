@@ -70,21 +70,21 @@ function TicketRow({
         )}
         onClick={() => hasMessage && setExpanded(e => !e)}
       >
-        <span className='font-mono text-xs'>{ticket.issueKey}</span>
-        <div className='flex items-center gap-2'>
+        <span className="font-mono text-xs">{ticket.issueKey}</span>
+        <div className="flex items-center gap-2">
           {result &&
             (result.status === 'logged' ? (
-              <Check className='h-3.5 w-3.5 text-green-500' />
+              <Check className="h-3.5 w-3.5 text-green-500" />
             ) : result.status === 'skipped' ? (
-              <Minus className='h-3.5 w-3.5 text-muted-foreground' />
+              <Minus className="h-3.5 w-3.5 text-muted-foreground" />
             ) : (
-              <X className='h-3.5 w-3.5 text-destructive' />
+              <X className="h-3.5 w-3.5 text-destructive" />
             ))}
-          <span className='text-muted-foreground'>{ticket.hours}h</span>
+          <span className="text-muted-foreground">{ticket.hours}h</span>
         </div>
       </div>
       {expanded && hasMessage && (
-        <p className='pb-1 text-xs text-muted-foreground'>{result.message}</p>
+        <p className="pb-1 text-xs text-muted-foreground">{result.message}</p>
       )}
     </div>
   );
@@ -153,7 +153,7 @@ export function ConfigDetailSheet({
           }
         >
           <SheetHeader>
-            <div className='flex items-start justify-between gap-2'>
+            <div className="flex items-start justify-between gap-2">
               <div>
                 <SheetTitle>{config.projectName}</SheetTitle>
                 <SheetDescription>{config.projectKey}</SheetDescription>
@@ -166,14 +166,14 @@ export function ConfigDetailSheet({
             </div>
           </SheetHeader>
 
-          <div className='space-y-5 px-4 py-4'>
+          <div className="space-y-5 px-4 py-4">
             {/* Schedule section */}
-            <div className='space-y-1.5'>
-              <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                <Calendar className='h-4 w-4 shrink-0' />
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4 shrink-0" />
                 <span>{formatSchedule(config)}</span>
               </div>
-              <p className='pl-6 text-xs text-muted-foreground'>
+              <p className="pl-6 text-xs text-muted-foreground">
                 Covers {config.coveragePeriod.start} –{' '}
                 {config.coveragePeriod.end}
               </p>
@@ -182,11 +182,11 @@ export function ConfigDetailSheet({
             <Separator />
 
             {/* Tickets section */}
-            <div className='space-y-2'>
-              <p className='text-xs font-medium text-muted-foreground'>
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
                 Tickets ({config.tickets.length}) &middot; {totalHours}h total
               </p>
-              <div className='divide-y rounded-md border px-3'>
+              <div className="divide-y rounded-md border px-3">
                 {config.tickets.map(t => (
                   <TicketRow
                     key={t.issueKey}
@@ -201,16 +201,16 @@ export function ConfigDetailSheet({
 
             {/* Last run section */}
             {config.lastRunAt ? (
-              <div className='space-y-1'>
-                <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                  <Clock className='h-3.5 w-3.5 shrink-0' />
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5 shrink-0" />
                   <span>
                     Last run: {new Date(config.lastRunAt).toLocaleString()}
                   </span>
                   {config.lastRunStatus && (
                     <Badge
                       variant={RUN_STATUS_CONFIG[config.lastRunStatus].variant}
-                      className='ml-auto py-0'
+                      className="ml-auto py-0"
                     >
                       {RUN_STATUS_CONFIG[config.lastRunStatus].label}
                     </Badge>
@@ -218,22 +218,22 @@ export function ConfigDetailSheet({
                 </div>
                 {config.lastRunStatus === 'partial' &&
                   loggedCount !== undefined && (
-                    <p className='pl-[1.375rem] text-xs text-muted-foreground'>
+                    <p className="pl-[1.375rem] text-xs text-muted-foreground">
                       {loggedCount}/{config.tickets.length} tickets logged
                     </p>
                   )}
               </div>
             ) : (
-              <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                <Clock className='h-3.5 w-3.5 shrink-0' />
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Clock className="h-3.5 w-3.5 shrink-0" />
                 <span>No runs yet</span>
               </div>
             )}
 
             {/* Re-auth warning */}
             {config.status === 'paused_auth' && (
-              <div className='flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-xs text-destructive'>
-                <AlertTriangle className='mt-0.5 h-3.5 w-3.5 shrink-0' />
+              <div className="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-xs text-destructive">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>
                   Jira token expired. Update your token to resume autolog.
                 </span>
@@ -241,37 +241,37 @@ export function ConfigDetailSheet({
             )}
           </div>
 
-          <SheetFooter className='flex-row gap-2 border-t px-4 pt-4'>
+          <SheetFooter className="flex-row gap-2 border-t px-4 pt-4">
             {config.status === 'paused_auth' ? (
-              <Button className='flex-1' onClick={handleEdit}>
+              <Button className="flex-1" onClick={handleEdit}>
                 Re-authenticate
               </Button>
             ) : (
               <Button
-                variant='default'
+                variant="default"
                 onClick={handleRun}
                 disabled={isRunning || runSuccess}
               >
                 {isRunning ? (
-                  <Loader2 className='mr-1.5 h-3.5 w-3.5 animate-spin' />
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
                 ) : runSuccess ? (
-                  <Check className='mr-1.5 h-3.5 w-3.5' />
+                  <Check className="mr-1.5 h-3.5 w-3.5" />
                 ) : (
-                  <Play className='mr-1.5 h-3.5 w-3.5' />
+                  <Play className="mr-1.5 h-3.5 w-3.5" />
                 )}
                 {isRunning ? 'Running...' : runSuccess ? 'Done' : 'Run Now'}
               </Button>
             )}
-            <div className='ml-auto flex gap-2'>
-              <Button variant='outline' onClick={handleEdit}>
-                <Pencil className='mr-1.5 h-3.5 w-3.5' />
+            <div className="ml-auto flex gap-2">
+              <Button variant="outline" onClick={handleEdit}>
+                <Pencil className="mr-1.5 h-3.5 w-3.5" />
                 Edit
               </Button>
               <Button
-                variant='destructive'
+                variant="destructive"
                 onClick={() => setShowDeleteDialog(true)}
               >
-                <Trash2 className='mr-1.5 h-3.5 w-3.5' />
+                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                 Delete
               </Button>
             </div>
@@ -280,7 +280,7 @@ export function ConfigDetailSheet({
       </Sheet>
 
       <DeleteConfirmDialog
-        title='Delete configuration?'
+        title="Delete configuration?"
         description={
           <>
             This will permanently delete the autolog configuration for{' '}

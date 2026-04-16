@@ -41,9 +41,9 @@ One-time setup that makes the toolbar aware of your flags:
 
 ```ts
 // src/hooks.server.ts
-import { createHandle } from 'flags/sveltekit';
 import { FLAGS_SECRET } from '$env/static/private';
 import * as flags from '$lib/flags';
+import { createHandle } from 'flags/sveltekit';
 
 export const handle = createHandle({ secret: FLAGS_SECRET, flags });
 ```
@@ -82,8 +82,8 @@ export const load = async () => {
 ```ts
 // vite.config.ts
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
 import { vercelToolbar } from '@vercel/toolbar/plugins/vite';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [sveltekit(), vercelToolbar()],
@@ -116,7 +116,9 @@ import { flag } from 'flags/sveltekit';
 
 export const showSummerSale = flag<boolean>({
   key: 'summer-sale',
-  async decide() { return false; },
+  async decide() {
+    return false;
+  },
   origin: 'https://example.com/flags/summer-sale/',
   description: 'Show Summer Holiday Sale Banner, 20% off',
   options: [
@@ -151,7 +153,8 @@ export const exampleFlag = flag<boolean, Entities>({
 
 ### Deduplication
 
-Extract `identify` as a named function and reuse across flags. Calls are deduped by function identity:
+Extract `identify` as a named function and reuse across flags. Calls are deduped by function
+identity:
 
 ```ts
 import type { ReadonlyHeaders, ReadonlyRequestCookies } from 'flags';
@@ -168,21 +171,24 @@ function identify({
   cookies: ReadonlyRequestCookies;
   headers: ReadonlyHeaders;
 }): Entities {
-  const visitorId =
-    cookies.get('visitorId')?.value ?? headers.get('x-visitorId');
+  const visitorId = cookies.get('visitorId')?.value ?? headers.get('x-visitorId');
   return { visitorId };
 }
 
 export const flag1 = flag<boolean, Entities>({
   key: 'flag1',
   identify,
-  decide({ entities }) { /* ... */ },
+  decide({ entities }) {
+    /* ... */
+  },
 });
 
 export const flag2 = flag<boolean, Entities>({
   key: 'flag2',
   identify,
-  decide({ entities }) { /* ... */ },
+  decide({ entities }) {
+    /* ... */
+  },
 });
 ```
 
@@ -192,7 +198,8 @@ export const flag2 = flag<boolean, Entities>({
 
 - `middleware.ts` handles full page visits in production (runs before CDN)
 - `reroute` handles client-side navigations and dev-time routing
-- Middleware has access to cookies and private env vars; `reroute` runs on client and must defer to server
+- Middleware has access to cookies and private env vars; `reroute` runs on client and must defer to
+  server
 
 ### Step 1: Create flag group
 
@@ -214,6 +221,7 @@ export const secondPricingABTest = flag({
 ```ts
 // src/lib/precomputed-flags.ts
 import { precompute } from 'flags/sveltekit';
+
 import { firstPricingABTest, secondPricingABTest } from './flags';
 
 export const pricingFlags = [firstPricingABTest, secondPricingABTest];
@@ -234,21 +242,18 @@ export async function reroute({ url, fetch }) {
   if (url.pathname === '/pricing') {
     const destination = new URL('/api/reroute', url);
     destination.searchParams.set('pathname', url.pathname);
-    return fetch(destination).then((response) => response.text());
+    return fetch(destination).then(response => response.text());
   }
 }
 ```
 
 ```ts
 // src/routes/api/reroute/+server.ts
-import { text } from '@sveltejs/kit';
 import { computeInternalRoute } from '$lib/precomputed-flags';
+import { text } from '@sveltejs/kit';
 
 export async function GET({ url, request }) {
-  const destination = await computeInternalRoute(
-    url.searchParams.get('pathname')!,
-    request,
-  );
+  const destination = await computeInternalRoute(url.searchParams.get('pathname')!, request);
   return text(destination);
 }
 ```
@@ -257,8 +262,9 @@ export async function GET({ url, request }) {
 
 ```ts
 // middleware.ts
-import { rewrite } from '@vercel/edge';
 import { normalizeUrl } from '@sveltejs/kit';
+import { rewrite } from '@vercel/edge';
+
 import { computeInternalRoute } from './src/lib/precomputed-flags';
 
 export const config = { matcher: ['/pricing'] };
@@ -266,9 +272,7 @@ export const config = { matcher: ['/pricing'] };
 export default async function middleware(request: Request) {
   const { url, denormalize } = normalizeUrl(request.url);
   if (url.pathname === '/pricing') {
-    return rewrite(
-      denormalize(await computeInternalRoute(url.pathname, request)),
-    );
+    return rewrite(denormalize(await computeInternalRoute(url.pathname, request)));
   }
 }
 ```
@@ -277,9 +281,10 @@ export default async function middleware(request: Request) {
 
 ```ts
 // src/routes/pricing/[code]/+page.server.ts
-import type { PageServerLoad } from './$types';
 import { firstPricingABTest, secondPricingABTest } from '$lib/flags';
 import { pricingFlags } from '$lib/precomputed-flags';
+
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
   const flag1 = await firstPricingABTest(params.code, pricingFlags);
@@ -313,13 +318,13 @@ export const config = {
 ### Enable prerendering
 
 ```ts
-import { generatePermutations } from 'flags/sveltekit';
 import { pricingFlags } from '$lib/precomputed-flags';
+import { generatePermutations } from 'flags/sveltekit';
 
 export const prerender = true;
 
 export async function entries() {
-  return (await generatePermutations(pricingFlags)).map((code) => ({ code }));
+  return (await generatePermutations(pricingFlags)).map(code => ({ code }));
 }
 ```
 
@@ -339,8 +344,9 @@ export const showNewDashboard = flag<boolean>({
 
 ```ts
 // src/routes/+page.server.ts
-import type { PageServerLoad } from './$types';
 import { showNewDashboard } from '$lib/flags';
+
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
   const dashboard = await showNewDashboard();
@@ -356,9 +362,10 @@ Combine precompute with visitor ID generation for A/B tests on static pages:
 
 ```ts
 // middleware.ts
+import { normalizeUrl } from '@sveltejs/kit';
 import { rewrite } from '@vercel/edge';
 import { parse } from 'cookie';
-import { normalizeUrl } from '@sveltejs/kit';
+
 import { computeInternalRoute, createVisitorId } from './src/lib/precomputed-flags';
 
 export const config = { matcher: ['/examples/marketing-pages'] };
@@ -372,9 +379,7 @@ export default async function middleware(request: Request) {
     request.headers.set('x-visitorId', visitorId);
   }
 
-  return rewrite(
-    denormalize(await computeInternalRoute(url.pathname, request)),
-  );
+  return rewrite(denormalize(await computeInternalRoute(url.pathname, request)));
 }
 ```
 
@@ -389,8 +394,7 @@ interface Entities {
 }
 
 function identify({ cookies, headers }) {
-  const visitorId =
-    cookies.get('visitorId')?.value ?? headers.get('x-visitorId');
+  const visitorId = cookies.get('visitorId')?.value ?? headers.get('x-visitorId');
   if (!visitorId) throw new Error('Visitor ID not found');
   return { visitorId };
 }
@@ -405,4 +409,5 @@ export const firstMarketingABTest = flag<boolean, Entities>({
 });
 ```
 
-The `x-visitorId` header ensures the visitor ID is available even on the first request before the cookie is set.
+The `x-visitorId` header ensures the visitor ID is available even on the first request before the
+cookie is set.

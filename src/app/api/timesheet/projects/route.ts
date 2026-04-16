@@ -11,13 +11,16 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('Authorization') || '';
     const params = new URLSearchParams({ jiraInstance });
 
-    const response = await fetch(`${TIMESHEET_URLS.PROJECTS}?${params.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: authHeader,
-      },
-    });
+    const response = await fetch(
+      `${TIMESHEET_URLS.PROJECTS}?${params.toString()}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: authHeader,
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -86,19 +89,22 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('Authorization') || '';
     const params = new URLSearchParams({ jiraInstance });
 
-    const response = await fetch(`${TIMESHEET_URLS.PROJECTS}?${params.toString()}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: authHeader,
-      },
-      body: JSON.stringify({
-        jql: payload.jql,
-        columnConfig: payload.columnConfig || 'explicit',
-        layoutKey: payload.layoutKey || 'split-view',
-        startIndex: payload.startIndex || '0',
-      }),
-    });
+    const response = await fetch(
+      `${TIMESHEET_URLS.PROJECTS}?${params.toString()}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: authHeader,
+        },
+        body: JSON.stringify({
+          jql: payload.jql,
+          columnConfig: payload.columnConfig || 'explicit',
+          layoutKey: payload.layoutKey || 'split-view',
+          startIndex: payload.startIndex || '0',
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();

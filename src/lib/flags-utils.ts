@@ -31,11 +31,7 @@ export function getVisibleToolPaths(
   // `""` is the Vercel "All tools" variant — treat as unset.
   if (parsed === '') return null;
 
-  if (
-    typeof parsed !== 'object' ||
-    parsed === null ||
-    Array.isArray(parsed)
-  ) {
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
     console.error(
       '[flags] visible-tools: expected a JSON object keyed by tenant, got %s — showing all tools',
       JSON.stringify(parsed)

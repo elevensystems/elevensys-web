@@ -1,5 +1,5 @@
-import { flag } from 'flags/next';
 import { vercelAdapter } from '@flags-sdk/vercel';
+import { flag } from 'flags/next';
 
 export const enableAutologFlag = flag({
   key: 'enable-autolog',

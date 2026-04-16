@@ -18,46 +18,46 @@ interface SupportModalProps {
 export function SupportModal({ open, onOpenChange }: SupportModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>IT Support</DialogTitle>
           <DialogDescription>
             Need help? Contact our IT support team
           </DialogDescription>
         </DialogHeader>
-        <div className='space-y-4 py-4'>
-          <div className='flex items-center gap-3'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-muted'>
-              <User className='h-5 w-5 text-muted-foreground' />
+        <div className="space-y-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+              <User className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className='flex-1'>
-              <p className='text-sm font-medium'>Name</p>
-              <p className='text-sm text-muted-foreground'>Bao Huynh</p>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Name</p>
+              <p className="text-sm text-muted-foreground">Bao Huynh</p>
             </div>
           </div>
-          <div className='flex items-center gap-3'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-muted'>
-              <Phone className='h-5 w-5 text-muted-foreground' />
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+              <Phone className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className='flex-1'>
-              <p className='text-sm font-medium'>Phone</p>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Phone</p>
               <a
-                href='tel:+840981029371'
-                className='text-sm text-muted-foreground hover:text-foreground hover:underline'
+                href="tel:+840981029371"
+                className="text-sm text-muted-foreground hover:text-foreground hover:underline"
               >
                 (+84) 0981029371
               </a>
             </div>
           </div>
-          <div className='flex items-center gap-3'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-muted'>
-              <Mail className='h-5 w-5 text-muted-foreground' />
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+              <Mail className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className='flex-1'>
-              <p className='text-sm font-medium'>Email</p>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Email</p>
               <a
-                href='mailto:huynhquocbao0188@gmail.com'
-                className='text-sm text-muted-foreground hover:text-foreground hover:underline'
+                href="mailto:huynhquocbao0188@gmail.com"
+                className="text-sm text-muted-foreground hover:text-foreground hover:underline"
               >
                 huynhquocbao0188@gmail.com
               </a>

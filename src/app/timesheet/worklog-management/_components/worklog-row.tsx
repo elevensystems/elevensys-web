@@ -4,6 +4,7 @@ import { memo, useCallback } from 'react';
 
 import { SquarePenIcon, Trash2Icon } from 'lucide-react';
 
+import { ActionButton } from '@/components/action-button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +17,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { ActionButton } from '@/components/action-button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Spinner } from '@/components/ui/spinner';
 import { TableCell, TableRow } from '@/components/ui/table';
@@ -82,47 +82,47 @@ export const WorklogRow = memo(function WorklogRow({
           aria-label={`Select ${worklog.issueKey}`}
         />
       </TableCell>
-      <TableCell className='font-mono font-semibold'>
+      <TableCell className="font-mono font-semibold">
         {worklog.issueKey}
       </TableCell>
-      <TableCell className='max-w-[200px]'>
+      <TableCell className="max-w-[200px]">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className='block truncate'>
+              <span className="block truncate">
                 {worklog.description || '-'}
               </span>
             </TooltipTrigger>
             {worklog.description && (
-              <TooltipContent side='bottom' className='max-w-sm'>
+              <TooltipContent side="bottom" className="max-w-sm">
                 <p>{worklog.description}</p>
               </TooltipContent>
             )}
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className='text-right font-medium'>
+      <TableCell className="text-right font-medium">
         {parseFloat(String(worklog.worked))}h
       </TableCell>
       <TableCell>
         <Badge
-          variant='outline'
+          variant="outline"
           className={getWorkTypeBadgeClass(worklog.typeOfWork)}
         >
           {worklog.typeOfWork}
         </Badge>
       </TableCell>
-      <TableCell className='text-nowrap'>{displayDate}</TableCell>
+      <TableCell className="text-nowrap">{displayDate}</TableCell>
       <TableCell>
         <Badge variant={getStatusVariant(worklog.statusWorklog)}>
           {worklog.statusWorklog}
         </Badge>
       </TableCell>
-      <TableCell className='text-muted-foreground text-nowrap'>
+      <TableCell className="text-muted-foreground text-nowrap">
         {worklog.author}
       </TableCell>
       <TableCell>
-        <div className='flex items-center gap-1'>
+        <div className="flex items-center gap-1">
           {isDeleting ? (
             <Spinner />
           ) : (
@@ -131,13 +131,13 @@ export const WorklogRow = memo(function WorklogRow({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <ActionButton
-                      variant='ghost'
-                      size='icon'
-                      className='size-8'
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
                       disabled={!isEditable}
                       onClick={handleEdit}
                       leftIcon={<SquarePenIcon />}
-                      aria-label='Edit'
+                      aria-label="Edit"
                     />
                   </TooltipTrigger>
                   <TooltipContent>Edit</TooltipContent>
@@ -149,12 +149,12 @@ export const WorklogRow = memo(function WorklogRow({
                     <TooltipTrigger asChild>
                       <AlertDialogTrigger asChild>
                         <ActionButton
-                          variant='ghost'
-                          size='icon'
-                          className='size-8 text-destructive hover:text-destructive'
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-destructive hover:text-destructive"
                           disabled={!isEditable}
                           leftIcon={<Trash2Icon />}
-                          aria-label='Delete'
+                          aria-label="Delete"
                         />
                       </AlertDialogTrigger>
                     </TooltipTrigger>
@@ -166,7 +166,7 @@ export const WorklogRow = memo(function WorklogRow({
                     <AlertDialogTitle>Delete Worklog</AlertDialogTitle>
                     <AlertDialogDescription>
                       Are you sure you want to delete this worklog for{' '}
-                      <span className='font-semibold'>{worklog.issueKey}</span>{' '}
+                      <span className="font-semibold">{worklog.issueKey}</span>{' '}
                       ({parseFloat(String(worklog.worked))}h on {displayDate}
                       )? This action cannot be undone.
                     </AlertDialogDescription>
@@ -174,7 +174,7 @@ export const WorklogRow = memo(function WorklogRow({
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                      variant='destructive'
+                      variant="destructive"
                       onClick={handleDelete}
                     >
                       Delete

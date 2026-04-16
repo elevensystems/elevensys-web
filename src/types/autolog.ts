@@ -75,4 +75,3 @@ export const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => ({
   value: i,
   label: `${String(i).padStart(2, '0')}:00 UTC`,
 }));
-

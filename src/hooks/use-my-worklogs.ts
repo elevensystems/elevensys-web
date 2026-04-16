@@ -26,7 +26,12 @@ export function useMyWorklogs({ settings, isConfigured }: UseMyWorklogsParams) {
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
 
-  const mutations = useWorklogMutations({ settings, isConfigured, worklogs, setWorklogs });
+  const mutations = useWorklogMutations({
+    settings,
+    isConfigured,
+    worklogs,
+    setWorklogs,
+  });
   const { clearSelection } = mutations;
 
   const handleSearch = useCallback(async () => {

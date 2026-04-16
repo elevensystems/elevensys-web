@@ -35,23 +35,23 @@ export function ForgotPasswordForm({
           <form>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor='email'>Email</FieldLabel>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
-                  id='email'
-                  type='email'
-                  placeholder='m@example.com'
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
                   required
                 />
               </Field>
               <Field>
-                <Button type='submit' className='w-full'>
+                <Button type="submit" className="w-full">
                   Send Request
                 </Button>
-                <FieldDescription className='text-center'>
+                <FieldDescription className="text-center">
                   Remember your password?{' '}
                   <Link
-                    href='/login'
-                    className='underline-offset-4 hover:underline'
+                    href="/login"
+                    className="underline-offset-4 hover:underline"
                   >
                     Back to login
                   </Link>

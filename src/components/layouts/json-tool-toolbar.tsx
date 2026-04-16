@@ -19,31 +19,27 @@ export function JsonToolToolbar({
   actions,
 }: JsonToolToolbarProps) {
   return (
-    <div className='flex items-center justify-between gap-2 py-2'>
+    <div className="flex items-center justify-between gap-2 py-2">
       {/* Left: title */}
-      <div className='flex items-center gap-3'>
-        <h1 className='text-lg font-semibold'>{title}</h1>
+      <div className="flex items-center gap-3">
+        <h1 className="text-lg font-semibold">{title}</h1>
       </div>
 
       {options && (
         <>
           {/* Center: options (desktop) */}
-          <div className='hidden lg:flex items-center gap-2'>{options}</div>
+          <div className="hidden lg:flex items-center gap-2">{options}</div>
 
           {/* Center: settings popover (mobile) */}
-          <div className='lg:hidden'>
+          <div className="lg:hidden">
             <Popover>
               <PopoverTrigger asChild>
-                <ActionButton
-                  variant='ghost'
-                  size='sm'
-                  leftIcon={<Settings />}
-                >
+                <ActionButton variant="ghost" size="sm" leftIcon={<Settings />}>
                   Settings
                 </ActionButton>
               </PopoverTrigger>
-              <PopoverContent className='w-72'>
-                <div className='flex flex-col gap-3'>{options}</div>
+              <PopoverContent className="w-72">
+                <div className="flex flex-col gap-3">{options}</div>
               </PopoverContent>
             </Popover>
           </div>
@@ -51,7 +47,7 @@ export function JsonToolToolbar({
       )}
 
       {/* Right: actions */}
-      <div className='flex items-center gap-1'>{actions}</div>
+      <div className="flex items-center gap-1">{actions}</div>
     </div>
   );
 }

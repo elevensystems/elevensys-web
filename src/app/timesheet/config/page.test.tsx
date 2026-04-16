@@ -31,7 +31,7 @@ beforeAll(() => {
 jest.mock('@/components/layouts/main-layout', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid='main-layout'>{children}</div>
+    <div data-testid="main-layout">{children}</div>
   ),
 }));
 
@@ -45,10 +45,10 @@ jest.mock('@/components/layouts/tool-page-header', () => ({
     description: string;
     infoMessage?: string;
   }) => (
-    <div data-testid='tool-page-header'>
+    <div data-testid="tool-page-header">
       <h1>{title}</h1>
       <p>{description}</p>
-      {infoMessage && <p data-testid='info-message'>{infoMessage}</p>}
+      {infoMessage && <p data-testid="info-message">{infoMessage}</p>}
     </div>
   ),
 }));
@@ -69,24 +69,24 @@ jest.mock('next/link', () => ({
 // --- Mock icons ---
 
 jest.mock('lucide-react', () => ({
-  ArrowLeft: () => <span data-testid='icon-arrow-left' />,
-  Check: () => <span data-testid='icon-check' />,
-  Eye: () => <span data-testid='icon-eye' />,
-  EyeOff: () => <span data-testid='icon-eye-off' />,
-  Save: () => <span data-testid='icon-save' />,
-  Settings: () => <span data-testid='icon-settings' />,
-  Trash2: () => <span data-testid='icon-trash' />,
+  ArrowLeft: () => <span data-testid="icon-arrow-left" />,
+  Check: () => <span data-testid="icon-check" />,
+  Eye: () => <span data-testid="icon-eye" />,
+  EyeOff: () => <span data-testid="icon-eye-off" />,
+  Save: () => <span data-testid="icon-save" />,
+  Settings: () => <span data-testid="icon-settings" />,
+  Trash2: () => <span data-testid="icon-trash" />,
 }));
 
 jest.mock('@/components/ui/spinner', () => ({
-  Spinner: () => <span data-testid='icon-loader' />,
+  Spinner: () => <span data-testid="icon-loader" />,
 }));
 
 // --- Mock UI components ---
 
 jest.mock('@/components/ui/alert', () => ({
   Alert: ({ children }: { children: React.ReactNode }) => (
-    <div role='alert'>{children}</div>
+    <div role="alert">{children}</div>
   ),
   AlertDescription: ({ children }: { children: React.ReactNode }) => (
     <span>{children}</span>
@@ -122,7 +122,7 @@ jest.mock('@/components/ui/button', () => ({
 jest.mock('@/components/ui/card', () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardAction: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid='card-action'>{children}</div>
+    <div data-testid="card-action">{children}</div>
   ),
   CardContent: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
@@ -131,7 +131,7 @@ jest.mock('@/components/ui/card', () => ({
     <p>{children}</p>
   ),
   CardFooter: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid='card-footer'>{children}</div>
+    <div data-testid="card-footer">{children}</div>
   ),
   CardHeader: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>

@@ -33,7 +33,7 @@ export function NavTools({ tools }: NavToolsProps) {
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
-          <SidebarMenuButton className='group-data-[collapsible=icon]:hidden'>
+          <SidebarMenuButton className="group-data-[collapsible=icon]:hidden">
             <MoreHorizontal />
             <span>More</span>
           </SidebarMenuButton>

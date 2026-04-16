@@ -83,33 +83,32 @@ export default function WorklogManagementPage() {
   if (!isLoaded) {
     return (
       <MainLayout>
-        <section className='container mx-auto px-4 py-12'>
-          <div className='flex items-center justify-center h-40'>
-            <Spinner className='size-6 text-muted-foreground' />
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center justify-center h-40">
+            <Spinner className="size-6 text-muted-foreground" />
           </div>
         </section>
       </MainLayout>
     );
   }
 
-
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-full mx-auto space-y-8'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-full mx-auto space-y-8">
           <ToolPageHeader
-            title='Worklog Management'
-            description='Search and manage logged timesheets from Jira by project. View, edit, and delete work entries with pagination support.'
+            title="Worklog Management"
+            description="Search and manage logged timesheets from Jira by project. View, edit, and delete work entries with pagination support."
             error={error || undefined}
           />
 
           <NotConfiguredAlert isConfigured={isConfigured} />
 
           {/* Filters */}
-          <Card className='mb-6'>
+          <Card className="mb-6">
             <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <Search className='h-5 w-5' />
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5" />
                 Search Worklogs
               </CardTitle>
               <CardDescription>
@@ -117,14 +116,14 @@ export default function WorklogManagementPage() {
                 &quot;Search&quot; to view your worklogs.
               </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-4'>
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr_1fr] gap-4 items-end'>
-                <div className='space-y-1.5'>
-                  <Label htmlFor='project-select'>
-                    Project <span className='text-destructive'>*</span>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr_1fr] gap-4 items-end">
+                <div className="space-y-1.5">
+                  <Label htmlFor="project-select">
+                    Project <span className="text-destructive">*</span>
                   </Label>
                   <NativeSelect
-                    id='project-select'
+                    id="project-select"
                     value={selectedProject?.id ?? ''}
                     onChange={e => {
                       const project =
@@ -133,7 +132,7 @@ export default function WorklogManagementPage() {
                     }}
                     disabled={!isConfigured || projectsLoading}
                   >
-                    <option value=''>
+                    <option value="">
                       {projectsLoading
                         ? 'Loading projects…'
                         : 'Select a project'}
@@ -146,24 +145,24 @@ export default function WorklogManagementPage() {
                   </NativeSelect>
                 </div>
 
-                <div className='space-y-1.5'>
-                  <Label htmlFor='date-range'>Date Range</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="date-range">Date Range</Label>
                   <DateRangePicker
-                    id='date-range'
+                    id="date-range"
                     from={fromDate}
                     to={toDate}
                     onRangeChange={(from, to) => {
                       setFromDate(from);
                       setToDate(to);
                     }}
-                    className='w-full'
+                    className="w-full"
                   />
                 </div>
 
-                <div className='space-y-1.5'>
-                  <Label htmlFor='status-select'>Status</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="status-select">Status</Label>
                   <NativeSelect
-                    id='status-select'
+                    id="status-select"
                     value={statusWorklog}
                     onChange={e => setStatusWorklog(e.target.value)}
                     disabled={!isConfigured}
@@ -176,14 +175,14 @@ export default function WorklogManagementPage() {
                   </NativeSelect>
                 </div>
 
-                <div className='flex items-end'>
+                <div className="flex items-end">
                   <ActionButton
                     onClick={handleSearch}
                     disabled={!isConfigured || !selectedProject}
-                    className='w-full'
+                    className="w-full"
                     leftIcon={<Search />}
                     isLoading={isLoading}
-                    loadingText='Searching…'
+                    loadingText="Searching…"
                   >
                     Search
                   </ActionButton>
@@ -195,8 +194,8 @@ export default function WorklogManagementPage() {
           {/* Results */}
           <Card>
             <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <ClipboardList className='h-5 w-5' />
+              <CardTitle className="flex items-center gap-2">
+                <ClipboardList className="h-5 w-5" />
                 Worklogs
               </CardTitle>
               {hasSearched && totalRecords > 0 && (
@@ -219,50 +218,50 @@ export default function WorklogManagementPage() {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className='overflow-hidden rounded-lg border'>
+                <div className="overflow-hidden rounded-lg border">
                   <Table>
-                    <TableHeader className='bg-muted/50 top-0 z-10'>
+                    <TableHeader className="bg-muted/50 top-0 z-10">
                       <TableRow>
-                        <TableHead className='w-[40px]' />
+                        <TableHead className="w-[40px]" />
                         <TableHead>Key</TableHead>
                         <TableHead>Description</TableHead>
-                        <TableHead className='text-right'>Hours</TableHead>
+                        <TableHead className="text-right">Hours</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>User</TableHead>
-                        <TableHead className='w-[60px]'>Actions</TableHead>
+                        <TableHead className="w-[60px]">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {Array.from({ length: 8 }).map((_, i) => (
                         <TableRow key={i}>
-                          <td className='p-2 pl-4'>
-                            <Skeleton className='h-4 w-4' />
+                          <td className="p-2 pl-4">
+                            <Skeleton className="h-4 w-4" />
                           </td>
-                          <td className='p-2'>
-                            <Skeleton className='h-4 w-28' />
+                          <td className="p-2">
+                            <Skeleton className="h-4 w-28" />
                           </td>
-                          <td className='p-2'>
-                            <Skeleton className='h-4 w-40' />
+                          <td className="p-2">
+                            <Skeleton className="h-4 w-40" />
                           </td>
-                          <td className='p-2 text-right'>
-                            <Skeleton className='h-4 w-10 ml-auto' />
+                          <td className="p-2 text-right">
+                            <Skeleton className="h-4 w-10 ml-auto" />
                           </td>
-                          <td className='p-2'>
-                            <Skeleton className='h-5 w-16 rounded-full' />
+                          <td className="p-2">
+                            <Skeleton className="h-5 w-16 rounded-full" />
                           </td>
-                          <td className='p-2'>
-                            <Skeleton className='h-4 w-24' />
+                          <td className="p-2">
+                            <Skeleton className="h-4 w-24" />
                           </td>
-                          <td className='p-2'>
-                            <Skeleton className='h-5 w-16 rounded-full' />
+                          <td className="p-2">
+                            <Skeleton className="h-5 w-16 rounded-full" />
                           </td>
-                          <td className='p-2'>
-                            <Skeleton className='h-4 w-20' />
+                          <td className="p-2">
+                            <Skeleton className="h-4 w-20" />
                           </td>
-                          <td className='p-2'>
-                            <Skeleton className='h-4 w-8' />
+                          <td className="p-2">
+                            <Skeleton className="h-4 w-8" />
                           </td>
                         </TableRow>
                       ))}
@@ -270,7 +269,7 @@ export default function WorklogManagementPage() {
                   </Table>
                 </div>
               ) : worklogs.length === 0 ? (
-                <div className='flex flex-col items-center justify-center h-40 text-muted-foreground'>
+                <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                   {hasSearched ? (
                     <p>No worklogs found for the selected filters.</p>
                   ) : (
@@ -282,11 +281,11 @@ export default function WorklogManagementPage() {
                 </div>
               ) : (
                 <>
-                  <div className='overflow-hidden rounded-lg border'>
+                  <div className="overflow-hidden rounded-lg border">
                     <Table>
-                      <TableHeader className='bg-muted/50 top-0 z-10'>
+                      <TableHeader className="bg-muted/50 top-0 z-10">
                         <TableRow>
-                          <TableHead className='w-[40px]'>
+                          <TableHead className="w-[40px]">
                             <Checkbox
                               checked={
                                 allSelected
@@ -296,17 +295,17 @@ export default function WorklogManagementPage() {
                                     : false
                               }
                               onCheckedChange={toggleSelectAll}
-                              aria-label='Select all'
+                              aria-label="Select all"
                             />
                           </TableHead>
                           <TableHead>Key</TableHead>
                           <TableHead>Description</TableHead>
-                          <TableHead className='text-right'>Hours</TableHead>
+                          <TableHead className="text-right">Hours</TableHead>
                           <TableHead>Type</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>User</TableHead>
-                          <TableHead className='w-[60px]'>Actions</TableHead>
+                          <TableHead className="w-[60px]">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

@@ -85,33 +85,33 @@ const tools = [
 export default function ToolsPage() {
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-5xl mx-auto space-y-12'>
-          <div className='mb-12'>
-            <div className='flex items-center gap-3 mb-4'>
-              <Wrench className='h-8 w-8' />
-              <h1 className='text-4xl font-semibold'>Tools</h1>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-5xl mx-auto space-y-12">
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <Wrench className="h-8 w-8" />
+              <h1 className="text-4xl font-semibold">Tools</h1>
             </div>
-            <p className='text-muted-foreground text-lg'>
+            <p className="text-muted-foreground text-lg">
               A collection of useful tools to help you be more productive
             </p>
           </div>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tools.map(tool => {
               const Icon = tool.icon;
               return (
                 <Link key={tool.href} href={tool.href}>
-                  <Card className='h-full hover:shadow-lg transition-shadow cursor-pointer'>
+                  <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                     <CardHeader>
-                      <div className='flex items-center gap-3 mb-2'>
-                        <Icon className='h-6 w-6 text-primary' />
+                      <div className="flex items-center gap-3 mb-2">
+                        <Icon className="h-6 w-6 text-primary" />
                         <CardTitle>{tool.title}</CardTitle>
                       </div>
                       <CardDescription>{tool.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <Button variant='ghost' className='w-full' asChild>
+                      <Button variant="ghost" className="w-full" asChild>
                         <span>Open Tool →</span>
                       </Button>
                     </CardContent>

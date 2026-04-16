@@ -61,11 +61,11 @@ export function ConfigCard({ config, onClick }: ConfigCardProps) {
       )}
       onClick={() => onClick(config)}
     >
-      <CardHeader className='p-5'>
-        <div className='flex items-start justify-between gap-2'>
+      <CardHeader className="p-5">
+        <div className="flex items-start justify-between gap-2">
           <div>
-            <CardTitle className='text-base'>{config.projectName}</CardTitle>
-            <CardDescription className='text-xs'>
+            <CardTitle className="text-base">{config.projectName}</CardTitle>
+            <CardDescription className="text-xs">
               {config.projectKey}
             </CardDescription>
           </div>
@@ -75,16 +75,16 @@ export function ConfigCard({ config, onClick }: ConfigCardProps) {
         </div>
       </CardHeader>
 
-      <CardContent className='space-y-3 px-5 pb-5 pt-0'>
+      <CardContent className="space-y-3 px-5 pb-5 pt-0">
         <Separator />
 
         {/* Schedule */}
-        <div className='space-y-1'>
-          <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-            <Calendar className='h-3.5 w-3.5 shrink-0' />
-            <span className='truncate'>{formatSchedule(config)}</span>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Calendar className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{formatSchedule(config)}</span>
           </div>
-          <p className='pl-[1.375rem] text-xs text-muted-foreground'>
+          <p className="pl-[1.375rem] text-xs text-muted-foreground">
             {totalHours}h total
           </p>
         </div>
@@ -93,23 +93,23 @@ export function ConfigCard({ config, onClick }: ConfigCardProps) {
 
         {/* Last run */}
         {config.lastRunAt ? (
-          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-            <Clock className='h-3.5 w-3.5 shrink-0' />
-            <span className='truncate'>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">
               {new Date(config.lastRunAt).toLocaleString()}
             </span>
             {config.lastRunStatus && (
               <Badge
                 variant={RUN_STATUS_CONFIG[config.lastRunStatus].variant}
-                className='ml-auto shrink-0 py-0'
+                className="ml-auto shrink-0 py-0"
               >
                 {RUN_STATUS_CONFIG[config.lastRunStatus].label}
               </Badge>
             )}
           </div>
         ) : (
-          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-            <Clock className='h-3.5 w-3.5 shrink-0' />
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3.5 w-3.5 shrink-0" />
             <span>No runs yet</span>
           </div>
         )}

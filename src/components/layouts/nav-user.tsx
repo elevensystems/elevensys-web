@@ -28,7 +28,6 @@ import {
 } from '@/components/ui/sidebar';
 import { AuthUser } from '@/types/auth';
 
-
 export function NavUser({ user }: { user?: AuthUser | null }) {
   const { isMobile } = useSidebar();
 
@@ -50,36 +49,36 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
-                size='lg'
-                className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <Avatar className='h-8 w-8 rounded-sm'>
-                  <AvatarFallback className='rounded-sm bg-gray-500 text-white'>
+                <Avatar className="h-8 w-8 rounded-sm">
+                  <AvatarFallback className="rounded-sm bg-gray-500 text-white">
                     G
                   </AvatarFallback>
                 </Avatar>
-                <div className='grid flex-1 text-left text-sm leading-tight'>
-                  <span className='truncate font-medium'>Guest</span>
-                  <span className='truncate text-xs'>Not signed in</span>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">Guest</span>
+                  <span className="truncate text-xs">Not signed in</span>
                 </div>
-                <ChevronsUpDown className='ml-auto size-4' />
+                <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
               side={isMobile ? 'bottom' : 'right'}
-              align='end'
+              align="end"
               sideOffset={4}
             >
               <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
-                  <Link href='/login' className='cursor-pointer'>
+                  <Link href="/login" className="cursor-pointer">
                     <LogIn />
                     Sign in
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href='/signup' className='cursor-pointer'>
+                  <Link href="/signup" className="cursor-pointer">
                     <UserPlus />
                     Sign up
                   </Link>
@@ -98,26 +97,26 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
-              size='lg'
-              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className='h-8 w-8 rounded-lg'>
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className='rounded-lg'>
+                <AvatarFallback className="rounded-lg">
                   {getUserInitials(user.name)}
                 </AvatarFallback>
               </Avatar>
-              <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-medium'>{user.name}</span>
-                <span className='truncate text-xs'>{user.email}</span>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate text-xs">{user.email}</span>
               </div>
-              <ChevronsUpDown className='ml-auto size-4' />
+              <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? 'bottom' : 'right'}
-            align='end'
+            align="end"
             sideOffset={4}
           >
             {user.role === 'free' && (
@@ -133,7 +132,7 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
             )}
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href='/profile' className='cursor-pointer'>
+                <Link href="/profile" className="cursor-pointer">
                   <BadgeCheck />
                   Account
                 </Link>
@@ -142,9 +141,9 @@ export function NavUser({ user }: { user?: AuthUser | null }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link
-                href='/api/auth/logout'
+                href="/api/auth/logout"
                 prefetch={false}
-                className='cursor-pointer'
+                className="cursor-pointer"
               >
                 <LogOut />
                 Log out

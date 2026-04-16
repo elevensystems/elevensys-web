@@ -54,42 +54,42 @@ export default function MainLayout({
     <SidebarProvider defaultOpen={true}>
       <AppSidebar user={user} />
       <SidebarInset>
-        <header className='sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b bg-background/50 backdrop-blur'>
-          <div className='flex items-center gap-2 px-4'>
-            <SidebarTrigger className='-ml-1' />
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b bg-background/50 backdrop-blur">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
             <Separator
-              orientation='vertical'
-              className='mr-2 data-[orientation=vertical]:h-4'
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
             />
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem className='hidden md:block'>
+                <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink asChild>
-                    <Link href='/'>Home</Link>
+                    <Link href="/">Home</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 {pathSegments.length > 0 && (
-                  <BreadcrumbSeparator className='hidden md:block' />
+                  <BreadcrumbSeparator className="hidden md:block" />
                 )}
                 {pathSegments.map((segment, index) => {
                   const isLast = index === pathSegments.length - 1;
                   const href = '/' + pathSegments.slice(0, index + 1).join('/');
 
                   return (
-                    <div key={href} className='contents'>
+                    <div key={href} className="contents">
                       <BreadcrumbItem>
                         {isLast ? (
                           <BreadcrumbPage>
                             {formatSegment(segment)}
                           </BreadcrumbPage>
                         ) : (
-                          <BreadcrumbLink asChild className='hidden md:block'>
+                          <BreadcrumbLink asChild className="hidden md:block">
                             <Link href={href}>{formatSegment(segment)}</Link>
                           </BreadcrumbLink>
                         )}
                       </BreadcrumbItem>
                       {!isLast && (
-                        <BreadcrumbSeparator className='hidden md:block' />
+                        <BreadcrumbSeparator className="hidden md:block" />
                       )}
                     </div>
                   );
@@ -98,7 +98,7 @@ export default function MainLayout({
             </Breadcrumb>
           </div>
         </header>
-        <div className='flex flex-1 flex-col gap-4 p-4 pt-0'>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <main className={className}>{children}</main>
         </div>
       </SidebarInset>

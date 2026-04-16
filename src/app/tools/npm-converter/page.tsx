@@ -4,9 +4,9 @@ import { useCallback, useState } from 'react';
 
 import { Copy, Package } from 'lucide-react';
 
+import { ActionButton } from '@/components/action-button';
 import MainLayout from '@/components/layouts/main-layout';
 import { ToolPageHeader } from '@/components/layouts/tool-page-header';
-import { ActionButton } from '@/components/action-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -114,56 +114,60 @@ export default function NpmConverterPage() {
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-full mx-auto'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-full mx-auto">
           <ToolPageHeader
-            title='NPM Converter'
-            description='Convert Lerna publish output to npm install commands. Paste your Lerna output and get the npm install command instantly.'
-            infoMessage='This tool converts Lerna monorepo package publish output into a format ready for npm install. All processing is done locally in your browser.'
+            title="NPM Converter"
+            description="Convert Lerna publish output to npm install commands. Paste your Lerna output and get the npm install command instantly."
+            infoMessage="This tool converts Lerna monorepo package publish output into a format ready for npm install. All processing is done locally in your browser."
             error={error}
           />
 
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Input Card */}
             <Card>
               <CardHeader>
-                <CardTitle className='flex items-center gap-2'>
-                  <Package className='h-5 w-5' />
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
                   Lerna Output
                 </CardTitle>
               </CardHeader>
-              <CardContent className='space-y-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='lerna-input'>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="lerna-input">
                     Paste Lerna publish output
                   </Label>
                   <Textarea
-                    id='lerna-input'
+                    id="lerna-input"
                     rows={12}
                     value={input}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                       setInput(e.target.value)
                     }
-                    placeholder='Paste Lerna output here...&#10;Example:&#10; - @scope/package-name => 1.2.3&#10; - another-package@4.5.6'
-                    className='font-mono text-sm'
+                    placeholder="Paste Lerna output here...&#10;Example:&#10; - @scope/package-name => 1.2.3&#10; - another-package@4.5.6"
+                    className="font-mono text-sm"
                   />
-                  <p className='text-xs text-muted-foreground'>
+                  <p className="text-xs text-muted-foreground">
                     Paste the output from your Lerna publish command
                   </p>
                 </div>
 
-                <div className='flex gap-2'>
+                <div className="flex gap-2">
                   <ActionButton
                     onClick={handleConvert}
                     disabled={!input.trim()}
-                    className='flex-1'
-                    size='lg'
+                    className="flex-1"
+                    size="lg"
                     leftIcon={<Package />}
                   >
                     Convert to NPM Install
                   </ActionButton>
                   {(input || result) && (
-                    <ActionButton onClick={handleClear} variant='outline' size='lg'>
+                    <ActionButton
+                      onClick={handleClear}
+                      variant="outline"
+                      size="lg"
+                    >
                       Clear
                     </ActionButton>
                   )}
@@ -174,56 +178,56 @@ export default function NpmConverterPage() {
             {/* Result Card */}
             <Card>
               <CardHeader>
-                <CardTitle className='flex items-center gap-2 justify-between'>
-                  <span className='flex items-center gap-2'>
-                    <Package className='h-5 w-5' />
+                <CardTitle className="flex items-center gap-2 justify-between">
+                  <span className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
                     NPM Install Command
                   </span>
                   {result && (
-                    <span className='text-sm font-normal text-muted-foreground'>
+                    <span className="text-sm font-normal text-muted-foreground">
                       {result.count} package{result.count !== 1 ? 's' : ''}{' '}
                       converted ⚙
                     </span>
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent className='space-y-4'>
+              <CardContent className="space-y-4">
                 {!result ? (
-                  <div className='flex items-center justify-center h-64 text-muted-foreground'>
-                    <p className='text-center'>
+                  <div className="flex items-center justify-center h-64 text-muted-foreground">
+                    <p className="text-center">
                       Paste Lerna output and click &quot;Convert to NPM
                       Install&quot; to generate the npm install command
                     </p>
                   </div>
                 ) : (
-                  <div className='space-y-4'>
-                    <div className='space-y-2'>
-                      <Label htmlFor='npm-result'>Command</Label>
-                      <div className='relative'>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="npm-result">Command</Label>
+                      <div className="relative">
                         <Textarea
-                          id='npm-result'
+                          id="npm-result"
                           rows={12}
                           value={result.command}
                           readOnly
-                          className='font-mono text-sm bg-muted pr-20'
+                          className="font-mono text-sm bg-muted pr-20"
                         />
                         <ActionButton
-                          size='sm'
-                          variant='ghost'
+                          size="sm"
+                          variant="ghost"
                           onClick={handleCopy}
-                          className='absolute top-2 right-2'
-                          aria-label='Copy to clipboard'
-                          leftIcon={<Copy aria-hidden='true' />}
+                          className="absolute top-2 right-2"
+                          aria-label="Copy to clipboard"
+                          leftIcon={<Copy aria-hidden="true" />}
                           feedbackActive={isActive('copy')}
                         />
                       </div>
-                      <p className='text-xs text-muted-foreground'>
+                      <p className="text-xs text-muted-foreground">
                         Use this command to install all the published packages
                       </p>
                     </div>
 
-                    <div className='p-3 bg-muted rounded-lg'>
-                      <p className='text-sm text-muted-foreground'>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground">
                         💡 Tip: You can paste this command directly into your
                         terminal to install all packages at their specific
                         versions.

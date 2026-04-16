@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { OPENAI_URL } from '@/lib/api-urls';
 import { getUserFromSession } from '@/lib/auth';
 import { MAX_TRANSLATE_INPUT_LENGTH, validateModel } from '@/lib/constants';
 import { fetchWithTimeout } from '@/lib/fetch-utils';
-import { OPENAI_URL } from '@/lib/api-urls';
 import type { TranslateRequestBody } from '@/types/translate';
 
 const buildPrompt = (

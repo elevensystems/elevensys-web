@@ -29,14 +29,17 @@ export async function POST(request: NextRequest) {
 
     const params = new URLSearchParams({ jiraInstance });
 
-    const response = await fetch(`${TIMESHEET_URLS.LOGWORK}?${params.toString()}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: authHeader,
-      },
-      body: JSON.stringify(worklog),
-    });
+    const response = await fetch(
+      `${TIMESHEET_URLS.LOGWORK}?${params.toString()}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: authHeader,
+        },
+        body: JSON.stringify(worklog),
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();

@@ -40,11 +40,11 @@ export default function AutologPage() {
 
   return (
     <MainLayout>
-      <section className='container mx-auto px-4 py-12'>
-        <div className='max-w-5xl mx-auto space-y-12'>
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-5xl mx-auto space-y-12">
           <ToolPageHeader
-            title='Autolog'
-            description='Automatically log work to Jira on a weekly or monthly schedule.'
+            title="Autolog"
+            description="Automatically log work to Jira on a weekly or monthly schedule."
           />
 
           {isLoaded && !isConfigured && (
@@ -52,38 +52,38 @@ export default function AutologPage() {
           )}
 
           {isLoaded && isConfigured && (
-            <div className='space-y-6 mt-6'>
+            <div className="space-y-6 mt-6">
               {/* Header row */}
-              <div className='flex items-center justify-between'>
-                <p className='text-sm text-muted-foreground'>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
                   {configs.length} / 3 configurations
                 </p>
                 <Button
                   onClick={() => router.push('/timesheet/autolog/new')}
                   disabled={!canAddMore}
-                  size='sm'
+                  size="sm"
                 >
-                  <PlusCircle className='mr-1.5 h-4 w-4' />
+                  <PlusCircle className="mr-1.5 h-4 w-4" />
                   Add Config
                 </Button>
               </div>
 
               {/* Loading state */}
               {isLoading && (
-                <div className='space-y-3'>
+                <div className="space-y-3">
                   {[1, 2].map(i => (
                     <Card key={i}>
-                      <CardHeader className='pb-2'>
-                        <div className='flex items-start justify-between gap-2'>
-                          <div className='space-y-1'>
-                            <Skeleton className='h-5 w-32' />
-                            <Skeleton className='h-3 w-16' />
+                      <CardHeader className="pb-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="space-y-1">
+                            <Skeleton className="h-5 w-32" />
+                            <Skeleton className="h-3 w-16" />
                           </div>
-                          <Skeleton className='h-5 w-14 rounded-full' />
+                          <Skeleton className="h-5 w-14 rounded-full" />
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <Skeleton className='h-4 w-48' />
+                        <Skeleton className="h-4 w-48" />
                       </CardContent>
                     </Card>
                   ))}
@@ -92,9 +92,9 @@ export default function AutologPage() {
 
               {/* Empty state */}
               {!isLoading && configs.length === 0 && (
-                <div className='rounded-lg border border-dashed p-10 text-center text-muted-foreground'>
-                  <p className='text-sm'>No autolog configurations yet.</p>
-                  <p className='text-xs mt-1'>
+                <div className="rounded-lg border border-dashed p-10 text-center text-muted-foreground">
+                  <p className="text-sm">No autolog configurations yet.</p>
+                  <p className="text-xs mt-1">
                     Click &ldquo;Add Config&rdquo; to get started.
                   </p>
                 </div>
@@ -102,7 +102,7 @@ export default function AutologPage() {
 
               {/* Config cards — vertical stack */}
               {!isLoading && configs.length > 0 && (
-                <div className='space-y-3'>
+                <div className="space-y-3">
                   {configs.map(config => (
                     <ConfigCard
                       key={config.configId}

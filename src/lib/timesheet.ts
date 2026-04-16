@@ -33,7 +33,11 @@ export function parseApiDate(dateStr: string): Date | null {
     m => m.toLowerCase() === monthAbbr.toLowerCase()
   );
   if (monthIndex === -1) return null;
-  return new Date(2000 + parseInt(yearShort, 10), monthIndex, parseInt(day, 10));
+  return new Date(
+    2000 + parseInt(yearShort, 10),
+    monthIndex,
+    parseInt(day, 10)
+  );
 }
 
 /**
@@ -130,9 +134,8 @@ export function formatDisplayDate(dateStr: string): string {
  */
 export function getMonthStart(): string {
   const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), 1)
-    .toISOString()
-    .split('T')[0];
+  const d = new Date(now.getFullYear(), now.getMonth(), 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 /**
@@ -140,9 +143,8 @@ export function getMonthStart(): string {
  */
 export function getMonthEnd(): string {
   const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth() + 1, 0)
-    .toISOString()
-    .split('T')[0];
+  const d = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 /**
